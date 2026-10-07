@@ -1,0 +1,62 @@
+@font-face {
+    font-family: 'yekanBakh';
+    src: url('../fonts/Fa3/Yekan Bakh FA 04 Regular.eot');
+    src: url('../fonts/Fa3/Yekan Bakh FA 04 Regular.eot?#iefix') format('embedded-opentype'),
+    url('../fonts/Fa3/Yekan Bakh FA 04 Regular.woff') format('woff'),
+    url('../fonts/Fa3/Yekan Bakh FA 04 Regular.ttf') format('truetype');
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'yekanBakh';
+    src: url('../fonts/Fa3/Yekan Bakh FA 05 Medium.eot');
+    src: url('../fonts/Fa3/Yekan Bakh FA 05 Medium.eot?#iefix') format('embedded-opentype'),
+    url('../fonts/Fa3/Yekan Bakh FA 05 Medium.woff') format('woff'),
+    url('../fonts/Fa3/Yekan Bakh FA 05 Medium.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'yekanBakh';
+    src: url('../fonts/Fa3/Yekan Bakh FA 06 Bold.eot');
+    src: url('../fonts/Fa3/Yekan Bakh FA 06 Bold.eot?#iefix') format('embedded-opentype'),
+    url('../fonts/Fa3/Yekan Bakh FA 06 Bold.woff') format('woff'),
+    url('../fonts/Fa3/Yekan Bakh FA 06 Bold.ttf') format('truetype');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'yekanBakh';
+    src: url('../fonts/Fa3/Yekan Bakh FA 07 Heavy.eot');
+    src: url('../fonts/Fa3/Yekan Bakh FA 07 Heavy.eot?#iefix') format('embedded-opentype'),
+    url('../fonts/Fa3/Yekan Bakh FA 07 Heavy.woff') format('woff'),
+    url('../fonts/Fa3/Yekan Bakh FA 07 Heavy.ttf') format('truetype');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
+* {
+    outline: none !important;
+}
+
+/* ===== Tokens ===== */
+:root {
+    --green: #28735B;
+    --green-dark: #173F3B;
+    --green-soft: #e4efe9;
+    --beige: #F6F4EC;
+    --ink: #1d2823;
+    --muted: #6d7771;
+    --line: #e2e5e1;
+    --gold: #d9a62e;
+    --radius: 14px;
+    --ease: cubic-bezier(.22, .61, .36, 1);
+    --bs-body-font-family: "yekanBakh", "Vazirmatn", Tahoma, sans-serif;
+}

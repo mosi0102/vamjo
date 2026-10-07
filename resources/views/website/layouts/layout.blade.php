@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="theme-color" content="#1e5a45">
+    <title>@yield('title', 'وام‌جو')</title>
+    <meta name="description" content="@yield('description')">
+
+    {{-- Bootstrap 5 RTL + فونت پشتیبان (در صورت نبودن فایل‌های یکان بخ) --}}
+
+    <link rel="stylesheet" href="{{ asset('website/css/bootstrap.min.css') }}" type="text/css">
+    <link rel="stylesheet" href="{{ asset('website/css/line-awesome.css') }}" type="text/css">
+    <link rel="stylesheet" href="{{ asset('website/css/fonts.css') }}" type="text/css">
+    <link rel="stylesheet" href="{{ asset('website/css/main.css') }}" type="text/css">
+
+    @stack('styles')
+</head>
+<body class="@yield('body_class')">
+
+@include('website.__include.Header')
+
+<main>
+    @yield('main')
+</main>
+
+@include('website.__include.Footer')
+@include('website.__include.MobileNav')
+
+<script src="{{ asset('website/js/jquery-3.6.4.min.js') }}"></script>
+<script src="{{ asset('website/js/bootstrap.bundle.js') }}"></script>
+<script src="{{ asset('website/js/notyf.min.js') }}"></script>
+<script src="{{ asset('website/js/main.js') }}"></script>
+@stack('scripts')
+</body>
+</html>
