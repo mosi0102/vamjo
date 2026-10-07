@@ -8,13 +8,13 @@
     // نمونه داده؛ در پروژه واقعی از کنترلر پاس بدهید: return view('ads.main', compact('ads', 'banks', 'types'));
     $fa = fn ($n) => strtr(number_format($n), ['0'=>'۰','1'=>'۱','2'=>'۲','3'=>'۳','4'=>'۴','5'=>'۵','6'=>'۶','7'=>'۷','8'=>'۸','9'=>'۹', ',' => '،']);
     $banks = [
-      'javidan' => ['n'=>'بانک جاویدان', 'c'=>'#e07b00', 'l'=>'ج','image'=>'4'],
-      'resalat' => ['n'=>'بانک رسالت', 'c'=>'#1f8a9e', 'l'=>'ر','image'=>'8'],
-      'saderat' => ['n'=>'بانک صادرات', 'c'=>'#1b3a8a', 'l'=>'ص','image'=>'6'],
-      'shahr'   => ['n'=>'بانک شهر', 'c'=>'#d6322c', 'l'=>'ش','image'=>'7'],
-      'keshavarzi' => ['n'=>'بانک کشاورزی', 'c'=>'#4a7c3a', 'l'=>'ک','image'=>'5'],
-      'mehr'    => ['n'=>'بانک قرض الحسنه مهر', 'c'=>'#2e9a4f', 'l'=>'م','image'=>'3'],
-      'tejarat' => ['n'=>'بانک تجارت', 'c'=>'#3e4ea0', 'l'=>'ت','image'=>'9'],
+      'javidan' => ['n'=>' جاویدان', 'c'=>'#e07b00', 'l'=>'ج','image'=>'4'],
+      'resalat' => ['n'=>' رسالت', 'c'=>'#1f8a9e', 'l'=>'ر','image'=>'8'],
+      'saderat' => ['n'=>' صادرات', 'c'=>'#1b3a8a', 'l'=>'ص','image'=>'6'],
+      'shahr'   => ['n'=>' شهر', 'c'=>'#d6322c', 'l'=>'ش','image'=>'7'],
+      'keshavarzi' => ['n'=>' کشاورزی', 'c'=>'#4a7c3a', 'l'=>'ک','image'=>'5'],
+      'mehr'    => ['n'=>' قرض الحسنه مهر', 'c'=>'#2e9a4f', 'l'=>'م','image'=>'3'],
+      'tejarat' => ['n'=>' تجارت', 'c'=>'#3e4ea0', 'l'=>'ت','image'=>'9'],
     ];
     $types = ['qarz'=>'قرض الحسنه', 'marriage'=>'ازدواج', 'child'=>'فرزند آوری', 'housing'=>'مسکن', 'mehrbani'=>'مهربانی', 'commercial'=>'تجاری', 'medical'=>'درمانی'];
     $rows = [
@@ -38,9 +38,10 @@
     <div class="container ads-page" id="adsPage">
 
         {{-- Breadcrumb --}}
-        <nav class="crumbs d-none d-md-flex" aria-label="مسیر صفحه">
+        <nav class="crumbs d-none d-md-flex align-items-center" aria-label="مسیر صفحه">
             <a href="{{ url('/') }}">صفحه نخست</a><span class="sep-ic"
-                                                        aria-hidden="true">‹</span><span>آگهی‌های وام</span>
+                                                        aria-hidden="true"><i
+                    class="la la-angle-left"></i> </span><span>آگهی‌های وام</span>
         </nav>
 
         <div class="row g-4">
@@ -73,9 +74,11 @@
                                     <label class="chk bank-opt" data-name="{{ $b['n'] }}">
                                         <input type="checkbox" name="bank" value="{{ $key }}">
                                         <span class="box"></span>
-                                        <span class="chk-logo" style="background: {{ $b['c'] }}"
-                                              aria-hidden="true">{{ $b['l'] }}</span>
-                                        <span class="chk-text">{{ $b['n'] }}</span>
+
+                                        <div class="chk-text d-flex">
+                                            <img src="{{asset('website/img/bank/'.$b['image'].'.png')}}" height="30"
+                                                 class="me-2">
+                                            {{ $b['n'] }}</div>
                                     </label>
                                 @endforeach
                                 <p class="f-empty" id="bankEmpty" hidden>بانکی پیدا نشد</p>
@@ -186,8 +189,10 @@
                 </div>
 
                 <div class="empty-state" id="adsEmpty" hidden>
-                    <div class="empty-ic" aria-hidden="true">🔍</div>
-                    <h3>آگهی‌ای با این مشخصات پیدا نشد</h3>
+                    <div class="empty-ic" aria-hidden="true">
+                        <img src="{{asset('website/img/empty.png')}}" style="width: 200px"/>
+                    </div>
+                    <h3 class="mt-2">آگهی‌ای با این مشخصات پیدا نشد</h3>
                     <p>فیلترها یا عبارت جستجو را تغییر دهید.</p>
                     <button type="button" class="btn btn-brand" id="emptyReset">حذف همه فیلترها</button>
                 </div>

@@ -17,7 +17,7 @@
 
     @stack('styles')
 </head>
-<body class="@yield('body_class')">
+<body class="@yield('body_class')" data-auth="{{ auth()->check() ? 1 : 0 }}">
 
 @include('website.__include.Header')
 
@@ -27,6 +27,9 @@
 
 @include('website.__include.Footer')
 @include('website.__include.MobileNav')
+@guest
+    @include('website.partials.modals.login')
+@endguest
 
 <script src="{{ asset('website/js/jquery-3.6.4.min.js') }}"></script>
 <script src="{{ asset('website/js/bootstrap.bundle.js') }}"></script>

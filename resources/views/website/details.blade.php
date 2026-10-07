@@ -12,7 +12,7 @@
       'id' => 1, 'code' => '1235896','bank'=>'resalat', 'bank_name' => 'رسالت', 'city' => 'سبزوار','image'=>'8', 'ago' => '۳ روز پیش',
       'amount' => 300000000, 'rate' => 2, 'months' => 60, 'installment' => 5100000, 'total' => 306000000,
       'guarantor' => 'یک ضامن کارمند رسمی یا کاسب دارای جواز کسب معتبر',
-      'price' => 30000000, 'max_offer' => 45000000, 'offers' => 8, 'phone' => '05144444400',
+      'price' => 30000000, 'max_offer' => 45000000, 'offers' => 8, 'phone' => '05144444400'
     ];
     $svg = [
       'wallet' => '<path d="M3 7a2 2 0 0 1 2-2h12v4"/><path d="M3 7v11a2 2 0 0 0 2 2h14a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1H5a2 2 0 0 1-2-2z"/><circle cx="16.5" cy="14.5" r="1.2"/>',
@@ -41,22 +41,22 @@
     <div class="container detail-page">
 
         <nav class="crumbs d-none d-md-flex" aria-label="مسیر صفحه">
-            <a href="{{ url('/') }}">صفحه نخست</a><span class="sep-ic" aria-hidden="true">‹</span>
-            <a href="{{ url('/ads') }}">آگهی‌های وام</a><span class="sep-ic" aria-hidden="true">‹</span>
-            <span>وام {{ $fa($ad['amount']) }} تومانی {{ $ad['bank'] }}</span>
+            <a href="{{ url('/') }}">صفحه نخست</a><span class="sep-ic" aria-hidden="true"><i class="la la-angle-left"></i> </span>
+            <a href="{{ url('/ads') }}">آگهی‌های وام</a><span class="sep-ic" aria-hidden="true"><i class="la la-angle-left"></i> </span>
+            <span>وام {{ $fa($ad['amount']) }} تومانی {{ $ad['bank_name'] }}</span>
         </nav>
 
         <div class="row g-3 g-lg-4">
 
             {{-- ===== ستون اصلی (راست) ===== --}}
-            <div class="col-lg-7">
+            <div class="col-lg-9">
 
                 {{-- عنوان آگهی --}}
                 <div class="d-card title-card reveal">
                     <span class="ribbon"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg> تایید شده</span>
-                    <div class="bank-badge" style="background:#1f8a9e" aria-hidden="true">ر</div>
+                    <img src="{{asset('website/img/bank/'.$ad['image'].'.png')}}" style="height: 60px; "/>
                     <div class="title-info">
-                        <h1>وام {{ $fa($ad['amount']) }} تومان بانک {{ $ad['bank'] }}</h1>
+                        <h1>وام {{ $fa($ad['amount']) }} تومان بانک {{ $ad['bank_name'] }}</h1>
                         <div class="meta">
                             <span class="id-pill">شناسه وام <b>#{{ $faDigits($ad['code']) }}</b></span>
                             <span class="meta-i"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>{{ $ad['ago'] }}</span>
@@ -86,7 +86,7 @@
             </div>
 
             {{-- ===== ستون کناری (چپ) ===== --}}
-            <aside class="col-lg-5">
+            <aside class="col-lg-3">
 
                 <div class="d-card buy-card reveal">
                     <div class="secure-box">
@@ -153,5 +153,5 @@
         <button type="button" class="btn btn-brand" id="requestBtnBar">ثبت درخواست</button>
     </div>
 
-{{--    @include('partials.modals.request', ['ad' => $ad, 'fa' => $fa])--}}
+    @include('website.partials.modals.request', ['ad' => $ad, 'fa' => $fa])
 @endsection

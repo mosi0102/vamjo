@@ -177,4 +177,155 @@ $(function () {
             $(this).text(open ? 'نمایش کمتر' : 'نمایش بیشتر');
         });
     }
+
+    /* =====================================================
+       ورود با OTP + مودال ثبت درخواست
+       ⚠️ API.demo = true یعنی بدون بک‌اند شبیه‌سازی می‌شود (هر کد ۵ رقمی پذیرفته می‌شود).
+          برای اتصال به لاراول مقدار را false کنید؛ سه آدرس زیر باید JSON برگردانند:
+          POST /auth/otp/send    {phone}         → {ok:true}
+          POST /auth/otp/verify  {phone, code}   → {ok:true}   (در خطا: HTTP 422)
+          POST /ads/{id}/request {offer}         → {ok:true, redirect:"/payment/.."}
+       ===================================================== */
+    var API = { demo: true };
+    var csrf = $('meta[name="csrf-token"]').attr('content');
+    var isAuth = String($('body').attr('data-auth')) === '1';
+    var intent = null;                          // بعد از ورود چه کاری انجام شود: {type:'request'} یا {type:'redirect', url}
+
+    var latin = function (s) {
+        return String(s || '').replace(/[۰-۹]/g, function (d) { return '۰۱۲۳۴۵۶۷۸۹'.indexOf(d); })
+            .replace(/[٠-٩]/g, function (d) { return '٠١٢٣٤٥٦٧٨٩'.indexOf(d); });
+    };
+    function post(url, data, demoResponse) {
+        if (API.demo) {
+            var d = $.Deferred(); setTimeout(function () { d.resolve(demoResponse || { ok: true }); }, 700); return d.promise();
+        }
+        return $.ajax({ url: url, method: 'POST', data: data, dataType: 'json', headers: { 'X-CSRF-TOKEN': csrf } });
+    }
+    function busy($btn, on) { $btn.toggleClass('loading', on).find('.spinner-border').toggleClass('d-none', !on); }
+
+    /* ---------- Request modal ---------- */
+    var $rm = $('#requestModal'), rm = $rm.length ? bootstrap.Modal.getOrCreateInstance($rm[0]) : null;
+    if ($rm.length) {
+        var minOffer = +$rm.data('min'), maxOffer = +$rm.data('max');
+        var $offer = $('#offerInput');
+
+        $offer.on('input', function () {
+            var v = latin(this.value).replace(/\D/g, '');
+            this.value = v ? Number(v).toLocaleString('en-US') : '';
+            $offer.parent().removeClass('invalid'); $('#offerErr').addClass('d-none'); $('#offerHint').removeClass('d-none');
+        });
+
+        $('#requestSubmit').on('click', function () {
+            var raw = +latin($offer.val()).replace(/\D/g, '');
+            if (raw && (raw < minOffer || raw > maxOffer)) {
+                $offer.parent().addClass('invalid'); $('#offerHint').addClass('d-none'); $('#offerErr').removeClass('d-none'); $offer.trigger('focus');
+                return;
+            }
+            var $b = $(this); busy($b, true);
+            post($rm.data('url'), { offer: raw || '' }, { ok: true, redirect: $rm.data('pay') })
+                .done(function (res) { window.location.href = (res && res.redirect) || $rm.data('pay'); })
+                .fail(function () { busy($b, false); $('#offerErr').text('ثبت درخواست انجام نشد؛ دوباره تلاش کنید.').removeClass('d-none'); });
+        });
+        $rm.on('hidden.bs.modal', function () { $offer.val('').parent().removeClass('invalid'); $('#offerErr').addClass('d-none'); $('#offerHint').removeClass('d-none'); busy($('#requestSubmit'), false); });
+    }
+
+    /* ---------- Login (OTP) modal ---------- */
+    var $lm = $('#loginModal'), lm = $lm.length ? bootstrap.Modal.getOrCreateInstance($lm[0]) : null;
+    var timerId = null, phone = '';
+
+    function showStep(n) { $lm.find('.l-step').addClass('d-none').filter('[data-step="' + n + '"]').removeClass('d-none'); }
+    function resetLogin() {
+        clearInterval(timerId); showStep('phone');
+        $('#phoneInput').val(''); $('#phoneErr, #otpErr').addClass('d-none');
+        $('#otpBoxes').removeClass('invalid').find('input').val('').removeClass('filled');
+        busy($('#sendOtp'), false); busy($('#verifyOtp'), false);
+    }
+    function openLogin(i) { if (!lm) return; intent = i || null; resetLogin(); lm.show(); }
+
+    function startTimer(sec) {
+        clearInterval(timerId); $('#resendOtp').addClass('d-none'); $('#otpTimer').removeClass('d-none');
+        var left = sec;
+        function tick() {
+            var m = Math.floor(left / 60), s = left % 60;
+            var pad = function (n) { return ('0' + n).slice(-2).replace(/\d/g, function (d) { return '۰۱۲۳۴۵۶۷۸۹'.charAt(d); }); };
+            $('#otpTimer b').text(pad(m) + ':' + pad(s));
+            if (left-- <= 0) { clearInterval(timerId); $('#otpTimer').addClass('d-none'); $('#resendOtp').removeClass('d-none'); }
+        }
+        tick(); timerId = setInterval(tick, 1000);
+    }
+    function sendCode() {
+        var $b = $('#sendOtp'); busy($b, true);
+        post($lm.data('send-url'), { phone: phone })
+            .done(function () {
+                busy($b, false); $('#otpPhone').text(phone); showStep('otp'); startTimer(120);
+                setTimeout(function () { $('#otpBoxes input').first().trigger('focus'); }, 150);
+            })
+            .fail(function () { busy($b, false); $('#phoneErr').text('ارسال کد انجام نشد؛ دوباره تلاش کنید.').removeClass('d-none'); });
+    }
+
+    /* باز کردن مودال ورود */
+    $(document).on('click', '[data-login-required]', function (e) {
+        if (isAuth) return;                       // کاربر لاگین است → لینک عادی کار می‌کند
+        e.preventDefault();
+        var href = $(this).attr('href');
+        openLogin(href && href !== '#' ? { type: 'redirect', url: href } : null);
+    });
+    $('#requestBtn, #requestBtnBar').on('click', function () {
+        if (isAuth) { rm && rm.show(); } else { openLogin({ type: 'request' }); }
+    });
+
+    /* مرحله ۱: شماره موبایل */
+    $('#phoneInput').on('input', function () {
+        this.value = latin(this.value).replace(/\D/g, '').slice(0, 11); $('#phoneErr').addClass('d-none');
+    }).on('keydown', function (e) { if (e.key === 'Enter') $('#sendOtp').trigger('click'); });
+    $('#sendOtp').on('click', function () {
+        phone = $('#phoneInput').val();
+        if (!/^09\d{9}$/.test(phone)) { $('#phoneErr').text('شماره موبایل معتبر نیست؛ مثال: ۰۹۱۲۳۴۵۶۷۸۹').removeClass('d-none'); return; }
+        sendCode();
+    });
+
+    /* مرحله ۲: کد تایید */
+    var $otp = $('#otpBoxes input');
+    function otpValue() { return $otp.map(function () { return this.value; }).get().join(''); }
+    $otp.on('input', function () {
+        this.value = latin(this.value).replace(/\D/g, '').slice(-1);
+        $(this).toggleClass('filled', !!this.value);
+        $('#otpBoxes').removeClass('invalid'); $('#otpErr').addClass('d-none');
+        if (this.value) { var $n = $otp.eq($otp.index(this) + 1); $n.length ? $n.trigger('focus') : $('#verifyOtp').trigger('click'); }
+    }).on('keydown', function (e) {
+        if (e.key === 'Backspace' && !this.value) $otp.eq($otp.index(this) - 1).trigger('focus').val('').removeClass('filled');
+    }).on('paste', function (e) {
+        var t = latin((e.originalEvent.clipboardData || window.clipboardData).getData('text')).replace(/\D/g, '').slice(0, 5);
+        if (!t) return; e.preventDefault();
+        $otp.each(function (i) { this.value = t[i] || ''; $(this).toggleClass('filled', !!t[i]); });
+        if (t.length === 5) $('#verifyOtp').trigger('click');
+    });
+    $('#verifyOtp').on('click', function () {
+        var code = otpValue();
+        if (code.length < 5) { $('#otpBoxes').addClass('invalid'); $('#otpErr').text('کد ۵ رقمی را کامل وارد کنید.').removeClass('d-none'); return; }
+        var $b = $(this); if ($b.hasClass('loading')) return; busy($b, true);
+        post($lm.data('verify-url'), { phone: phone, code: code })
+            .done(function () {
+                clearInterval(timerId); isAuth = true; $('body').attr('data-auth', 1); showStep('done');
+                setTimeout(function () {
+                    var go = intent; intent = null;
+                    if (go && go.type === 'request' && rm) { $lm.one('hidden.bs.modal', function () { rm.show(); }); lm.hide(); }
+                    else if (go && go.type === 'redirect') { window.location.href = go.url; }
+                    else { window.location.reload(); }
+                }, 1100);
+            })
+            .fail(function () {
+                busy($b, false); $('#otpBoxes').addClass('invalid'); $('#otpErr').text('کد وارد شده صحیح نیست.').removeClass('d-none');
+                $otp.val('').removeClass('filled').first().trigger('focus');
+            });
+    });
+    $('#resendOtp').on('click', function () { $otp.val('').removeClass('filled'); sendCode(); });
+    $('#editPhone').on('click', function () { clearInterval(timerId); showStep('phone'); $('#phoneInput').trigger('focus'); });
+    $lm.on('hidden.bs.modal', function () { clearInterval(timerId); });
+
+    /* ---------- Bookmark ---------- */
+    $('#bookmarkBtn').on('click', function () {
+        if (!isAuth) return;                      // برای مهمان، data-login-required مودال ورود را باز می‌کند
+        var on = !$(this).hasClass('on'); $(this).toggleClass('on', on).attr('aria-pressed', on);
+    });
 });

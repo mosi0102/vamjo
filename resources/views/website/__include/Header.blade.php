@@ -14,22 +14,30 @@
             <li><a class="nav-link" href="{{ url('/#faq') }}">سوالات متداول</a></li>
         </ul>
         <div class="header-actions ms-auto">
-            <a href="{{ url('/login') }}" class="btn btn-ghost">ورود | ثبت نام</a>
-            <a href="{{ url('/ads/create') }}" class="btn btn-brand"><span class="plus-icon" aria-hidden="true">+</span> ثبت آگهی</a>
+            @guest
+                <a href="{{ url('/login') }}" class="btn btn-ghost" data-bs-toggle="modal" data-bs-target="#loginModal">ورود | ثبت نام</a>
+            @else
+                <a href="{{ url('/panel') }}" class="btn btn-ghost">پنل کاربری</a>
+            @endguest
+            <a href="{{ url('/ads/create') }}" class="btn btn-brand" data-login-required><span class="plus-icon" aria-hidden="true">+</span> ثبت آگهی</a>
         </div>
+
     </div>
 
     {{-- Mobile / Tablet --}}
     <div class="container d-flex d-lg-none align-items-center m-bar">
-        <a href="{{ url('/') }}" aria-label="وام‌جو"><img class="logo" src="{{ asset('website/img/logo.png') }}" alt="وام‌جو" height="36"></a>
+        <a href="{{ url('/') }}" aria-label="وام‌جو"><img class="logo" src="{{ asset('assets/images/logo.png') }}" alt="وام‌جو" height="36"></a>
         <div class="ms-auto d-flex align-items-center gap-2">
-            <a href="{{ url('/login') }}" class="btn btn-brand btn-sm m-login">ورود | ثبت نام</a>
+            @guest
+                <a href="{{ url('/login') }}" class="btn btn-brand btn-sm m-login" data-bs-toggle="modal" data-bs-target="#loginModal">ورود | ثبت نام</a>
+            @endguest
             <button class="icon-btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#moreSheet" aria-controls="moreSheet" aria-label="منوی بیشتر">
                 <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="6.5" height="6.5" rx="2"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="2"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="2"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="2"/></svg>
             </button>
         </div>
     </div>
 </header>
+
 
 {{-- شیت پایین‌آمدنی برای صفحات اولویت دوم --}}
 <div class="offcanvas offcanvas-bottom sheet d-lg-none" tabindex="-1" id="moreSheet" aria-labelledby="moreSheetTitle">

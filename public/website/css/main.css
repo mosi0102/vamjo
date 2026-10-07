@@ -1,3 +1,4 @@
+
 html {
     scroll-behavior: smooth;
     scroll-padding-top: 90px;
@@ -1654,5 +1655,828 @@ a {
 
     .seo-toggle {
         display: block;
+    }
+}
+
+/* =====================================================
+   Loan detail page
+   ===================================================== */
+.detail-page {
+    padding-top: 1.5rem;
+    padding-bottom: 4rem;
+}
+
+.d-card {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    margin-bottom: 1.25rem;
+    overflow: hidden;
+    position: relative;
+    transition: box-shadow .3s var(--ease), border-color .3s;
+}
+
+.d-card:hover {
+    box-shadow: 0 12px 28px rgba(30, 90, 69, .08);
+    border-color: #cddbd3;
+}
+
+/* Title card */
+.title-card {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 1.7rem 1.6rem;
+}
+
+.bank-badge {
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    color: #fff;
+    display: grid;
+    place-items: center;
+    font-size: 1.9rem;
+    font-weight: 800;
+    flex-shrink: 0;
+    box-shadow: 0 10px 20px rgba(31, 138, 158, .25);
+}
+
+.title-info h1 {
+    font-size: 1.25rem;
+    font-weight: 800;
+    margin-bottom: .8rem;
+}
+
+.meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .6rem 1.1rem;
+    font-size: .8rem;
+    color: #4c5752;
+}
+
+.id-pill {
+    background: var(--green-soft);
+    border-radius: 20px;
+    padding: .2rem .9rem;
+}
+
+.id-pill b {
+    font-weight: 700;
+    color: var(--green-dark);
+}
+
+.meta-i {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+}
+
+.meta-i svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: #6d7771;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.ribbon {
+    position: absolute;
+    top: 20px;
+    left: -40px;
+    width: 150px;
+    transform: rotate(-45deg);
+    background: var(--green);
+    color: #fff;
+    font-size: .72rem;
+    text-align: center;
+    padding: .25rem 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .3rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, .12);
+}
+
+/* Spec table */
+.spec-table {
+    padding: .25rem 0;
+}
+
+.spec-row {
+    display: grid;
+    grid-template-columns: 210px 1fr;
+    align-items: center;
+    padding: .7rem 1.4rem;
+    font-size: .9rem;
+    transition: background .25s;
+}
+
+.spec-row:nth-child(even) {
+    background: #f6f6f4;
+}
+
+.spec-row:hover {
+    background: var(--green-soft);
+}
+
+.spec-key {
+    display: flex;
+    align-items: center;
+    gap: .8rem;
+    font-weight: 700;
+}
+
+.spec-ic {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: var(--green-soft);
+    color: var(--green);
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    transition: transform .35s var(--ease), background .3s, color .3s;
+}
+
+.spec-row:hover .spec-ic {
+    transform: rotate(-8deg) scale(1.1);
+    background: var(--green);
+    color: #fff;
+}
+
+.spec-ic svg, .offers-ic {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.spec-val {
+    color: #2d3833;
+}
+
+/* Warning */
+.warn-card {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    background: #fbefef;
+    border: 1px solid #ebc6c6;
+    border-radius: var(--radius);
+    padding: 1.3rem 1.5rem;
+    margin-bottom: 1.25rem;
+}
+
+.warn-ic {
+    width: 54px;
+    height: 54px;
+    flex-shrink: 0;
+    color: #d33;
+}
+
+.warn-ic svg {
+    width: 100%;
+    height: 100%;
+    fill: #fde3e3;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    animation: pulseWarn 2.4s ease-in-out infinite;
+}
+
+@keyframes pulseWarn {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.08);
+    }
+}
+
+.warn-card h2 {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #9a1f1f;
+    margin-bottom: .2rem;
+}
+
+.warn-card p {
+    margin: 0;
+    font-size: .82rem;
+    color: #4a3a3a;
+}
+
+/* Buy card */
+.buy-card {
+    padding: 1.6rem;
+}
+
+.secure-box {
+    background: var(--beige);
+    border-radius: 14px;
+    padding: 1.1rem 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.secure-ic {
+    width: 52px;
+    height: 52px;
+    flex-shrink: 0;
+    color: var(--green-dark);
+}
+
+.secure-ic svg {
+    width: 100%;
+    height: 100%;
+    fill: #d6e6dd;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.secure-box h2 {
+    font-size: 1.05rem;
+    font-weight: 800;
+    margin-bottom: .2rem;
+}
+
+.secure-box p {
+    margin: 0;
+    font-size: .78rem;
+    color: #4c5752;
+    line-height: 1.9;
+}
+
+.price-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 1.6rem .3rem 1.3rem;
+    gap: 1rem;
+}
+
+.price-label {
+    font-size: .9rem;
+    font-weight: 500;
+    color: #3a4540;
+    line-height: 1.8;
+}
+
+.price-val {
+    text-align: right;
+    line-height: 1.3;
+}
+
+.price-val b {
+    font-size: 2rem;
+    font-weight: 800;
+    display: block;
+    direction: ltr;
+}
+
+.price-val small {
+    font-size: .85rem;
+    color: #4c5752;
+}
+
+.buy-actions {
+    display: flex;
+    gap: .75rem;
+}
+
+.bookmark-btn {
+    width: 54px;
+    border: 1px solid var(--line);
+    background: #fff;
+    border-radius: 12px;
+    color: var(--green);
+    display: grid;
+    place-items: center;
+    transition: transform .2s var(--ease), background .25s, border-color .25s;
+}
+
+.bookmark-btn svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linejoin: round;
+    transition: fill .25s;
+}
+
+.bookmark-btn:hover {
+    border-color: var(--green);
+}
+
+.bookmark-btn:active {
+    transform: scale(.9);
+}
+
+.bookmark-btn.on {
+    background: var(--green-soft);
+    border-color: var(--green);
+}
+
+.bookmark-btn.on svg {
+    fill: var(--green);
+}
+
+.support-card {
+    text-align: center;
+    padding-top: 1.4rem;
+    margin-bottom: 1.25rem;
+}
+
+.support-card p {
+    font-size: .88rem;
+    line-height: 2.2;
+    padding: 0 1.2rem;
+    margin-bottom: 1.1rem;
+}
+
+.support-phone {
+    display: block;
+    background: var(--green-dark);
+    color: #fff;
+    font-size: 2rem;
+    font-weight: 800;
+    padding: .7rem 0;
+    letter-spacing: 1px;
+    transition: background .25s, letter-spacing .3s var(--ease);
+}
+
+.support-phone:hover {
+    background: #12392b;
+    color: #fff;
+    letter-spacing: 3px;
+}
+
+.offers-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: #f4f4f2;
+    border-radius: var(--radius);
+    padding: 1.1rem 1.5rem;
+    font-size: 1rem;
+    line-height: 1.7;
+    transition: transform .3s var(--ease);
+}
+
+.offers-card:hover {
+    transform: translateY(-3px);
+}
+
+.offers-card .offers-ic {
+    width: 54px;
+    height: 54px;
+    color: var(--green-dark);
+    flex-shrink: 0;
+}
+
+.offers-card b {
+    font-size: 2.4rem;
+    font-weight: 800;
+    color: var(--green);
+}
+
+.desc {
+    margin-top: 3rem;
+}
+
+.desc p {
+    text-align: justify;
+}
+
+.similar {
+    margin-top: 4rem;
+}
+
+/* Sticky buy bar (mobile/tablet) */
+.buy-bar {
+    position: fixed;
+    inset-inline: 0;
+    bottom: calc(68px + env(safe-area-inset-bottom, 0px));
+    z-index: 110;
+    background: #fff;
+    border-top: 1px solid var(--line);
+    border-radius: 18px 18px 0 0;
+    padding: .7rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    box-shadow: 0 -6px 20px rgba(0, 0, 0, .06);
+}
+
+.bb-price small {
+    display: block;
+    font-size: .7rem;
+    color: var(--muted);
+    line-height: 1.4;
+}
+
+.bb-price b {
+    font-size: 1.1rem;
+    font-weight: 800;
+}
+
+.bb-price b span {
+    font-size: .75rem;
+    font-weight: 500;
+}
+
+.buy-bar .btn {
+    padding-inline: 2rem;
+}
+
+/* =====================================================
+   Modals (center on desktop, bottom sheet on mobile)
+   ===================================================== */
+.app-modal .modal-content {
+    border: 0;
+    border-radius: 22px;
+    padding: .6rem .9rem 1rem;
+    box-shadow: 0 30px 70px rgba(0, 0, 0, .25);
+}
+
+.app-modal .modal-dialog {
+    max-width: 560px;
+}
+
+.modal-backdrop.show {
+    opacity: .55;
+    backdrop-filter: blur(2px);
+}
+
+.app-modal.fade .modal-dialog {
+    transform: translateY(24px) scale(.97);
+    transition: transform .35s var(--ease);
+}
+
+.app-modal.show .modal-dialog {
+    transform: none;
+}
+
+.m-close {
+    position: absolute;
+    top: 1rem;
+    inset-inline-start: 1rem;
+    z-index: 2;
+    margin: 0;
+}
+
+.m-illus {
+    width: 84px;
+    height: 84px;
+    margin: 1rem auto .6rem;
+    animation: floatY 4s ease-in-out infinite;
+}
+
+.m-illus svg {
+    width: 100%;
+    height: 100%;
+}
+
+.m-illus.round {
+    width: 74px;
+    height: 74px;
+    border-radius: 50%;
+    background: var(--green-soft);
+    display: grid;
+    place-items: center;
+    color: var(--green);
+}
+
+.m-illus.round svg {
+    width: 36px;
+    height: 36px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.m-illus.ok {
+    background: var(--green);
+    color: #fff;
+    animation: none;
+}
+
+.m-illus.ok svg {
+    stroke-width: 2.6;
+    stroke-dasharray: 30;
+    stroke-dashoffset: 30;
+    animation: draw .5s .15s var(--ease) forwards;
+}
+
+@keyframes draw {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+.m-title {
+    font-size: 1.15rem;
+    font-weight: 800;
+    margin-bottom: .8rem;
+}
+
+.m-text {
+    font-size: .9rem;
+    line-height: 2.3;
+    color: #2d3833;
+    margin-bottom: 1.4rem;
+}
+
+.m-note {
+    font-size: .75rem;
+    color: var(--muted);
+    margin: 1rem 0 0;
+}
+
+.m-note a {
+    color: var(--green);
+}
+
+.offer-label {
+    font-size: .88rem;
+    font-weight: 500;
+}
+
+.offer-range {
+    color: #c33;
+    font-size: .85rem;
+    font-weight: 500;
+}
+
+.offer-input {
+    display: flex;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow: hidden;
+    background: #fff;
+    transition: border-color .25s, box-shadow .25s;
+}
+
+.offer-input:focus-within {
+    border-color: var(--green);
+    box-shadow: 0 0 0 4px rgba(30, 90, 69, .12);
+}
+
+.offer-input.invalid {
+    border-color: #d33;
+    box-shadow: 0 0 0 4px rgba(220, 50, 50, .1);
+    animation: shake .35s;
+}
+
+.offer-input input {
+    flex: 1;
+    border: 0;
+    outline: 0;
+    padding: .95rem 1.1rem;
+    font: inherit;
+    font-size: .95rem;
+    min-width: 0;
+    background: transparent;
+}
+
+.offer-input .addon {
+    background: #efefed;
+    color: #7a847f;
+    padding: 0 1.3rem;
+    display: grid;
+    place-items: center;
+    font-size: .9rem;
+    order: 2;
+}
+
+.offer-hint {
+    color: #c33;
+    font-size: .8rem;
+    margin: .7rem 0 0;
+}
+
+@keyframes shake {
+    25% {
+        transform: translateX(-6px);
+    }
+    75% {
+        transform: translateX(6px);
+    }
+}
+
+.m-actions {
+    display: flex;
+    flex-direction: row-reverse;
+    gap: .9rem;
+    margin-top: 1.5rem;
+}
+
+.btn-outline-danger-soft {
+    background: #fff;
+    border: 1px solid #d33;
+    color: #c33;
+}
+
+.btn-outline-danger-soft:hover {
+    background: #fdeeee;
+    color: #c33;
+    border-color: #c33;
+}
+
+.btn .btn-label {
+    transition: opacity .2s;
+}
+
+.btn.loading .btn-label {
+    display: none;
+}
+
+.btn.loading {
+    pointer-events: none;
+    opacity: .85;
+}
+
+/* OTP */
+.otp-boxes {
+    display: flex;
+    justify-content: center;
+    gap: .6rem;
+    margin: .5rem 0;
+}
+
+.otp-boxes input {
+    width: 54px;
+    height: 62px;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 800;
+    border: 1.5px solid var(--line);
+    border-radius: 14px;
+    outline: 0;
+    font-family: inherit;
+    transition: border-color .2s, box-shadow .2s, transform .2s var(--ease), background .2s;
+}
+
+.otp-boxes input:focus {
+    border-color: var(--green);
+    box-shadow: 0 0 0 4px rgba(30, 90, 69, .13);
+    transform: translateY(-2px);
+}
+
+.otp-boxes input.filled {
+    background: var(--green-soft);
+    border-color: var(--green);
+}
+
+.otp-boxes.invalid input {
+    border-color: #d33;
+    animation: shake .35s;
+}
+
+.otp-foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.1rem;
+    font-size: .82rem;
+    color: var(--muted);
+}
+
+.link-btn {
+    background: none;
+    border: 0;
+    color: var(--green);
+    font: inherit;
+    font-weight: 700;
+    padding: 0;
+}
+
+.link-btn:hover {
+    text-decoration: underline;
+}
+
+.l-step:not(.d-none) {
+    animation: rise .4s var(--ease);
+}
+
+@media (max-width: 575.98px) {
+    .app-modal .modal-dialog {
+        margin: 0;
+        min-height: 100%;
+        align-items: flex-end;
+        max-width: none;
+    }
+
+    .app-modal.fade .modal-dialog {
+        transform: translateY(100%);
+        transition: transform .4s var(--ease);
+    }
+
+    .app-modal.show .modal-dialog {
+        transform: none;
+    }
+
+    .app-modal .modal-content {
+        border-radius: 24px 24px 0 0;
+        padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+    }
+
+    .m-illus {
+        margin-top: .3rem;
+        width: 70px;
+        height: 70px;
+    }
+
+    .otp-boxes input {
+        width: 48px;
+        height: 56px;
+    }
+
+    .m-actions {
+        flex-direction: column-reverse;
+    }
+}
+
+@media (max-width: 991.98px) {
+    .detail-page {
+        padding-top: 1rem;
+        padding-bottom: 7rem;
+    }
+
+    .title-card {
+        padding: 1.4rem 1.2rem 1.2rem;
+        gap: 1rem;
+        padding-top: 2.2rem;
+    }
+
+    .bank-badge {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+    }
+
+    .title-info h1 {
+        font-size: 1.05rem;
+    }
+
+    .spec-row {
+        grid-template-columns: 1fr;
+        gap: .25rem;
+        padding: .8rem 1.1rem;
+    }
+
+    .spec-val {
+        padding-inline-start: 3.2rem;
+        font-weight: 500;
+    }
+
+    .price-row {
+        margin-bottom: .4rem;
+    }
+
+    .price-val b {
+        font-size: 1.6rem;
+    }
+
+    .support-phone {
+        font-size: 1.6rem;
+    }
+
+    .similar-row {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        margin-inline: -12px;
+        padding: 4px 12px 14px;
+        scrollbar-width: none;
+    }
+
+    .similar-row::-webkit-scrollbar {
+        display: none;
+    }
+
+    .similar-row > [class*="col-"] {
+        flex: 0 0 86%;
+        scroll-snap-align: center;
+    }
+
+    body.page-detail .site-footer {
+        margin-top: 0;
     }
 }
