@@ -141,12 +141,12 @@
                             </svg>
                             فیلترها <b class="f-badge" id="filterBadge" hidden>۰</b>
                         </button>
-
                         <div class="dropdown sort-dd">
                             <button class="tool-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <span class="muted">مرتب سازی بر اساس :</span> <b id="sortLabel">جدیدترین</b>
                                 <span class="chev" aria-hidden="true"></span>
                             </button>
+
                             <ul class="dropdown-menu">
                                 <li>
                                     <button type="button" class="dropdown-item sort-opt active" data-sort="new">
@@ -170,6 +170,7 @@
                                 </li>
                             </ul>
                         </div>
+
                     </div>
                 </div>
 

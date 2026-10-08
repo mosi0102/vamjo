@@ -17,19 +17,23 @@
 
     @stack('styles')
 </head>
-<body class="@yield('body_class')" data-auth="{{ auth()->check() ? 1 : 0 }}">
+<body class="@yield('body_class')" data-auth="{{ auth()->check() ? 1 : 0 }}"
+      data-verified="{{ auth()->check() && auth()->user()->is_verified ? 1 : 0 }}">
 
-@include('website.__include.Header')
+@include('website.partials.Header')
 
 <main>
     @yield('main')
 </main>
 
-@include('website.__include.Footer')
-@include('website.__include.MobileNav')
-@guest
-    @include('website.partials.modals.login')
-@endguest
+@include('website.partials.Footer')
+
+{{--@guest--}}
+{{--    @include('website.partials.modals.login')--}}
+{{--@endguest--}}
+
+@include('website.partials.mobile-nav')
+@include('website.partials.modals.login')
 
 <script src="{{ asset('website/js/jquery-3.6.4.min.js') }}"></script>
 <script src="{{ asset('website/js/bootstrap.bundle.js') }}"></script>

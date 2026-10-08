@@ -189,6 +189,8 @@ $(function () {
     var API = { demo: true };
     var csrf = $('meta[name="csrf-token"]').attr('content');
     var isAuth = String($('body').attr('data-auth')) === '1';
+    var isVerified = String($('body').attr('data-verified')) === '1';   // احراز هویت (در پنل) انجام شده؟
+    var freshLogin = false;
     var intent = null;                          // بعد از ورود چه کاری انجام شود: {type:'request'} یا {type:'redirect', url}
 
     var latin = function (s) {
@@ -263,16 +265,36 @@ $(function () {
             .fail(function () { busy($b, false); $('#phoneErr').text('ارسال کد انجام نشد؛ دوباره تلاش کنید.').removeClass('d-none'); });
     }
 
-    /* باز کردن مودال ورود */
+    /* گیت ورود / احراز هویت */
+    function openVerifyNotice() { if (!lm) return; intent = null; freshLogin = false; resetLogin(); showStep('verify'); lm.show(); }
+    window.vamjoGate = function (needVerified, go) {          // true = مجاز است؛ در غیر این صورت مودال مناسب باز می‌شود
+        if (!isAuth) { openLogin(go || null); return false; }
+        if (needVerified && !isVerified) { openVerifyNotice(); return false; }
+        return true;
+    };
     $(document).on('click', '[data-login-required]', function (e) {
-        if (isAuth) return;                       // کاربر لاگین است → لینک عادی کار می‌کند
-        e.preventDefault();
-        var href = $(this).attr('href');
-        openLogin(href && href !== '#' ? { type: 'redirect', url: href } : null);
+        var $a = $(this), needV = $a.is('[data-verified-required]'), href = $a.attr('href');
+        var go = href && href !== '#' ? { type: 'redirect', url: href, verified: needV } : null;
+        if (!window.vamjoGate(needV, go)) e.preventDefault();
     });
     $('#requestBtn, #requestBtnBar').on('click', function () {
-        if (isAuth) { rm && rm.show(); } else { openLogin({ type: 'request' }); }
+        if (window.vamjoGate(true, { type: 'request' }) && rm) rm.show();
     });
+
+    /* بعد از ورود/ثبت نام موفق */
+    function afterAuth(res) {
+        isAuth = true; isVerified = !!(res && res.verified); freshLogin = true;
+        $('body').attr({ 'data-auth': 1, 'data-verified': isVerified ? 1 : 0 });
+        var go = intent, needV = go && (go.type === 'request' || go.verified);
+        if (needV && !isVerified) { showStep('verify'); return; }   // اطلاع‌رسانی: ابتدا احراز هویت
+        showStep('done');
+        setTimeout(function () {
+            intent = null; freshLogin = false;
+            if (go && go.type === 'request' && rm) { $lm.one('hidden.bs.modal', function () { rm.show(); }); lm.hide(); }
+            else if (go && go.type === 'redirect') { window.location.href = go.url; }
+            else { window.location.reload(); }
+        }, 1100);
+    }
 
     /* مرحله ۱: شماره موبایل */
     $('#phoneInput').on('input', function () {
@@ -304,15 +326,11 @@ $(function () {
         var code = otpValue();
         if (code.length < 5) { $('#otpBoxes').addClass('invalid'); $('#otpErr').text('کد ۵ رقمی را کامل وارد کنید.').removeClass('d-none'); return; }
         var $b = $(this); if ($b.hasClass('loading')) return; busy($b, true);
-        post($lm.data('verify-url'), { phone: phone, code: code })
-            .done(function () {
-                clearInterval(timerId); isAuth = true; $('body').attr('data-auth', 1); showStep('done');
-                setTimeout(function () {
-                    var go = intent; intent = null;
-                    if (go && go.type === 'request' && rm) { $lm.one('hidden.bs.modal', function () { rm.show(); }); lm.hide(); }
-                    else if (go && go.type === 'redirect') { window.location.href = go.url; }
-                    else { window.location.reload(); }
-                }, 1100);
+        post($lm.data('verify-url'), { phone: phone, code: code }, { ok: true, is_new: +phone.slice(-1) % 2 === 1, verified: false })  // دمو: رقم آخر فرد = کاربر جدید
+            .done(function (res) {
+                busy($b, false); clearInterval(timerId); res = res || {};
+                if (res.is_new) { showStep('profile'); setTimeout(function () { $('#pfFirst').trigger('focus'); }, 150); }  // کاربر جدید → نام، نام خانوادگی، کد ملی
+                else { afterAuth(res); }                                                                                    // کاربر قبلی → ورود
             })
             .fail(function () {
                 busy($b, false); $('#otpBoxes').addClass('invalid'); $('#otpErr').text('کد وارد شده صحیح نیست.').removeClass('d-none');
@@ -321,11 +339,133 @@ $(function () {
     });
     $('#resendOtp').on('click', function () { $otp.val('').removeClass('filled'); sendCode(); });
     $('#editPhone').on('click', function () { clearInterval(timerId); showStep('phone'); $('#phoneInput').trigger('focus'); });
-    $lm.on('hidden.bs.modal', function () { clearInterval(timerId); });
+    $lm.on('hidden.bs.modal', function () {
+        clearInterval(timerId);
+        if (freshLogin) { freshLogin = false; window.location.reload(); }   // کاربر تازه لاگین شده و مودال را بسته → به‌روزرسانی هدر
+    });
+
+    /* مرحله ۳: ثبت نام کاربر جدید */
+    function validNid(c) {                                                // الگوریتم اعتبارسنجی کد ملی
+        if (!/^\d{10}$/.test(c) || /^(\d)\1{9}$/.test(c)) return false;
+        var sum = 0; for (var i = 0; i < 9; i++) sum += (+c.charAt(i)) * (10 - i);
+        var r = sum % 11, k = +c.charAt(9); return r < 2 ? k === r : k === 11 - r;
+    }
+    $('#pfNid').on('input', function () { this.value = latin(this.value).replace(/\D/g, '').slice(0, 10); });
+    $('#pfFirst, #pfLast, #pfNid').on('input', function () { $(this).parent().removeClass('invalid'); $('#profileErr').addClass('d-none'); });
+    $('#saveProfile').on('click', function () {
+        var f = $.trim($('#pfFirst').val()), l = $.trim($('#pfLast').val()), n = $('#pfNid').val(), bad = [];
+        var nameOk = function (v) { return /^[\u0600-\u06FF\u200c\s]{2,40}$/.test(v); };
+        if (!nameOk(f)) bad.push('first'); if (!nameOk(l)) bad.push('last'); if (!validNid(n)) bad.push('nid');
+        $('[data-pf]').removeClass('invalid');
+        if (bad.length) {
+            $.each(bad, function (_, k) { $('[data-pf="' + k + '"]').addClass('invalid'); });
+            $('#profileErr').text(bad.indexOf('nid') > -1 && bad.length === 1 ? 'کد ملی معتبر نیست.' : 'نام و نام خانوادگی را فارسی و کد ملی را صحیح وارد کنید.').removeClass('d-none');
+            return;
+        }
+        var $b = $(this); busy($b, true);
+        post($lm.data('profile-url'), { first_name: f, last_name: l, national_code: n, phone: phone }, { ok: true, verified: false })
+            .done(function (res) { busy($b, false); afterAuth(res); })
+            .fail(function () { busy($b, false); $('#profileErr').text('ثبت نام انجام نشد؛ دوباره تلاش کنید.').removeClass('d-none'); });
+    });
 
     /* ---------- Bookmark ---------- */
     $('#bookmarkBtn').on('click', function () {
         if (!isAuth) return;                      // برای مهمان، data-login-required مودال ورود را باز می‌کند
         var on = !$(this).hasClass('on'); $(this).toggleClass('on', on).attr('aria-pressed', on);
     });
+
+    /* =====================================================
+       صفحه ثبت آگهی
+       ===================================================== */
+    var $form = $('#adForm');
+    if ($form.length) {
+        var faDigits = function (str) { return String(str).replace(/\d/g, function (d) { return '۰۱۲۳۴۵۶۷۸۹'.charAt(d); }); };
+        var num = function (v) { return +latin(v).replace(/[^\d.]/g, '') || 0; };
+
+        /* فرمت ورودی‌ها (نمایش ارقام فارسی، ذخیره لاتین هنگام خواندن) */
+        $form.on('input', '[data-money]', function () {
+            var v = latin(this.value).replace(/\D/g, ''); this.value = v ? faDigits(Number(v).toLocaleString('en-US')) : '';
+        }).on('input', '[data-int]', function () {
+            this.value = faDigits(latin(this.value).replace(/\D/g, '').slice(0, 3));
+        }).on('input', '[data-decimal]', function () {
+            var v = latin(this.value).replace(/[٫,]/g, '.').replace(/[^\d.]/g, '').replace(/(\..*)\./g, '$1').slice(0, 5);
+            this.value = faDigits(v).replace('.', '٫');
+        });
+        $('#fSheba').on('input', function () {
+            var d = latin(this.value).replace(/^\s*ir/i, '').replace(/\D/g, '').slice(0, 24);
+            this.value = d ? 'IR' + d : '';
+        });
+
+        /* توصیه سیستم: ۵٪ تا ۳۰٪ مبلغ وام */
+        var fmtShort = function (v) {
+            if (v >= 1e6) { var m = Math.round(v / 1e5) / 10; return faDigits(String(m).replace('.', '٫')); }
+            return faDigits(Math.round(v).toLocaleString('en-US'));
+        };
+        $('#fAmount').on('input', function () {
+            var amount = num(this.value), $box = $('#recoBox');
+            if (!amount) { $('#recoText').text('** تا ** میلیون تومان'); $box.removeClass('live'); return; }
+            var lo = amount * 0.05, hi = amount * 0.30, unit = hi >= 1e6 && lo >= 1e5 ? ' میلیون تومان' : ' تومان';
+            var toStr = unit === ' تومان' ? function (v) { return faDigits(Math.round(v).toLocaleString('en-US')); } : fmtShort;
+            $('#recoText').text(toStr(lo) + ' تا ' + toStr(hi) + unit);
+            $box.removeClass('live'); void $box[0].offsetWidth; $box.addClass('live');
+        });
+
+        /* آپلود مدارک (کلیک + درگ و دراپ + پیش‌نمایش) */
+        function setFile($dz, file) {
+            var $err = $dz.closest('.f-field'), ok = file && /^image\/(png|jpeg)$/.test(file.type) && file.size <= 5 * 1024 * 1024;
+            if (file && !ok) { $err.addClass('invalid').find('.f-err').text('فقط JPG یا PNG و حداکثر ۵ مگابایت مجاز است.'); return false; }
+            $err.removeClass('invalid');
+            if (!file) { $dz.removeClass('has-file').find('.dz-thumb').prop('hidden', true).attr('src', ''); $dz.find('.dz-remove').prop('hidden', true); $dz.find('.dz-title').text($dz.data('title')); return true; }
+            var url = URL.createObjectURL(file);
+            $dz.addClass('has-file').find('.dz-thumb').attr('src', url).prop('hidden', false);
+            $dz.find('.dz-remove').prop('hidden', false); $dz.find('.dz-title').text(file.name);
+            return true;
+        }
+        $('.dz').each(function () { $(this).data('title', $(this).find('.dz-title').text()); });
+        $('.dz input[type=file]').on('change', function () { var $dz = $(this).closest('.dz'); if (!setFile($dz, this.files[0])) this.value = ''; });
+        $('.dz').on('dragover dragenter', function (e) { e.preventDefault(); $(this).addClass('drag'); })
+            .on('dragleave drop', function () { $(this).removeClass('drag'); })
+            .on('drop', function (e) {
+                e.preventDefault(); var f = e.originalEvent.dataTransfer.files; if (!f.length) return;
+                var input = $(this).find('input')[0]; input.files = f; $(input).trigger('change');
+            })
+            .on('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $(this).find('input').trigger('click'); } });
+        $('.dz-remove').on('click', function (e) {
+            e.preventDefault(); e.stopPropagation();
+            var $dz = $(this).closest('.dz'); $dz.find('input').val(''); setFile($dz, null);
+        });
+
+        /* اعتبارسنجی و ارسال */
+        $form.on('input change', '.f-input, #fAgree', function () { $(this).closest('.f-field').removeClass('invalid'); });
+        $form.on('submit', function (e) {
+            e.preventDefault();
+            if (!window.vamjoGate(true, null)) return;                  // لاگین + احراز هویت لازم است
+
+            var bad = [];
+            var check = function (name, ok) { var $f = $form.find('[data-field="' + name + '"]'); $f.toggleClass('invalid', !ok); if (!ok) bad.push($f); };
+            var months = num($('#fMonths').val()), rate = $('#fRate').val() ? parseFloat(latin($('#fRate').val()).replace('٫', '.')) : NaN;
+            check('bank', !!$('#fBank').val());
+            check('amount', num($('#fAmount').val()) > 0);
+            check('months', months >= 1 && months <= 120);
+            check('rate', !isNaN(rate) && rate >= 0 && rate <= 100);
+            check('price', num($('#fPrice').val()) > 0);
+            check('sheba', /^IR\d{24}$/.test($('#fSheba').val()));
+            check('note', $.trim($('#fNote').val()).length >= 10);
+            check('doc_balance', !!$('#fDocBalance')[0].files.length);
+            check('doc_id', !!$('#fDocId')[0].files.length);
+            check('agree', $('#fAgree').is(':checked'));
+            $form.find('[data-field="doc_balance"] .f-err').filter(function () { return $(this).closest('.f-field').hasClass('invalid') && !$('#fDocBalance')[0].files.length; }).text('تصویر موجودی/امتیاز وام را بارگذاری کنید.');
+            $form.find('[data-field="doc_id"] .f-err').filter(function () { return $(this).closest('.f-field').hasClass('invalid') && !$('#fDocId')[0].files.length; }).text('تصویر کارت ملی را بارگذاری کنید.');
+
+            if (bad.length) {
+                $('html, body').animate({ scrollTop: bad[0].offset().top - 120 }, 400);
+                bad[0].find('input:not([hidden]), select, textarea').first().trigger('focus');
+                return;
+            }
+            var $b = $('#adSubmit'); busy($b, true);
+            if (API.demo) {                                             // دمو: شبیه‌سازی ثبت موفق
+                setTimeout(function () { busy($b, false); bootstrap.Modal.getOrCreateInstance($('#adSuccessModal')[0]).show(); }, 900);
+            } else { $form[0].submit(); }                              // لاراول: ارسال عادی فرم (POST /ads با CSRF و فایل‌ها)
+        });
+    }
 });

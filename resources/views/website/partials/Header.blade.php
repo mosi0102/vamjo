@@ -17,16 +17,15 @@
             @guest
                 <a href="{{ url('/login') }}" class="btn btn-ghost" data-bs-toggle="modal" data-bs-target="#loginModal">ورود | ثبت نام</a>
             @else
-                <a href="{{ url('/panel') }}" class="btn btn-ghost">پنل کاربری</a>
+                <a href="{{ url('/userPanel') }}" class="btn btn-ghost">پنل کاربری</a>
             @endguest
-            <a href="{{ url('/ads/create') }}" class="btn btn-brand" data-login-required><span class="plus-icon" aria-hidden="true">+</span> ثبت آگهی</a>
+            <a href="{{ url('/ads/create') }}" class="btn btn-brand" data-login-required data-verified-required><span class="plus-icon" aria-hidden="true">+</span> ثبت آگهی</a>
         </div>
-
     </div>
 
     {{-- Mobile / Tablet --}}
     <div class="container d-flex d-lg-none align-items-center m-bar">
-        <a href="{{ url('/') }}" aria-label="وام‌جو"><img class="logo" src="{{ asset('assets/images/logo.png') }}" alt="وام‌جو" height="36"></a>
+        <a href="{{ url('/') }}" aria-label="وام‌جو"><img class="logo" src="{{ asset('website/img/logo.png') }}" alt="وام‌جو" height="36"></a>
         <div class="ms-auto d-flex align-items-center gap-2">
             @guest
                 <a href="{{ url('/login') }}" class="btn btn-brand btn-sm m-login" data-bs-toggle="modal" data-bs-target="#loginModal">ورود | ثبت نام</a>
@@ -37,7 +36,6 @@
         </div>
     </div>
 </header>
-
 
 {{-- شیت پایین‌آمدنی برای صفحات اولویت دوم --}}
 <div class="offcanvas offcanvas-bottom sheet d-lg-none" tabindex="-1" id="moreSheet" aria-labelledby="moreSheetTitle">

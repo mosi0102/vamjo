@@ -11,3 +11,9 @@ Route::get('/list', function () {
 Route::get('/details', function () {
     return view('website.details');
 });
+Route::get('/add', function () {
+    return view('website.addNew');
+});
+Route::get('/dashboard', function () {
+    return view('userPanel.index');
+});
