@@ -9,8 +9,12 @@
 
     {{-- جلوگیری از پرش منو هنگام لود: وضعیت جمع‌شدن سایدبار قبل از رندر اعمال می‌شود --}}
     <script>
-        (function (d) { d.classList.add('js');
-            try { if (localStorage.getItem('pn-collapsed') === '1' && innerWidth >= 992) d.classList.add('pn-collapsed'); } catch (e) {}
+        (function (d) {
+            d.classList.add('js');
+            try {
+                if (localStorage.getItem('pn-collapsed') === '1' && innerWidth >= 992) d.classList.add('pn-collapsed');
+            } catch (e) {
+            }
         })(document.documentElement);
     </script>
 

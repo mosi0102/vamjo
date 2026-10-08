@@ -60,3 +60,20 @@
     --ease: cubic-bezier(.22, .61, .36, 1);
     --bs-body-font-family: "yekanBakh", "Vazirmatn", Tahoma, sans-serif;
 }
+
+.ad-top {
+    justify-content: start !important;;
+}
+
+.step-num {
+    margin: 1.1rem auto;
+}
+
+.step h3, .step p {
+    text-align: center;
+    margin: 0 auto !important;
+}
+
+.footer-bottom {
+    background-color: #fff !important;
+}
