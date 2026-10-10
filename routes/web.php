@@ -19,3 +19,17 @@ Route::get('/userPanel', function () {
 Route::get('/userPanel/requests', function () {
     return view('userPanel.requests.index');
 });
+Route::get('/userPanel/ads', function () {
+    return view('userPanel.ads.index');
+});
+
+Route::get('/userPanel/ads/{id}/offers', function () {
+    return view('userPanel.ads.offers');
+});
+Route::get('/userPanel/ads/{id}/edit', function () {
+    return view('userPanel.ads.edit');
+});
+
+Route::get('/userPanel/radar', function () {
+    return view('userPanel.radar.index');
+});

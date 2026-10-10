@@ -83,7 +83,7 @@
 
                 <h3 class="d-flex align-items-center">کاربر گرامی وامجو
                     <span
-                        class="pn-badge-warn mx-2">@include('userPanel.partials.icon', ['name' => 'lock']) نیازمند احراز هویت</span>
+                            class="pn-badge-warn mx-2">@include('userPanel.partials.icon', ['name' => 'lock']) نیازمند احراز هویت</span>
                 </h3>
                 <p>برای بهره مندی از تمام امکانات سامانه (<b>ثبت آگهی وام</b> یا <b>درخواست وام</b>) اطلاعات احراز هویت
                     حساب کاربری خود را تکمیل نمایید.</p>
@@ -162,22 +162,22 @@
                         {{ $s['label'] }}
                     </span>
                     <span
-                        class="pn-trend {{ $s['up'] ? 'up' : 'down' }}">@include('userPanel.partials.icon', ['name' => 'trend']){{ $s['trend'] }}</span>
+                            class="pn-trend {{ $s['up'] ? 'up' : 'down' }}">@include('userPanel.partials.icon', ['name' => 'trend']){{ $s['trend'] }}</span>
                 </div>
-{{--                <div class="pn-stat-foot">--}}
+                {{--                <div class="pn-stat-foot">--}}
 
-{{--                    <svg class="pn-spark" viewBox="0 0 120 38" preserveAspectRatio="none" aria-hidden="true">--}}
-{{--                        <defs>--}}
-{{--                            <linearGradient id="{{ $gid }}" x1="0" x2="0" y1="0" y2="1">--}}
-{{--                                <stop offset="0" stop-color="currentColor" stop-opacity=".25"/>--}}
-{{--                                <stop offset="1" stop-color="currentColor" stop-opacity="0"/>--}}
-{{--                            </linearGradient>--}}
-{{--                        </defs>--}}
-{{--                        <path d="{{ $area }}" fill="url(#{{ $gid }})" class="spark-area"/>--}}
-{{--                        <path d="{{ $line }}" class="spark-line" pathLength="1" fill="none" stroke="currentColor"--}}
-{{--                              stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>--}}
-{{--                    </svg>--}}
-{{--                </div>--}}
+                {{--                    <svg class="pn-spark" viewBox="0 0 120 38" preserveAspectRatio="none" aria-hidden="true">--}}
+                {{--                        <defs>--}}
+                {{--                            <linearGradient id="{{ $gid }}" x1="0" x2="0" y1="0" y2="1">--}}
+                {{--                                <stop offset="0" stop-color="currentColor" stop-opacity=".25"/>--}}
+                {{--                                <stop offset="1" stop-color="currentColor" stop-opacity="0"/>--}}
+                {{--                            </linearGradient>--}}
+                {{--                        </defs>--}}
+                {{--                        <path d="{{ $area }}" fill="url(#{{ $gid }})" class="spark-area"/>--}}
+                {{--                        <path d="{{ $line }}" class="spark-line" pathLength="1" fill="none" stroke="currentColor"--}}
+                {{--                              stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>--}}
+                {{--                    </svg>--}}
+                {{--                </div>--}}
             </article>
         @endforeach
     </section>
@@ -189,7 +189,7 @@
                style="--d:{{ .15 + $i * .06 }}s">
                 <span class="pn-quick-ic">@include('userPanel.partials.icon', ['name' => $q['icon']])</span>
                 <span
-                    class="pn-quick-text"><b>{{ $q['label'] }}</b><small>{{ $q['locked'] ? 'ابتدا احراز هویت کنید' : $q['sub'] }}</small></span>
+                        class="pn-quick-text"><b>{{ $q['label'] }}</b><small>{{ $q['locked'] ? 'ابتدا احراز هویت کنید' : $q['sub'] }}</small></span>
                 @if ($q['locked'])
                     <span class="pn-quick-lock">@include('userPanel.partials.icon', ['name' => 'lock'])</span>
                 @endif
@@ -240,7 +240,7 @@
                 <div class="pn-card pn-chart" id="pnChart" data-labels='@json($chart['labels'])'
                      data-pay='@json($chart['pay'])' data-recv='@json($chart['recv'])'>
                     <div class="pn-chart-sum"><small>مجموع <span id="pnChartTitle">پرداختی</span></small><b><span
-                                id="pnChartTotal">۰</span> <small>میلیون تومان</small></b></div>
+                                    id="pnChartTotal">۰</span> <small>میلیون تومان</small></b></div>
                     <div class="pn-bars" id="pnBars" role="img" aria-label="نمودار ستونی مبلغ ماهانه"></div>
                 </div>
             </section>
@@ -267,7 +267,7 @@
                     <div class="ad-bar"><span>حداقل مبلغ خرید:</span><span>{{ $fa($auction['min_buy']) }} تومان</span>
                     </div>
                     <div class="ad-foot"><span>{{ $fa($auction['offers']) }} پیشنهاد ثبت شده</span><a
-                            href="{{ url('/ads/1') }}">اطلاعات بیشتر ←</a></div>
+                                href="{{ url('/ads/1') }}">اطلاعات بیشتر ←</a></div>
                     <div class="pn-cd" data-remaining="{{ $auction['remaining'] }}" role="timer"
                          aria-label="زمان باقی‌مانده مزایده">
                         @foreach ([['s', 'ثانیه'], ['m', 'دقیقه'], ['h', 'ساعت'], ['d', 'روز']] as $k => $un)
