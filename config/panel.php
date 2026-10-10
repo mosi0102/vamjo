@@ -10,14 +10,14 @@ return [
 
     'menu' => [
         // ----- کاربر -----
-        ['label' => 'داشبورد',          'icon' => 'dashboard', 'url' => '/panel',            'active' => ['panel'],            'roles' => ['user'], 'bottom' => true],
-        ['label' => 'آگهی های من',      'icon' => 'book',      'url' => '/panel/ads',        'active' => ['panel/ads*'],       'roles' => ['user'], 'bottom' => true],
-        ['label' => 'درخواست های من',   'icon' => 'doc',       'url' => '/panel/requests',   'active' => ['panel/requests*'],  'roles' => ['user'], 'bottom' => true],
-        ['label' => 'پرداخت های من',    'icon' => 'card',      'url' => '/panel/payments',   'active' => ['panel/payments*'],  'roles' => ['user'], 'bottom' => true],
-        ['label' => 'آگهی های برگزیده', 'icon' => 'bookmark',  'url' => '/panel/favorites',  'active' => ['panel/favorites*'], 'roles' => ['user']],
-        ['label' => 'رادار وام',        'icon' => 'radar',     'url' => '/panel/radar',      'active' => ['panel/radar*'],     'roles' => ['user']],
-        ['label' => 'تیکت های پشتیبانی','icon' => 'chat',      'url' => '/panel/tickets',    'active' => ['panel/tickets*'],   'roles' => ['user']],
-        ['label' => 'اطلاعات هویتی',    'icon' => 'idcard',    'url' => '/panel/verify',     'active' => ['panel/verify*'],    'roles' => ['user']],
+        ['label' => 'داشبورد',          'icon' => 'dashboard', 'url' => '/userPanel',            'active' => ['userPanel'],            'roles' => ['user'], 'bottom' => true],
+        ['label' => 'آگهی های من',      'icon' => 'book',      'url' => '/userPanel/ads',        'active' => ['userPanel/ads*'],       'roles' => ['user'], 'bottom' => true],
+        ['label' => 'درخواست های من',   'icon' => 'doc',       'url' => '/userPanel/requests',   'active' => ['userPanel/requests*'],  'roles' => ['user'], 'bottom' => true],
+        ['label' => 'پرداخت های من',    'icon' => 'card',      'url' => '/userPanel/payments',   'active' => ['userPanel/payments*'],  'roles' => ['user'], 'bottom' => true],
+        ['label' => 'آگهی های برگزیده', 'icon' => 'bookmark',  'url' => '/userPanel/favorites',  'active' => ['userPanel/favorites*'], 'roles' => ['user']],
+        ['label' => 'رادار وام',        'icon' => 'radar',     'url' => '/userPanel/radar',      'active' => ['userPanel/radar*'],     'roles' => ['user']],
+        ['label' => 'تیکت های پشتیبانی','icon' => 'chat',      'url' => '/userPanel/tickets',    'active' => ['userPanel/tickets*'],   'roles' => ['user']],
+        ['label' => 'اطلاعات هویتی',    'icon' => 'idcard',    'url' => '/userPanel/verify',     'active' => ['userPanel/verify*'],    'roles' => ['user']],
 
         // ----- مدیر / پشتیبان (نمونه) -----
         ['label' => 'داشبورد مدیریت',   'icon' => 'dashboard', 'url' => '/admin',               'active' => ['admin'],                'roles' => ['admin', 'support'], 'bottom' => true],

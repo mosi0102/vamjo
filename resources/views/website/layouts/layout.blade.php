@@ -14,12 +14,13 @@
     <link rel="stylesheet" href="{{ asset('website/css/line-awesome.css') }}" type="text/css">
     <link rel="stylesheet" href="{{ asset('website/css/fonts.css') }}" type="text/css">
     <link rel="stylesheet" href="{{ asset('website/css/main.css') }}" type="text/css">
+    <link rel="stylesheet" href="{{ asset('website/css/loader.css') }}" type="text/css">
 
     @stack('styles')
 </head>
 <body class="@yield('body_class')" data-auth="{{ auth()->check() ? 1 : 0 }}"
       data-verified="{{ auth()->check() && auth()->user()->is_verified ? 1 : 0 }}">
-
+@include('website.partials.loader')
 @include('website.partials.Header')
 
 <main>
@@ -37,8 +38,8 @@
 
 <script src="{{ asset('website/js/jquery-3.6.4.min.js') }}"></script>
 <script src="{{ asset('website/js/bootstrap.bundle.js') }}"></script>
-<script src="{{ asset('website/js/notyf.min.js') }}"></script>
 <script src="{{ asset('website/js/main.js') }}"></script>
+<script src="{{ asset('website/js/loader.js') }}"></script>
 @stack('scripts')
 </body>
 </html>

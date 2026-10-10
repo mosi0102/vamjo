@@ -1838,7 +1838,7 @@ a {
     width: 54px;
     height: 54px;
     flex-shrink: 0;
-    color: #d33;
+    color: #9A0000;
 }
 
 .warn-ic svg {
@@ -1864,7 +1864,7 @@ a {
 .warn-card h2 {
     font-size: 1.05rem;
     font-weight: 800;
-    color: #9a1f1f;
+    color: #9A0000;
     margin-bottom: .2rem;
 }
 
@@ -2012,7 +2012,7 @@ a {
     color: #fff;
     font-size: 2rem;
     font-weight: 800;
-    padding: .7rem 0;
+    /*padding: .7rem 0;*/
     letter-spacing: 1px;
     transition: background .25s, letter-spacing .3s var(--ease);
 }

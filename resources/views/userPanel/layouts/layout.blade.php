@@ -9,23 +9,24 @@
 
     {{-- جلوگیری از پرش منو هنگام لود: وضعیت جمع‌شدن سایدبار قبل از رندر اعمال می‌شود --}}
     <script>
-        (function (d) {
-            d.classList.add('js');
-            try {
-                if (localStorage.getItem('pn-collapsed') === '1' && innerWidth >= 992) d.classList.add('pn-collapsed');
-            } catch (e) {
-            }
+        (function (d) { d.classList.add('js');
+            try { if (localStorage.getItem('pn-collapsed') === '1' && innerWidth >= 992) d.classList.add('pn-collapsed'); } catch (e) {}
         })(document.documentElement);
     </script>
 
+
     <link rel="stylesheet" href="{{ asset('website/css/bootstrap.min.css') }}" type="text/css">
     <link rel="stylesheet" href="{{ asset('website/css/line-awesome.css') }}" type="text/css">
-    <link rel="stylesheet" href="{{ asset('website/css/fonts.css') }}" type="text/css">
     <link rel="stylesheet" href="{{ asset('website/css/main.css') }}" type="text/css">
     <link rel="stylesheet" href="{{ asset('panel/css/main.css') }}" type="text/css">
+    <link rel="stylesheet" href="{{ asset('website/css/fonts.css') }}" type="text/css">
+    <link rel="stylesheet" href="{{ asset('website/css/loader.css') }}" type="text/css">
     @stack('styles')
 </head>
+
+
 <body class="panel-body @yield('body_class')">
+@include('website.partials.loader')
 @php
     // کاربر جاری (برای دمو مقدار پیش‌فرض دارد). نقش: user | admin | support
     $u = auth()->user();
@@ -53,11 +54,13 @@
 </div>
 
 @include('userPanel.partials.bottom-nav')
+@include('userPanel.partials.logout-modal')
+
 
 <script src="{{ asset('website/js/jquery-3.6.4.min.js') }}"></script>
 <script src="{{ asset('website/js/bootstrap.bundle.js') }}"></script>
-<script src="{{ asset('website/js/notyf.min.js') }}"></script>
 <script src="{{ asset('panel/js/main.js') }}"></script>
+<script src="{{ asset('website/js/loader.js') }}"></script>
 @stack('scripts')
 </body>
 </html>

@@ -53,7 +53,7 @@
     --green-soft: #e4efe9;
     --beige: #F6F4EC;
     --ink: #1d2823;
-    --muted: #6d7771;
+    --muted: #8D8D8D;
     --line: #e2e5e1;
     --gold: #d9a62e;
     --radius: 14px;
@@ -76,4 +76,24 @@
 
 .footer-bottom {
     background-color: #fff !important;
+    color: #8D8D8D !important;
+}
+header .pn-bar {
+    width: 100% !important;
+    position: relative;
+    transition: height .9s var(--ease), filter .3s, background .5s;
+    cursor: pointer;
+}
+.pn-reveal .pn-bar {
+    width: 100%;
+    max-width: 54px;
+    height: 0;
+    border-radius: 12px 12px 5px 5px;
+    background: linear-gradient(180deg, #d95757, #b01e1e);
+    position: relative;
+    transition: height .9s var(--ease), filter .3s, background .5s;
+    cursor: pointer;
+}
+.rq-steps li {
+    padding:.4rem;
 }

@@ -10,7 +10,9 @@
                     <svg viewBox="0 0 64 64"><rect x="12" y="8" width="34" height="46" rx="5" fill="#e4efe9" stroke="#1e5a45" stroke-width="2.5"/><rect x="22" y="4" width="14" height="9" rx="3" fill="#1e5a45"/><rect x="18" y="20" width="10" height="10" rx="2" fill="#1e5a45"/><path d="M32 22h10M32 28h10M18 38h24M18 44h16" stroke="#1e5a45" stroke-width="2.4" stroke-linecap="round"/><circle cx="47" cy="46" r="9" fill="#2a7a5f"/><path d="M43 46l3 3 5-6" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </div>
                 <h2 class="m-title" id="requestModalTitle">ثبت درخواست وام</h2>
-                <p class="m-text">کاربر عزیز ثبت درخواست شما به منزله قبول شدن درخواست وام شما نمیباشد و تایید درخواست شما به دست شخص فروشنده میباشد. در صورت تایید درخواست شما پیامکی از طریق سامانه ارسال میشود و یا میتوانید از طرق <b>حساب کاربری &gt; درخواست های من</b> وضعیت درخواست هایی که داده اید را پیگیری نمایید.</p>
+                <p class="m-text">
+                    کاربر عزیز ثبت درخواست شما به منزله قبول شدن درخواست وام شما نمیباشد و تایید درخواست شما به دست شخص فروشنده میباشد. در صورت تایید درخواست شما پیامکی از طریق سامانه ارسال میشود و یا میتوانید از طرق <b>حساب کاربری &gt; درخواست های من</b> وضعیت درخواست هایی که داده اید را پیگیری نمایید.
+                </p>
 
                 <div class="offer-field text-start">
                     <div class="d-flex justify-content-between align-items-center mb-2">
