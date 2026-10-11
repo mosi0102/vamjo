@@ -46,4 +46,9 @@ Route::get('/userPanel/tickets/{id}', function () {
 Route::get('/userPanel/verify', function () {
     return view('userPanel.profile.index');
 });
-
+Route::get('/userPanel/payments', function () {
+    return view('userPanel.payments.index');
+});
+Route::get('/userPanel/favorites', function () {
+    return view('userPanel.favorite.index');
+});

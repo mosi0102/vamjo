@@ -6,7 +6,7 @@
         <button type="button" class="pn-icon-btn pn-drawer-close" aria-label="بستن منو">@include('userPanel.partials.icon', ['name' => 'close'])</button>
     </div>
 
-    <a href="{{ url($role === 'user' ? '/panel/verify' : '/admin') }}" class="pn-user" title="{{ $pn->name }}">
+    <a href="{{ url($role === 'user' ? '/userPanel/verify' : '/admin') }}" class="pn-user" title="{{ $pn->name }}">
     <span class="pn-avatar">
       @if ($pn->avatar)<img src="{{ $pn->avatar }}" alt="">@else @include('userPanel.partials.icon', ['name' => 'user']) @endif
     </span>

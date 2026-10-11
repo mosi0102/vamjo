@@ -63,14 +63,14 @@
             @if ($ok)
                 <a href="{{ url('/') }}" class="btn btn-brand btn-lg">بازگشت به سایت</a>
                 <div class="pr-links">
-                    <a href="{{ url('/panel/requests') }}" class="btn btn-ghost">مشاهده درخواست ها</a>
+                    <a href="{{ url('/userPanel/requests') }}" class="btn btn-ghost">مشاهده درخواست ها</a>
                     <button type="button" class="btn btn-ghost" id="prPrint">@include('userPanel.partials.icon', ['name' => 'doc']) چاپ رسید</button>
                 </div>
             @else
-                <a href="{{ url('/panel/requests') }}" class="btn btn-brand btn-lg">تلاش مجدد برای پرداخت</a>
+                <a href="{{ url('/userPanel/requests') }}" class="btn btn-brand btn-lg">تلاش مجدد برای پرداخت</a>
                 <div class="pr-links">
-                    <a href="{{ url('/panel/requests') }}" class="btn btn-ghost">بازگشت به درخواست ها</a>
-                    <a href="{{ url('/panel/tickets') }}" class="btn btn-ghost">@include('userPanel.partials.icon', ['name' => 'chat']) تماس با پشتیبانی</a>
+                    <a href="{{ url('/userPanel/requests') }}" class="btn btn-ghost">بازگشت به درخواست ها</a>
+                    <a href="{{ url('/userPanel/tickets') }}" class="btn btn-ghost">@include('userPanel.partials.icon', ['name' => 'chat']) تماس با پشتیبانی</a>
                 </div>
             @endif
         </div>

@@ -259,18 +259,36 @@ $(function () {
     /* =====================================================
        ابزار مشترک: Toast
        ===================================================== */
-    window.pnToast = function (msg) {
-        var $t = $('<div class="pn-toast" role="status"><svg viewBox="0 0 24 24" class="pn-ic" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span></span></div>');
-        $t.find('span').text(msg).end().appendTo('body');
+    window.pnToast = function (msg, opt) {
+        opt = opt || {};
+        var closed = false, acted = false, timer;
+        var $t = $('<div class="pn-toast" role="status"><svg viewBox="0 0 24 24" class="pn-ic" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span class="tt"></span></div>');
+        $t.find('.tt').text(msg);
+        if (opt.action) {
+            $t.addClass('has-act').append($('<button type="button" class="tt-act">').text(opt.action));
+        }
+        $t.appendTo('body');
         requestAnimationFrame(function () {
             $t.addClass('show');
         });
-        setTimeout(function () {
+
+        function close() {
+            if (closed) return;
+            closed = true;
+            clearTimeout(timer);
             $t.removeClass('show');
             setTimeout(function () {
                 $t.remove();
             }, 400);
-        }, 2200);
+            if (opt.onClose) opt.onClose(acted);
+        }
+
+        $t.on('click', '.tt-act', function () {
+            acted = true;
+            if (opt.onAction) opt.onAction();
+            close();
+        });
+        timer = setTimeout(close, opt.duration || 2200);
     };
 
     /* =====================================================
@@ -324,9 +342,9 @@ $(function () {
         /* کپی شناسه وام */
         $rqList.on('click', '.rq-id', function (e) {
             e.preventDefault();
-            var text = String($(this).data('copy'));
+            var text = String($(this).data('copy')), label = $(this).data('copy-label') || 'شناسه وام کپی شد';
             var done = function () {
-                window.pnToast('شناسه وام کپی شد');
+                window.pnToast(label);
             };
             if (navigator.clipboard && window.isSecureContext) {
                 navigator.clipboard.writeText(text).then(done);
@@ -1263,5 +1281,359 @@ $(function () {
                 $tx.trigger('focus');
             }, 500);
         });
+    }
+
+    /* =====================================================
+       اطلاعات هویتی (احراز هویت)
+       ===================================================== */
+    var $vf = $('#vfForm');
+    if ($vf.length) {
+        var vfFa = function (s) {
+            return String(s).replace(/\d/g, function (d) {
+                return '۰۱۲۳۴۵۶۷۸۹'.charAt(d);
+            });
+        };
+        var vfLat = function (s) {
+            return String(s || '').replace(/[۰-۹]/g, function (d) {
+                return '۰۱۲۳۴۵۶۷۸۹'.indexOf(d);
+            });
+        };
+
+        /* اعتبارسنجی کد ملی و شبا (استاندارد IBAN: mod 97) */
+        function vfNid(c) {
+            if (!/^\d{10}$/.test(c) || /^(\d)\1{9}$/.test(c)) return false;
+            var s = 0;
+            for (var i = 0; i < 9; i++) s += (+c.charAt(i)) * (10 - i);
+            var r = s % 11, k = +c.charAt(9);
+            return r < 2 ? k === r : k === 11 - r;
+        }
+
+        function vfIban(s) {
+            if (!/^IR\d{24}$/.test(s)) return false;
+            var r = s.slice(4) + '1827' + s.slice(2, 4), rem = 0;
+            for (var i = 0; i < r.length; i++) rem = (rem * 10 + (+r.charAt(i))) % 97;
+            return rem === 1;
+        }
+
+        var vfBanks = {
+            '010': 'مرکزی',
+            '011': 'صنعت و معدن',
+            '012': 'ملت',
+            '013': 'رفاه',
+            '014': 'مسکن',
+            '015': 'سپه',
+            '016': 'کشاورزی',
+            '017': 'ملی',
+            '018': 'تجارت',
+            '019': 'صادرات',
+            '020': 'توسعه صادرات',
+            '021': 'پست بانک',
+            '051': 'موسسه اعتباری توسعه',
+            '053': 'کارآفرین',
+            '054': 'پارسیان',
+            '055': 'اقتصاد نوین',
+            '056': 'سامان',
+            '057': 'پاسارگاد',
+            '058': 'سرمایه',
+            '059': 'سینا',
+            '060': 'قرض‌الحسنه مهر ایران',
+            '061': 'شهر',
+            '062': 'آینده',
+            '063': 'انصار',
+            '064': 'گردشگری',
+            '065': 'حکمت ایرانیان',
+            '066': 'دی',
+            '069': 'ایران زمین',
+            '070': 'رسالت',
+            '075': 'ایران ونزوئلا'
+        };
+
+        /* پیشرفت تکمیل */
+        function vfProgress() {
+            var done = {
+                base: $.trim($('#vfFirst').val()).length >= 2 && $.trim($('#vfLast').val()).length >= 2 && vfNid(vfLat($('#vfNid').val())),
+                birth: !!$('#vfBirthVal').val(), sheba: vfIban($('#vfSheba').val()),
+                id: !!$('#vf_id_card')[0].files.length, selfie: !!$('#vf_selfie')[0].files.length
+            }, n = 0;
+            $('#vfProgress .pn-steps li').each(function () {
+                var ok = !!done[$(this).data('step')];
+                $(this).toggleClass('done', ok);
+                if (ok) n++;
+            });
+            var pct = Math.round(n / 5 * 100);
+            $('#vfBar').css('--w', pct + '%');
+            $('#vfPct').text(vfFa(pct) + '٪');
+            $('#vfProgress').attr('aria-valuenow', pct);
+        }
+
+        /* ورودی‌ها */
+        $('#vfNid').on('input', function () {
+            this.value = vfLat(this.value).replace(/\D/g, '').slice(0, 10);
+        });
+        $('#vfSheba').on('input', function () {
+            var d = vfLat(this.value).replace(/^\s*ir/i, '').replace(/\D/g, '').slice(0, 24);
+            this.value = d ? 'IR' + d : '';
+            var bank = d.length >= 7 ? vfBanks[d.substr(2, 3)] : '';                      // رقم‌های ۵ تا ۷ شبا = کد بانک
+            $('#vfBankChip').text(bank ? 'بانک ' + bank : '').prop('hidden', !bank);
+        });
+        $vf.on('input change', '.f-input', function () {
+            $(this).closest('.f-field').removeClass('invalid');
+            vfProgress();
+        });
+        $vf.on('change', 'input[type=file]', vfProgress).on('click', '.dz-remove', function () {
+            setTimeout(vfProgress, 0);
+        });
+
+        /* انتخاب تاریخ تولد شمسی (سال / ماه / روز) */
+        var vfMonths = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
+        var curY = 1405;
+        try {
+            curY = +vfLat(new Intl.DateTimeFormat('en-u-ca-persian', {year: 'numeric'}).formatToParts(new Date()).filter(function (p) {
+                return p.type === 'year';
+            })[0].value).replace(/\D/g, '');
+        } catch (er) {
+        }
+        var $y = $('#vfY'), $m = $('#vfM'), $d = $('#vfD'), $pop = $('#vfPop');
+        for (var yy = curY - 18; yy >= curY - 100; yy--) $y.append($('<option>').val(yy).text(vfFa(yy)));
+        $.each(vfMonths, function (i, n) {
+            $m.append($('<option>').val(i + 1).text(n));
+        });
+
+        function vfDays() {
+            var mo = +$m.val(), max = mo <= 6 ? 31 : (mo <= 11 ? 30 : 29), cur = +$d.val() || 1;
+            $d.empty();
+            for (var i = 1; i <= max; i++) $d.append($('<option>').val(i).text(vfFa(i)));
+            $d.val(Math.min(cur, max));
+        }
+
+        $m.on('change', vfDays);
+        vfDays();
+
+        function vfPop(open) {
+            $pop.prop('hidden', !open);
+            $('#vfBirth').attr('aria-expanded', open);
+        }
+
+        $('#vfBirth, #vfBirthBtn').on('click', function (e) {
+            e.stopPropagation();
+            vfPop($pop.prop('hidden'));
+        });
+        $pop.on('click', function (e) {
+            e.stopPropagation();
+        });
+        $(document).on('click', function () {
+            vfPop(false);
+        }).on('keydown', function (e) {
+            if (e.key === 'Escape') vfPop(false);
+        });
+        $('#vfPopCancel').on('click', function () {
+            vfPop(false);
+        });
+        $('#vfPopOk').on('click', function () {
+            var mm = ('0' + $m.val()).slice(-2), dd = ('0' + $d.val()).slice(-2);
+            $('#vfBirthVal').val($y.val() + '-' + mm + '-' + dd);
+            $('#vfBirth').val(vfFa($y.val() + ' – ' + mm + ' – ' + dd));
+            $('[data-field="birth"]').removeClass('invalid');
+            vfPop(false);
+            vfProgress();
+        });
+
+        /* ثبت */
+        $vf.on('submit', function (e) {
+            e.preventDefault();
+            var bad = [], chk = function (n, ok, msg) {
+                var $f = $vf.find('[data-field="' + n + '"]').toggleClass('invalid', !ok);
+                if (!ok) {
+                    if (msg) $f.find('.f-err').text(msg);
+                    bad.push($f);
+                }
+            };
+            var nameOk = function (v) {
+                return /^[\u0600-\u06FF\u200c\s]{2,40}$/.test($.trim(v));
+            };
+            chk('first', nameOk($('#vfFirst').val()));
+            chk('last', nameOk($('#vfLast').val()));
+            chk('nid', vfNid(vfLat($('#vfNid').val())));
+            chk('birth', !!$('#vfBirthVal').val());
+            chk('sheba', vfIban($('#vfSheba').val()));
+            chk('selfie', !!$('#vf_selfie')[0].files.length);
+            chk('id_card', !!$('#vf_id_card')[0].files.length);
+            $vf.find('.dz').each(function () {
+                var $f = $(this).closest('.f-field');
+                if ($f.hasClass('invalid') && !$(this).find('input')[0].files.length) $f.find('.f-err').text($(this).find('.dz-title').text() + ' را بارگذاری کنید.');
+            });
+            if (bad.length) {
+                $('html, body').animate({scrollTop: bad[0].offset().top - 110}, 350);
+                bad[0].find('input:not([hidden]), select').first().trigger('focus');
+                return;
+            }
+            var $b = $('#vfSubmit').addClass('loading').prop('disabled', true);
+            $b.find('.spinner-border').removeClass('d-none');
+            if (PN_DEMO) {                                                                // دمو: شبیه‌سازی ارسال
+                setTimeout(function () {
+                    $b.removeClass('loading').prop('disabled', false).find('.spinner-border').addClass('d-none');
+                    bootstrap.Modal.getOrCreateInstance($('#vfDone')[0]).show();
+                }, 900);
+                return;
+            }
+            this.submit();                                                                // POST /panel/verify (multipart)
+        });
+        vfProgress();
+    }
+
+    /* =====================================================
+       پرداخت های من
+       ===================================================== */
+    var $pmExport = $('#pmExport');
+    if ($pmExport.length) {
+        $pmExport.on('click', function () {                                           // خروجی CSV از ردیف‌های قابل مشاهده
+            var rows = [['شناسه تراکنش', 'شناسه وام', 'بانک', 'مبلغ (تومان)', 'زمان پرداخت', 'وضعیت']];
+            $('#rqList .rq-card:not(.d-none)').each(function () {
+                rows.push(String($(this).data('csv')).split('|'));
+            });
+            if (rows.length === 1) {
+                window.pnToast('موردی برای خروجی وجود ندارد');
+                return;
+            }
+            var csv = '\ufeff' + rows.map(function (r) {
+                return r.map(function (c) {
+                    return '"' + String(c).replace(/"/g, '""') + '"';
+                }).join(',');
+            }).join('\r\n');
+            var a = document.createElement('a');
+            a.href = URL.createObjectURL(new Blob([csv], {type: 'text/csv;charset=utf-8;'}));
+            a.download = 'payments.csv';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.pnToast('گزارش دانلود شد');
+        });
+    }
+    var $rc = $('#receiptModal');
+    if ($rc.length) {
+        $rc.on('show.bs.modal', function (e) {
+            var $b = $(e.relatedTarget);
+            if (!$b.length) return;
+            $('#rcAmount').text($b.data('amount'));
+            $('#rcLoan').text($b.data('title'));
+            $('#rcLoanId').text($b.data('loan'));
+            $('#rcDate').text($b.data('date'));
+            $('#rcTx').text($b.data('tx')).attr('dir', 'ltr');
+            $('#rcGateway').text($b.data('gateway'));
+            $('#rcStatus').attr('class', 'pn-pill ' + $b.data('status-class')).text($b.data('status'));
+        });
+        $('#rcTx').on('click keydown', function (e) {
+            if (e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ') return;
+            e.preventDefault();
+            var t = $(this).text();
+            if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(t).then(function () {
+                window.pnToast('شماره تراکنش کپی شد');
+            });
+        });
+        $('#rcPrint').on('click', function () {
+            $('body').addClass('pn-print-receipt');
+            window.print();
+        });
+        window.addEventListener('afterprint', function () {
+            $('body').removeClass('pn-print-receipt');
+        });
+    }
+
+    /* =====================================================
+       آگهی های برگزیده
+       ===================================================== */
+    var $fvGrid = $('#fvGrid');
+    if ($fvGrid.length) {
+        var fvGroup = 'all', fvQ = '';
+        var fvNorm = function (s) {
+            return String(s || '').replace(/[۰-۹]/g, function (d) {
+                return '۰۱۲۳۴۵۶۷۸۹'.indexOf(d);
+            }).replace(/[,،٬\s]+/g, '').toLowerCase();
+        };
+        var fvFa = function (n) {
+            return String(n).replace(/\d/g, function (d) {
+                return '۰۱۲۳۴۵۶۷۸۹'.charAt(d);
+            });
+        };
+
+        function fvRender() {
+            var cnt = {all: 0, active: 0, off: 0}, shown = 0;
+            $fvGrid.children('.fv-item').each(function () {
+                var $i = $(this), removed = $i.attr('data-removed') === '1', grp = $i.data('group');
+                if (!removed) {
+                    cnt.all++;
+                    cnt[grp]++;
+                }
+                var ok = !removed && (fvGroup === 'all' || grp === fvGroup) && (!fvQ || fvNorm($i.data('search')).indexOf(fvQ) > -1);
+                var was = $i.hasClass('d-none');
+                $i.toggleClass('d-none', !ok);
+                if (ok) {
+                    if (was && !reduceMotion) {
+                        $i.removeClass('rq-pop');
+                        void this.offsetWidth;
+                        $i.css('animation-delay', (shown * 60) + 'ms').addClass('rq-pop');
+                    }
+                    shown++;
+                }
+            });
+            $('[data-count]').each(function () {
+                $(this).text(fvFa(cnt[$(this).data('count')] || 0));
+            });
+            var none = cnt.all === 0;
+            $('#fvEmpty').prop('hidden', shown > 0);
+            $('#fvEmptyTitle').text(none ? 'هنوز آگهی‌ای ذخیره نکرده‌اید' : 'آگهی‌ای پیدا نشد');
+            $('#fvEmptyText').text(none ? 'با زدن دکمه نشان‌گذاری روی هر آگهی، آن را اینجا پیدا می‌کنید.' : 'فیلتر یا عبارت جستجو را تغییر دهید.');
+        }
+
+        $('.rq-tab[data-fgroup]').on('click', function () {
+            $('.rq-tab[data-fgroup]').removeClass('active').attr('aria-selected', 'false');
+            $(this).addClass('active').attr('aria-selected', 'true');
+            fvGroup = $(this).data('fgroup');
+            fvRender();
+        });
+        var fvT;
+        $('#fvSearch').on('input', function () {
+            var v = this.value;
+            clearTimeout(fvT);
+            fvT = setTimeout(function () {
+                fvQ = fvNorm(v);
+                fvRender();
+            }, 180);
+        });
+        $('#fvSort').on('change', function () {
+            var by = this.value, items = $fvGrid.children('.fv-item').get();
+            items.sort(function (a, b) {
+                var da = $(a).data(), db = $(b).data();
+                return by === 'amount-asc' ? da.amount - db.amount : by === 'amount-desc' ? db.amount - da.amount : by === 'rate' ? da.rate - db.rate : da.age - db.age;
+            });
+            $fvGrid.append(items);
+        });
+
+        /* حذف از برگزیده‌ها با امکان بازگردانی (Undo) */
+        $fvGrid.on('click', '.fv-remove', function () {
+            var $i = $(this).closest('.fv-item');
+            $i.addClass('removing');
+            setTimeout(function () {
+                $i.attr('data-removed', '1').removeClass('removing');
+                fvRender();
+            }, reduceMotion ? 0 : 320);
+            window.pnToast('از برگزیده‌ها حذف شد', {
+                action: 'بازگردانی', duration: 5000,
+                onAction: function () {
+                    $i.removeAttr('data-removed');
+                    fvRender();
+                },
+                onClose: function (undone) {
+                    if (undone || PN_DEMO) return;                                          // حذف واقعی: DELETE /panel/favorites/{id}
+                    $.ajax({
+                        url: $i.data('remove-url'),
+                        method: 'POST',
+                        data: {_method: 'DELETE'},
+                        headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}
+                    });
+                }
+            });
+        });
+        fvRender();
     }
 });

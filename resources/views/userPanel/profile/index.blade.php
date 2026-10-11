@@ -32,7 +32,7 @@
         </div>
     </div>
 
-    <div class="vf-wrap">
+    <div class="vf-wrap mx-auto">
 
         {{-- وضعیت احراز هویت --}}
         <div class="vf-status {{ $stateInfo[0] }} pn-reveal" role="status" style="--d:.06s">
