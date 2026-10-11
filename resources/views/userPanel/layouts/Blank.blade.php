@@ -15,11 +15,12 @@
     @stack('styles')
 </head>
 <body class="panel-body pn-blank @yield('body_class')">
-@include('website.partials.loader')
+@include('partials.loader')
 <header class="pr-top">
-    <a href="{{ url('/') }}" aria-label="وام‌جو"><img src="{{ asset('Website/img/logo.png') }}" alt="وام‌جو" height="46"></a>
+    <a href="{{ url('/') }}" aria-label="وام‌جو"><img src="{{ asset('assets/images/logo.png') }}" alt="وام‌جو" height="46"></a>
 </header>
 <main class="pr-wrap">@yield('main')</main>
+
 
 <script src="{{ asset('website/js/jquery-3.6.4.min.js') }}"></script>
 <script src="{{ asset('website/js/bootstrap.bundle.js') }}"></script>

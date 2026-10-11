@@ -40,6 +40,7 @@
     ];
 @endphp
 
+
 <div class="pn-app">
     @include('userPanel.partials.header')
 
@@ -59,8 +60,9 @@
 
 <script src="{{ asset('website/js/jquery-3.6.4.min.js') }}"></script>
 <script src="{{ asset('website/js/bootstrap.bundle.js') }}"></script>
-<script src="{{ asset('panel/js/main.js') }}"></script>
 <script src="{{ asset('website/js/loader.js') }}"></script>
+<script src="{{ asset('panel/js/main.js') }}"></script>
+
 @stack('scripts')
 </body>
 </html>

@@ -33,3 +33,17 @@ Route::get('/userPanel/ads/{id}/edit', function () {
 Route::get('/userPanel/radar', function () {
     return view('userPanel.radar.index');
 });
+
+Route::get('/userPanel/tickets', function () {
+    return view('userPanel.ticket.index');
+});
+Route::get('/userPanel/tickets/create', function () {
+    return view('userPanel.ticket.create');
+});
+Route::get('/userPanel/tickets/{id}', function () {
+    return view('userPanel.ticket.show');
+});
+Route::get('/userPanel/verify', function () {
+    return view('userPanel.profile.index');
+});
+

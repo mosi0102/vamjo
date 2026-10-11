@@ -1131,4 +1131,137 @@ $(function () {
             this.submit();                                                   // PUT /panel/ads/{id} (multipart)
         });
     }
+
+    /* =====================================================
+       تیکت‌های پشتیبانی: ایجاد تیکت
+       ===================================================== */
+    var tkFa = function (s) {
+        return String(s).replace(/\d/g, function (d) {
+            return '۰۱۲۳۴۵۶۷۸۹'.charAt(d);
+        });
+    };
+    var $tkf = $('#tkForm');
+    if ($tkf.length) {
+        $('#tkMessage').on('input', function () {
+            $('#tkCount').text(tkFa(this.value.length));
+        });
+        $tkf.on('input change', '.f-input', function () {
+            $(this).closest('.f-field').removeClass('invalid');
+        });
+        $tkf.on('submit', function (e) {
+            e.preventDefault();
+            var bad = [], chk = function (n, ok) {
+                var $f = $tkf.find('[data-field="' + n + '"]').toggleClass('invalid', !ok);
+                if (!ok) bad.push($f);
+            };
+            chk('subject', $.trim($('#tkSubject').val()).length >= 4);
+            chk('message', $.trim($('#tkMessage').val()).length >= 10);
+            if ($tkf.find('[data-field="attachment"]').hasClass('invalid')) bad.push($tkf.find('[data-field="attachment"]'));
+            if (bad.length) {
+                $('html, body').animate({scrollTop: bad[0].offset().top - 110}, 350);
+                bad[0].find('input:not([hidden]), textarea').first().trigger('focus');
+                return;
+            }
+            var $b = $('#tkSubmit').addClass('loading').prop('disabled', true);
+            $b.find('.spinner-border').removeClass('d-none');
+            if (PN_DEMO) {
+                setTimeout(function () {
+                    window.pnToast('تیکت شما ثبت شد');
+                    window.location.href = $tkf.data('demo-redirect');
+                }, 800);
+                return;
+            }
+            this.submit();                                                         // POST /panel/tickets (multipart)
+        });
+    }
+
+    /* =====================================================
+       تیکت‌های پشتیبانی: گفت‌وگو
+       ===================================================== */
+    var $tkc = $('#tkMessages');
+    if ($tkc.length) {
+        var tkBottom = function (smooth) {
+            $tkc.stop(true).animate({scrollTop: $tkc[0].scrollHeight}, smooth && !reduceMotion ? 400 : 0);
+        };
+        tkBottom(false);
+
+        var $tx = $('#tkText'), $tkr = $('#tkReply');
+        var autosize = function () {
+            $tx.css('height', 'auto').css('height', Math.min($tx[0].scrollHeight, 140) + 'px');
+        };
+        $tx.on('input', function () {
+            autosize();
+            $('#tkErr').removeClass('show');
+        });
+        $tx.on('keydown', function (e) {                                          // Enter = ارسال (دسکتاپ) | Shift+Enter = خط جدید
+            if (e.key === 'Enter' && !e.shiftKey && window.matchMedia('(hover: hover)').matches) {
+                e.preventDefault();
+                $tkr.trigger('submit');
+            }
+        });
+
+        /* ضمیمه */
+        var tkErr = function (m) {
+            $('#tkErr').text(m).addClass('show');
+        };
+        $('#tkFile').on('change', function () {
+            var f = this.files[0];
+            $('#tkErr').removeClass('show');
+            if (!f) {
+                $('#tkAttached').prop('hidden', true);
+                return;
+            }
+            if (!(/^image\/(png|jpeg)$/.test(f.type) && f.size <= 5 * 1024 * 1024)) {
+                this.value = '';
+                $('#tkAttached').prop('hidden', true);
+                tkErr('فقط JPG یا PNG و حداکثر ۵ مگابایت مجاز است.');
+                return;
+            }
+            $('#tkAttachedName').text(f.name);
+            $('#tkAttached').prop('hidden', false);
+        });
+        $('#tkAttachedRemove').on('click', function () {
+            $('#tkFile').val('');
+            $('#tkAttached').prop('hidden', true);
+        });
+        $('.tk-attach').on('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                $('#tkFile').trigger('click');
+            }
+        });
+
+        /* ارسال پاسخ */
+        $tkr.on('submit', function (e) {
+            e.preventDefault();
+            var text = $.trim($tx.val()), file = $('#tkFile')[0].files[0];
+            if (!text && !file) {
+                tkErr('متن پاسخ یا یک فایل ضمیمه وارد کنید.');
+                $tx.trigger('focus');
+                return;
+            }
+            var $b = $('#tkSend').addClass('loading').prop('disabled', true);
+            $b.find('.spinner-border').removeClass('d-none');
+            if (!PN_DEMO) {
+                this.submit();
+                return;
+            }                                // POST /panel/tickets/{id}/reply (multipart)
+
+            setTimeout(function () {                                                // دمو: افزودن پیام به گفت‌وگو
+                var now = new Date().toLocaleTimeString('fa-IR', {hour: '2-digit', minute: '2-digit'});
+                var $m = $('<div class="tk-msg me"><b class="tk-who">پیام شما</b></div>');
+                if (text) $('<div class="tk-bubble">').text(text).css('white-space', 'pre-wrap').appendTo($m);
+                if (file) $('<div class="tk-file"><span class="tk-file-name"></span></div>').find('.tk-file-name').append($('<span dir="ltr">').text(file.name)).end().appendTo($m);
+                $('<small class="tk-time">').text(now).appendTo($m);
+                $m.appendTo($tkc);
+                $tx.val('').trigger('input');
+                $('#tkFile').val('');
+                $('#tkAttached').prop('hidden', true);
+                $('#tkStatus').attr('class', 'pn-pill pending').text('در انتظار پاسخ');
+                $b.removeClass('loading').prop('disabled', false).find('.spinner-border').addClass('d-none');
+                tkBottom(true);
+                $tx.trigger('focus');
+            }, 500);
+        });
+    }
 });
