@@ -73,7 +73,7 @@
                             <b>{{ $r['name'] }}</b>
                             <label class="rd-switch" title="{{ $r['active'] ? 'غیرفعال کردن' : 'فعال کردن' }}"
                                    data-name="{{ $r['name'] }}"
-                                   data-url="{{ url('/panel/radar/' . $r['id'] . '/toggle') }}">
+                                   data-url="{{ url('/userPanel/radar/' . $r['id'] . '/toggle') }}">
                                 <input type="checkbox"
                                        {{ $r['active'] ? 'checked' : '' }} aria-label="فعال بودن {{ $r['name'] }}"><i></i>
                             </label>
@@ -92,7 +92,7 @@
                 <button type="button" class="rd-ic-btn danger" data-bs-toggle="modal" data-bs-target="#confirmModal"
                         data-confirm-title="حذف رادار"
                         data-confirm-text="رادار «{{ $r['name'] }}» حذف شود؟ دیگر برای وام‌های جدید اطلاع‌رسانی نمی‌شود."
-                        data-confirm-action="{{ url('/panel/radar/' . $r['id']) }}" data-confirm-method="DELETE"
+                        data-confirm-action="{{ url('/userPanel/radar/' . $r['id']) }}" data-confirm-method="DELETE"
                         data-confirm-label="بله، حذف شود" data-confirm-tone="danger"
                         aria-label="حذف {{ $r['name'] }}"
                         title="حذف">@include('userPanel.partials.icon', ['name' => 'trash'])</button>
@@ -145,7 +145,7 @@
                                     data-bs-target="#confirmModal"
                                     data-confirm-title="حذف از رادار"
                                     data-confirm-text="«{{ $title }}» از نتایج رادار حذف شود؟"
-                                    data-confirm-action="{{ url('/panel/radar/matches/' . $m['id']) }}"
+                                    data-confirm-action="{{ url('/userPanel/radar/matches/' . $m['id']) }}"
                                     data-confirm-method="DELETE" data-confirm-label="حذف از رادار"
                                     data-confirm-tone="danger">
                                 @include('userPanel.partials.icon', ['name' => 'trash']) حذف از رادار

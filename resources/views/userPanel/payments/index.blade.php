@@ -146,15 +146,15 @@
                                 مشاهده رسید
                             </button>
                         @endunless
-                        <a href="{{ url('/panel/requests') }}"
+                        <a href="{{ url('/userPanel/requests') }}"
                            class="ad-act">@include('userPanel.partials.icon', ['name' => 'clipboard']) مشاهده
                             درخواست</a>
                         @if ($p['status'] === 'failed')
-                            <a href="{{ url('/panel/requests') }}"
+                            <a href="{{ url('/userPanel/requests') }}"
                                class="ad-act highlight">@include('userPanel.partials.icon', ['name' => 'undo']) تلاش
                                 مجدد پرداخت</a>
                         @endif
-                        <a href="{{ url('/panel/tickets/create') }}"
+                        <a href="{{ url('/userPanel/tickets/create') }}"
                            class="ad-act ms-lg-auto">@include('userPanel.partials.icon', ['name' => 'chat']) گزارش
                             مشکل</a>
                     </div>
