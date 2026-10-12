@@ -3,10 +3,10 @@
 /*
  | منوی پنل (کاربر / ادمین / پشتیبان) – هر آیتم با roles مشخص می‌شود.
  | active: الگوهای request()->is(...) | bottom: در نویگیشن پایین موبایل بیاید (۴ مورد اول هر نقش)
- | آیتم‌های admin/support نمونه‌اند و با طراحی پنل مدیریت تکمیل می‌شوند.
+ | آیتم‌های adminPanel/support نمونه‌اند و با طراحی پنل مدیریت تکمیل می‌شوند.
  */
 return [
-    'roles' => ['user' => 'کاربر', 'admin' => 'مدیر سیستم', 'support' => 'پشتیبان'],
+    'roles' => ['user' => 'کاربر', 'adminPanel' => 'مدیر سیستم', 'support' => 'پشتیبان'],
 
     'menu' => [
         // ----- کاربر -----
@@ -19,14 +19,13 @@ return [
         ['label' => 'تیکت های پشتیبانی','icon' => 'chat',      'url' => '/userPanel/tickets',    'active' => ['userPanel/tickets*'],   'roles' => ['user']],
         ['label' => 'اطلاعات هویتی',    'icon' => 'idcard',    'url' => '/userPanel/verify',     'active' => ['userPanel/verify*'],    'roles' => ['user']],
 
-        // ----- مدیر / پشتیبان (نمونه) -----
-        ['label' => 'داشبورد مدیریت',   'icon' => 'dashboard', 'url' => '/admin',               'active' => ['admin'],                'roles' => ['admin', 'support'], 'bottom' => true],
-        ['label' => 'کاربران',          'icon' => 'users',     'url' => '/admin/users',         'active' => ['admin/users*'],         'roles' => ['admin'],            'bottom' => true],
-        ['label' => 'احراز هویت ها',    'icon' => 'shield',    'url' => '/admin/verifications', 'active' => ['admin/verifications*'], 'roles' => ['admin', 'support'], 'bottom' => true],
-        ['label' => 'آگهی ها',          'icon' => 'book',      'url' => '/admin/ads',           'active' => ['admin/ads*'],           'roles' => ['admin'],            'bottom' => true],
-        ['label' => 'درخواست ها',       'icon' => 'doc',       'url' => '/admin/requests',      'active' => ['admin/requests*'],      'roles' => ['admin']],
-        ['label' => 'پرداخت ها',        'icon' => 'card',      'url' => '/admin/payments',      'active' => ['admin/payments*'],      'roles' => ['admin']],
-        ['label' => 'تیکت های پشتیبانی','icon' => 'chat',      'url' => '/admin/tickets',       'active' => ['admin/tickets*'],       'roles' => ['admin', 'support'], 'bottom' => true],
-        ['label' => 'تنظیمات',          'icon' => 'settings',  'url' => '/admin/settings',      'active' => ['admin/settings*'],      'roles' => ['admin']],
+
+        // ----- مدیر / پشتیبان -----   (badge = تعداد موارد منتظر اقدام؛ از کنترلر/View Composer مقدار بدهید)
+        ['label' => 'داشبورد',          'icon' => 'dashboard', 'url' => '/adminPanel',               'active' => ['adminPanel'],                'roles' => ['adminPanel', 'support'], 'bottom' => true],
+        ['label' => 'کاربران',          'icon' => 'users',     'url' => '/adminPanel/users',         'active' => ['adminPanel/users*'],         'roles' => ['adminPanel', 'support']],
+        ['label' => 'احراز هویت ها',    'icon' => 'shield',    'url' => '/adminPanel/verifications', 'active' => ['adminPanel/verifications*'], 'roles' => ['adminPanel', 'support'], 'bottom' => true, 'badge' => 7],
+        ['label' => 'آگهی ها',          'icon' => 'book',      'url' => '/adminPanel/ads',           'active' => ['adminPanel/ads*'],           'roles' => ['adminPanel', 'support'], 'bottom' => true, 'badge' => 5],
+        ['label' => 'امور مالی',        'icon' => 'card',      'url' => '/adminPanel/finance',       'active' => ['adminPanel/finance*'],       'roles' => ['adminPanel']],
+        ['label' => 'تیکت های پشتیبانی','icon' => 'chat',      'url' => '/adminPanel/tickets',       'active' => ['adminPanel/tickets*'],       'roles' => ['adminPanel', 'support'], 'bottom' => true, 'badge' => 4],
     ],
 ];

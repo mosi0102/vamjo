@@ -9,11 +9,10 @@
 
     {{-- جلوگیری از پرش منو هنگام لود: وضعیت جمع‌شدن سایدبار قبل از رندر اعمال می‌شود --}}
     <script>
-        (function (d) { d.classList.add('js');
+        (function (d) { d.classList.add('js', 'pn-root');
             try { if (localStorage.getItem('pn-collapsed') === '1' && innerWidth >= 992) d.classList.add('pn-collapsed'); } catch (e) {}
         })(document.documentElement);
     </script>
-
 
     <link rel="stylesheet" href="{{ asset('website/css/bootstrap.min.css') }}" type="text/css">
     <link rel="stylesheet" href="{{ asset('website/css/line-awesome.css') }}" type="text/css">
@@ -28,11 +27,12 @@
 <body class="panel-body @yield('body_class')">
 @include('website.partials.loader')
 @php
-    // کاربر جاری (برای دمو مقدار پیش‌فرض دارد). نقش: user | admin | support
+    // کاربر جاری (برای دمو مقدار پیش‌فرض دارد). نقش: user | adminPanel | support
     $u = auth()->user();
-    $role = $u->role ?? 'user';
+    // دمو بدون لاگین: آدرس‌های /adminPanel نقش adminPanel می‌گیرند؛ با ?role=support نقش پشتیبان قابل تست است
+    $role = $u->role ?? (in_array(request('role'), ['adminPanel', 'support']) ? request('role') : (request()->is('adminPanel*') ? 'adminPanel' : 'user'));
     $pn = (object) [
-      'name' => $u->name ?? 'محمد حسین طاهری',
+      'name' => $u->name ?? ($role === 'adminPanel' ? 'مدیر وامجو' : ($role === 'support' ? 'کارشناس پشتیبانی' : 'محمد حسین طاهری')),
       'verified' => (bool) ($u->is_verified ?? false),
       'role' => $role,
       'role_label' => config('panel.roles')[$role] ?? '',

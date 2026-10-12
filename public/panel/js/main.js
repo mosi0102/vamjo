@@ -173,7 +173,8 @@ $(function () {
     var $chart = $('#pnChart');
     if ($chart.length) {
         var labels = $chart.data('labels'), sets = {pay: $chart.data('pay'), recv: $chart.data('recv')};
-        var names = {pay: 'پرداختی', recv: 'دریافتی'}, $bars = $('#pnBars'), built = false, shownTotal = 0;
+        var names = $chart.data('names') || {pay: 'پرداختی', recv: 'دریافتی'}, units = $chart.data('units') || null,
+            $bars = $('#pnBars'), built = false, shownTotal = 0;
 
         function countTo($el, to) {
             if (reduceMotion) {
@@ -201,12 +202,13 @@ $(function () {
             }
             $bars.toggleClass('recv', key === 'recv');
             $bars.find('.pn-bar').each(function (i) {
-                var $b = $(this).attr('data-v', fa(vals[i]) + ' میلیون');
+                var $b = $(this).attr('data-v', fa(vals[i]) + ' ' + (units ? String(units[key]).split(' ')[0] : 'میلیون'));
                 setTimeout(function () {
                     $b.css('height', (vals[i] / max * 100) + '%');
                 }, reduceMotion ? 0 : 40 + i * 80);
             });
             $('#pnChartTitle').text(names[key]);
+            if (units) $('#pnChartUnit').text(units[key]);
             countTo($('#pnChartTotal'), vals.reduce(function (a, b) {
                 return a + b;
             }, 0));
@@ -1267,7 +1269,9 @@ $(function () {
 
             setTimeout(function () {                                                // دمو: افزودن پیام به گفت‌وگو
                 var now = new Date().toLocaleTimeString('fa-IR', {hour: '2-digit', minute: '2-digit'});
-                var $m = $('<div class="tk-msg me"><b class="tk-who">پیام شما</b></div>');
+                var adm = $('body').hasClass('pn-admin'), note = adm && $('#tkInternal').is(':checked');
+                var $m = $('<div class="tk-msg me' + (note ? ' note' : '') + '"><b class="tk-who"></b></div>');
+                $m.find('.tk-who').text(note ? 'یادداشت داخلی' : (adm ? 'پشتیبانی (شما)' : 'پیام شما'));
                 if (text) $('<div class="tk-bubble">').text(text).css('white-space', 'pre-wrap').appendTo($m);
                 if (file) $('<div class="tk-file"><span class="tk-file-name"></span></div>').find('.tk-file-name').append($('<span dir="ltr">').text(file.name)).end().appendTo($m);
                 $('<small class="tk-time">').text(now).appendTo($m);
@@ -1275,7 +1279,7 @@ $(function () {
                 $tx.val('').trigger('input');
                 $('#tkFile').val('');
                 $('#tkAttached').prop('hidden', true);
-                $('#tkStatus').attr('class', 'pn-pill pending').text('در انتظار پاسخ');
+                if (!note) $('#tkStatus').attr('class', 'pn-pill ' + (adm ? 'approved' : 'pending')).text(adm ? 'پاسخ داده شده' : 'در انتظار پاسخ');
                 $b.removeClass('loading').prop('disabled', false).find('.spinner-border').addClass('d-none');
                 tkBottom(true);
                 $tx.trigger('focus');
@@ -1636,4 +1640,474 @@ $(function () {
         });
         fvRender();
     }
+
+    /* =====================================================
+       پنل مدیریت / پشتیبان
+       ===================================================== */
+    var admFa = function (s) {
+        return String(s).replace(/\d/g, function (d) {
+            return '۰۱۲۳۴۵۶۷۸۹'.charAt(d);
+        });
+    };
+    var admNorm = function (s) {
+        return String(s || '').replace(/[۰-۹]/g, function (d) {
+            return '۰۱۲۳۴۵۶۷۸۹'.indexOf(d);
+        }).replace(/[,،٬\s]+/g, '').toLowerCase();
+    };
+
+    /* ---------- جدول عمومی: تب، جستجو، فیلتر، مرتب‌سازی، صفحه‌بندی ---------- */
+    function pnTable($root) {
+        var size = +$root.data('page-size') || 8, $rows = $root.find('tbody tr'),
+            tab = $root.find('.rq-tab.active').data('tgroup') || 'all';
+        var q = '', filters = {}, sortKey = null, sortDir = 1, page = 1, matched = [];
+        var grp = function ($r) {
+            return String($r.attr('data-groups') || $r.attr('data-group') || '').split(' ');
+        };
+
+        function counts() {
+            $root.find('.rq-tab[data-tgroup]').each(function () {
+                var g = $(this).data('tgroup');
+                var n = g === 'all' ? $rows.length : $rows.filter(function () {
+                    return grp($(this)).indexOf(g) > -1;
+                }).length;
+                $(this).find('.rq-count').text(admFa(n));
+            });
+        }
+
+        function render(animate) {
+            matched = $rows.filter(function () {
+                var $r = $(this);
+                if (tab !== 'all' && grp($r).indexOf(tab) < 0) return false;
+                if (q && admNorm($r.attr('data-search')).indexOf(q) < 0) return false;
+                for (var k in filters) if (filters[k] && String($r.attr('data-' + k)) !== filters[k]) return false;
+                return true;
+            }).get();
+            if (sortKey) matched.sort(function (a, b) {
+                return (parseFloat($(a).attr('data-' + sortKey)) - parseFloat($(b).attr('data-' + sortKey))) * sortDir;
+            });
+            var pages = Math.max(1, Math.ceil(matched.length / size));
+            page = Math.min(page, pages);
+            var from = (page - 1) * size, show = matched.slice(from, from + size);
+            $rows.addClass('d-none').removeClass('pop');
+            $.each(show, function (i, r) {
+                var $r = $(r).removeClass('d-none');
+                $r.closest('tbody').append(r);
+                if (animate && !reduceMotion) {
+                    $r.addClass('pop').find('td').css('animation-delay', (i * 40) + 'ms');
+                }
+            });
+            $root.find('[data-tempty]').prop('hidden', matched.length > 0);
+            $root.find('.at-scroll').toggle(matched.length > 0);
+            $root.find('[data-tinfo]').text(matched.length ? 'نمایش ' + admFa(from + 1) + ' تا ' + admFa(from + show.length) + ' از ' + admFa(matched.length) + ' مورد' : '');
+            var $p = $root.find('[data-tpager]').empty();
+            if (pages > 1) {
+                var b = function (label, p, dis, act, aria) {
+                    return $('<button type="button">').text(label).prop('disabled', dis).toggleClass('active', !!act).attr('aria-label', aria || null).data('p', p).appendTo($p);
+                };
+                b('›', Math.max(1, page - 1), page <= 1, false, 'قبلی');                         // در RTL: قبلی سمت راست
+                for (var i = 1; i <= pages; i++) b(admFa(i), i, false, i === page);
+                b('‹', Math.min(pages, page + 1), page >= pages, false, 'بعدی');
+            }
+        }
+
+        $root.on('click', '.rq-tab[data-tgroup]', function () {
+            $root.find('.rq-tab[data-tgroup]').removeClass('active').attr('aria-selected', 'false');
+            $(this).addClass('active').attr('aria-selected', 'true');
+            tab = $(this).data('tgroup');
+            page = 1;
+            render(true);
+        });
+        var t;
+        $root.on('input', '[data-tsearch]', function () {
+            var v = this.value;
+            clearTimeout(t);
+            t = setTimeout(function () {
+                q = admNorm(v);
+                page = 1;
+                render(true);
+            }, 180);
+        });
+        $root.on('change', '[data-tfilter]', function () {
+            filters[$(this).data('tfilter')] = this.value;
+            page = 1;
+            render(true);
+        });
+        $root.on('click', 'th[data-sort]', function () {
+            var k = $(this).data('sort');
+            sortDir = sortKey === k ? -sortDir : 1;
+            sortKey = k;
+            $root.find('th[data-sort]').removeClass('asc desc');
+            $(this).addClass(sortDir === 1 ? 'asc' : 'desc');
+            render(true);
+        });
+        $root.on('click', '[data-tpager] button', function () {
+            page = +$(this).data('p');
+            render(true);
+            $('html, body').animate({scrollTop: $root.offset().top - 100}, 250);
+        });
+        $root.on('table:refresh', function () {
+            counts();
+            render(false);
+        });
+        $root.data('matched', function () {
+            return matched;
+        });
+        counts();
+        render(false);
+    }
+
+    $('[data-table]').each(function () {
+        pnTable($(this));
+    });
+
+    /* خروجی CSV از نتیجه فیلترشده */
+    var csvHeads = {
+        users: ['شناسه', 'نام', 'موبایل', 'کد ملی', 'احراز هویت', 'وضعیت حساب', 'تاریخ عضویت'],
+        finance: ['شماره تراکنش', 'نوع', 'کاربر', 'شناسه وام', 'مبلغ', 'کمیسیون', 'وضعیت', 'زمان']
+    };
+    $('[data-texport]').on('click', function () {
+        var rows = [csvHeads[$(this).data('texport')] || []], m = $('[data-table]').first().data('matched')();
+        $.each(m, function (_, r) {
+            rows.push(String($(r).attr('data-csv')).split('|'));
+        });
+        if (rows.length === 1) {
+            window.pnToast('موردی برای خروجی وجود ندارد');
+            return;
+        }
+        var csv = '\ufeff' + rows.map(function (r) {
+            return r.map(function (c) {
+                return '"' + String(c).replace(/"/g, '""') + '"';
+            }).join(',');
+        }).join('\r\n');
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([csv], {type: 'text/csv;charset=utf-8;'}));
+        a.download = $(this).data('texport') + '.csv';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.pnToast('فایل خروجی دانلود شد');
+    });
+
+    /* تب‌های داخل صفحه (جزئیات کاربر) */
+    $(document).on('click', '[data-tabs] [data-tab-target]', function () {
+        var $w = $(this).closest('[data-tabs]'), k = $(this).data('tab-target');
+        $w.find('[data-tab-target]').removeClass('active').attr('aria-selected', 'false');
+        $(this).addClass('active').attr('aria-selected', 'true');
+        $w.find('[data-tab-pane]').prop('hidden', true).filter('[data-tab-pane="' + k + '"]').prop('hidden', false);
+    });
+
+    /* Lightbox مدارک */
+    window.pnLightbox = function (src) {
+        var $lb = $('<div class="pn-lightbox" role="dialog" aria-label="مشاهده مدرک"><button type="button" class="lb-close" aria-label="بستن"><svg viewBox="0 0 24 24" class="pn-ic"><path d="M6 6l12 12M18 6L6 18"/></svg></button><img alt=""></div>');
+        $lb.find('img').attr('src', src);
+        $lb.appendTo('body');
+        requestAnimationFrame(function () {
+            $lb.addClass('show');
+        });
+        var close = function () {
+            $lb.removeClass('show');
+            setTimeout(function () {
+                $lb.remove();
+            }, 300);
+            $(document).off('keydown.lb2');
+        };
+        $lb.on('click', function (e) {
+            if ($(e.target).closest('.lb-close').length || e.target === this) close();
+        });
+        $lb.find('img').on('click', function () {
+            $lb.toggleClass('zoomed');
+        });
+        $(document).on('keydown.lb2', function (e) {
+            if (e.key === 'Escape') {
+                e.stopPropagation();
+                close();
+            }
+        });
+    };
+    $(document).on('click', '.at-doc img, img.zoomable', function () {
+        var s = $(this).attr('data-full') || $(this).attr('src');
+        if (s) window.pnLightbox(s);
+    });
+
+    /* به‌روزرسانی ردیف جدول بعد از اقدام مدیر (دمو: سمت کاربر؛ واقعی: بعد از ریلود) */
+    function admSetRow($tr, groups, pillClass, pillText) {
+        $tr.attr('data-groups', groups).removeAttr('data-group').find('.pn-pill').first().attr('class', 'pn-pill ' + pillClass).text(pillText);
+        $tr.closest('[data-table]').trigger('table:refresh');
+    }
+
+    var admBusy = function ($b, on) {
+        $b.toggleClass('loading', on).prop('disabled', on).find('.spinner-border').toggleClass('d-none', !on);
+    };
+
+    /* سوئیچ «آگهی ویژه» در جدول */
+    $(document).on('change', '.rd-switch[data-switch-group] input', function () {
+        var $in = $(this), on = this.checked, $sw = $in.closest('.rd-switch'), $tr = $in.closest('tr'),
+            g = $sw.data('switch-group');
+        var gs = ($tr.attr('data-groups') || '').split(' ').filter(function (x) {
+            return x && x !== g;
+        });
+        if (on) gs.push(g);
+        $tr.attr('data-groups', gs.join(' ')).closest('[data-table]').trigger('table:refresh');
+        var msg = $sw.data('name') + (on ? ' به‌عنوان آگهی ویژه ثبت شد' : ' از آگهی‌های ویژه خارج شد');
+        if (PN_DEMO) {
+            window.pnToast(msg);
+            return;
+        }
+        $.ajax({
+            url: $sw.data('url'),
+            method: 'POST',
+            data: {_method: 'PATCH', featured: on ? 1 : 0},
+            headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}
+        })
+            .done(function () {
+                window.pnToast(msg);
+            }).fail(function () {
+            $in.prop('checked', !on);
+            window.pnToast('تغییر انجام نشد');
+        });
+    });
+
+    /* ---------- بررسی مدارک احراز هویت ---------- */
+    var $kyc = $('#kycModal');
+    if ($kyc.length) {
+        var $kycRow = null, kycMode = 'approve';
+
+        function kycMode_(m) {
+            kycMode = m;
+            var rej = m === 'reject';
+            $('#kycRejectBox, #kycRejectActions').toggleClass('d-none', !rej);
+            $('#kycActions, #kycChecks').toggleClass('d-none', rej);
+        }
+
+        function kycUpdate() {
+            $('#kycApprove').prop('disabled', $('#kycChecks input:checked').length < 3);
+        }
+
+        $kyc.on('show.bs.modal', function (e) {
+            var $b = $(e.relatedTarget);
+            if (!$b.length) return;
+            $kycRow = $b.closest('tr');
+            $('#kycName').text($b.data('name'));
+            $('#kycSent').text('ارسال شده ' + $b.data('sent'));
+            $('#kycNid').text($b.data('nid'));
+            $('#kycBirth').text($b.data('birth'));
+            $('#kycMobile').text($b.data('mobile'));
+            $('#kycSheba').text($b.data('sheba'));
+            $('#kycBank').text($b.data('bank'));
+            $('#kycSelfie').attr('src', $b.data('selfie'));
+            $('#kycCard').attr('src', $b.data('idcard'));
+            $('#kycForm').data('id', $b.data('id'));
+            $('#kycChecks input').prop('checked', false);
+            $('#kycReasonSel').val('');
+            $('#kycReason').val('');
+            $('#kycRejectBox .f-field').removeClass('invalid');
+            kycMode_('approve');
+            kycUpdate();
+            var st = $b.data('status'), done = st !== 'pending';
+            $('#kycActions, #kycChecks').toggleClass('d-none', done);
+            $('#kycDone').toggleClass('d-none', !done).text(st === 'approved' ? 'هویت این کاربر قبلاً تایید شده است.' : 'این درخواست قبلاً رد شده است.');
+        });
+        $('#kycChecks').on('change', 'input', kycUpdate);
+        $('#kycRejectBtn').on('click', function () {
+            kycMode_('reject');
+        });
+        $('#kycBack').on('click', function () {
+            kycMode_('approve');
+        });
+        $('#kycApprove').on('click', function () {
+            $('#kycForm').attr('action', '/adminPanel/verifications/' + $('#kycForm').data('id') + '/approve');
+            kycMode = 'approve';
+        });
+        $('#kycRejectGo').on('click', function () {
+            $('#kycForm').attr('action', '/adminPanel/verifications/' + $('#kycForm').data('id') + '/reject');
+            kycMode = 'reject';
+        });
+        $('#kycForm').on('submit', function (e) {
+            var rej = !$('#kycRejectBox').hasClass('d-none');
+            if (rej) {
+                var sel = $('#kycReasonSel').val(), txt = $.trim($('#kycReason').val());
+                if (!sel && !txt) {
+                    e.preventDefault();
+                    $('#kycRejectBox .f-field').addClass('invalid');
+                    return;
+                }
+                $('#kycReason').val((sel ? sel + (txt ? ' — ' : '') : '') + txt);
+            } else if ($('#kycChecks input:checked').length < 3) {
+                e.preventDefault();
+                return;
+            }
+            if (!PN_DEMO) {
+                admBusy($(rej ? '#kycRejectGo' : '#kycApprove'), true);
+                return;
+            }
+            e.preventDefault();
+            var $b = $(rej ? '#kycRejectGo' : '#kycApprove');
+            admBusy($b, true);
+            setTimeout(function () {
+                admBusy($b, false);
+                bootstrap.Modal.getInstance($kyc[0]).hide();
+                if ($kycRow) {
+                    admSetRow($kycRow, rej ? 'rejected' : 'approved', rej ? 'rejected' : 'approved', rej ? 'رد شده' : 'تایید شده');
+                    $kycRow.find('.at-btn').removeClass('btn-brand').addClass('btn-ghost').text('مشاهده').attr('data-status', rej ? 'rejected' : 'approved').data('status', rej ? 'rejected' : 'approved');
+                }
+                window.pnToast(rej ? 'درخواست رد شد و به کاربر اطلاع داده شد' : 'هویت کاربر تایید شد');
+            }, 800);
+        });
+    }
+
+    /* ---------- بررسی آگهی: تایید و انتشار / رد / ویژه ---------- */
+    var $ar = $('#adReviewModal');
+    if ($ar.length) {
+        var $arRow = null, $arBtn = null;
+        var arStatusTxt = {
+            published: 'منتشر شده',
+            transfer: 'در حال معامله',
+            completed: 'تکمیل شده',
+            rejected: 'رد شده'
+        };
+
+        function arMode(rej) {
+            $('#arRejectBox, #arRejectActions').toggleClass('d-none', !rej);
+            $('#arActions, #arFeatureBox').toggleClass('d-none', rej);
+        }
+
+        $ar.on('show.bs.modal', function (e) {
+            var $b = $(e.relatedTarget);
+            if (!$b.length) return;
+            $arBtn = $b;
+            $arRow = $b.closest('tr');
+            $('#arTitle').text($b.data('title'));
+            $('#arId').text('#' + admFa($b.data('id')));
+            $('#arSeller').text($b.data('seller'));
+            $('#arCity').text($b.data('city'));
+            $('#arBank').text('بانک ' + $b.data('bank'));
+            $('#arAmount').text($b.data('amount'));
+            $('#arPrice').text($b.data('price'));
+            $('#arMonths').text($b.data('months'));
+            $('#arRate').text($b.data('rate'));
+            $('#arSheba').text($b.data('sheba'));
+            $('#arNote').text($b.data('note'));
+            $('#arDoc1').attr('src', $b.data('doc1'));
+            $('#arDoc2').attr('src', $b.data('doc2'));
+            var ratio = (+$b.data('price-raw')) / (+$b.data('amount-raw')) * 100, ok = ratio >= 5 && ratio <= 30;
+            $('#arCheck').attr('class', 'ar-price-check ' + (ok ? 'ok' : 'warn')).html('').append($('<span>').text(ok ? '✓ قیمت فروش (' + admFa(Math.round(ratio)) + '٪ مبلغ وام) در بازه توصیه سیستم (۵٪ تا ۳۰٪) است.' : '⚠ قیمت فروش ' + admFa(Math.round(ratio)) + '٪ مبلغ وام است و خارج از بازه توصیه (۵٪ تا ۳۰٪) قرار دارد.'));
+            $('#arFeatured').prop('checked', +$b.data('featured') === 1);
+            $('#arDays').toggleClass('d-none', +$b.data('featured') !== 1);
+            $('#arReasonSel').val('');
+            $('#arReason').val('');
+            $('#arRejectBox .f-field').removeClass('invalid');
+            var st = $b.data('status'), pending = st === 'pending', isAdm = +$b.data('adminPanel') === 1;
+            $('#arForm').data('id', $b.data('id'));
+            arMode(false);
+            $('#arActions').toggleClass('d-none', !pending);
+            $('#arFeatureBox').toggleClass('d-none', !(pending && isAdm));
+            $('#arReadonly').prop('hidden', pending);
+            $('#arStatusTxt').text(arStatusTxt[st] || '');
+        });
+        $('#arFeatured').on('change', function () {
+            $('#arDays').toggleClass('d-none', !this.checked);
+        });
+        $('#arRejectBtn').on('click', function () {
+            arMode(true);
+        });
+        $('#arBack').on('click', function () {
+            arMode(false);
+        });
+        $('#arApprove').on('click', function () {
+            $('#arForm').attr('action', '/adminPanel/ads/' + $('#arForm').data('id') + '/approve');
+        });
+        $('#arRejectGo').on('click', function () {
+            $('#arForm').attr('action', '/adminPanel/ads/' + $('#arForm').data('id') + '/reject');
+        });
+        $('#arForm').on('submit', function (e) {
+            var rej = !$('#arRejectBox').hasClass('d-none');
+            if (rej) {
+                var sel = $('#arReasonSel').val(), txt = $.trim($('#arReason').val());
+                if (!sel && !txt) {
+                    e.preventDefault();
+                    $('#arRejectBox .f-field').addClass('invalid');
+                    return;
+                }
+                $('#arReason').val((sel ? sel + (txt ? ' — ' : '') : '') + txt);
+            }
+            var $b = $(rej ? '#arRejectGo' : '#arApprove');
+            if (!PN_DEMO) {
+                admBusy($b, true);
+                return;
+            }
+            e.preventDefault();
+            admBusy($b, true);
+            setTimeout(function () {
+                admBusy($b, false);
+                bootstrap.Modal.getInstance($ar[0]).hide();
+                var feat = !rej && $('#arFeatured').is(':checked');
+                if ($arRow) {
+                    admSetRow($arRow, rej ? 'rejected' : 'published' + (feat ? ' featured' : ''), rej ? 'rejected' : 'approved', rej ? 'رد شده' : 'منتشر شده');
+                    $arRow.find('.at-btn').removeClass('btn-brand').addClass('btn-ghost').text('مشاهده').attr('data-status', rej ? 'rejected' : 'published').data('status', rej ? 'rejected' : 'published');
+                    $arRow.find('.rd-switch input').prop('checked', feat);
+                }
+                window.pnToast(rej ? 'آگهی رد شد و به کاربر اطلاع داده شد' : (feat ? 'آگهی منتشر و به‌عنوان ویژه ثبت شد' : 'آگهی منتشر شد'));
+            }, 800);
+        });
+    }
+
+    /* ---------- ثبت واریز به فروشنده ---------- */
+    var $po = $('#payoutModal');
+    if ($po.length) {
+        var $poRow = null;
+        $po.on('show.bs.modal', function (e) {
+            var $b = $(e.relatedTarget);
+            if (!$b.length) return;
+            $poRow = $b.closest('tr');
+            $('#poSeller').text($b.data('seller'));
+            $('#poLoan').text($b.data('loan'));
+            $('#poSheba').text($b.data('sheba'));
+            $('#poGross').text($b.data('gross'));
+            $('#poFee').text($b.data('fee'));
+            $('#poNet').text($b.data('net'));
+            $('#poForm').attr('action', $b.data('action'));
+            $('#poRef').val('').closest('.f-field').removeClass('invalid');
+        });
+        $('#poSheba').on('click keydown', function (e) {
+            if (e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ') return;
+            e.preventDefault();
+            if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText($(this).text()).then(function () {
+                window.pnToast('شماره شبا کپی شد');
+            });
+        });
+        $('#poRef').on('input', function () {
+            this.value = String(this.value).replace(/[۰-۹]/g, function (d) {
+                return '۰۱۲۳۴۵۶۷۸۹'.indexOf(d);
+            }).replace(/\D/g, '');
+            $(this).closest('.f-field').removeClass('invalid');
+        });
+        $('#poForm').on('submit', function (e) {
+            if ($('#poRef').val().length < 6) {
+                e.preventDefault();
+                $('#poRef').closest('.f-field').addClass('invalid');
+                return;
+            }
+            var $b = $(this).find('button[type=submit]');
+            if (!PN_DEMO) {
+                admBusy($b, true);
+                return;
+            }
+            e.preventDefault();
+            admBusy($b, true);
+            setTimeout(function () {
+                admBusy($b, false);
+                bootstrap.Modal.getInstance($po[0]).hide();
+                if ($poRow) {
+                    admSetRow($poRow, 'paid', 'approved', 'واریز شده');
+                    $poRow.find('.at-actions').html('<span class="text-muted small">ثبت شد ✓</span>');
+                }
+                window.pnToast('واریز به فروشنده ثبت شد');
+            }, 800);
+        });
+    }
+
+    /* ---------- تیکت (پشتیبان): پاسخ‌های آماده ---------- */
+    $(document).on('click', '.at-chip[data-canned]', function () {
+        $('#tkText').val($(this).data('canned')).trigger('input').trigger('focus');
+    });
 });
