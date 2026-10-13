@@ -468,4 +468,71 @@ $(function () {
             } else { $form[0].submit(); }                              // لاراول: ارسال عادی فرم (POST /ads با CSRF و فایل‌ها)
         });
     }
+
+    /* =====================================================
+       صفحه قوانین و مقررات
+       ===================================================== */
+    var $legal = $('#legalPage');
+    if ($legal.length) {
+        var $tocLinks = $('#legalToc a'), $secs = $legal.find('.legal-sec');
+        function legalSpy() {
+            var y = $win.scrollTop() + 140, cur = $secs.first().attr('id');
+            $secs.each(function () { if (y >= $(this).offset().top) cur = this.id; });
+            var $a = $tocLinks.removeClass('active').filter('[data-spy="' + cur + '"]').addClass('active');
+            var ol = $('#legalToc')[0];
+            if ($a.length && ol.scrollWidth > ol.clientWidth) { ol.scrollLeft = $a[0].offsetLeft - ol.clientWidth / 2 + $a[0].offsetWidth / 2; }     // موبایل: چیپ فعال وسط نوار
+            $('#toTop').prop('hidden', $win.scrollTop() < 700);
+        }
+        $win.on('scroll.legal', legalSpy).trigger('scroll.legal');
+        $('#legalPrint').on('click', function () { window.print(); });
+        $('#toTop').on('click', function () { $('html, body').animate({ scrollTop: 0 }, reduceMotion ? 0 : 450); });
+    }
+
+    /* =====================================================
+       صفحه سوالات متداول: جستجو، دسته‌بندی، هایلایت، باز/بسته همه
+       (باز و بسته شدن آیتم‌ها با همان هندلر #faqList بالاتر انجام می‌شود)
+       ===================================================== */
+    var $faqPage = $('#faqPage');
+    if ($faqPage.length) {
+        var $items = $('#faqList .faq-item'), fCat = 'all', fQ = '';
+        var fNorm = function (s) { return String(s || '').replace(/ي/g, 'ی').replace(/ك/g, 'ک').replace(/[۰-۹]/g, function (d) { return '۰۱۲۳۴۵۶۷۸۹'.indexOf(d); }).toLowerCase(); };
+
+        function faqHighlight($qt, q) {                                           // هایلایت اولین تطابق در تیتر سوال
+            var orig = String($qt.data('orig')), i = q ? fNorm(orig).indexOf(q) : -1;
+            $qt.empty();
+            if (i < 0) { $qt.text(orig); return; }
+            $qt.append(document.createTextNode(orig.slice(0, i)), $('<mark>').text(orig.slice(i, i + q.length)), document.createTextNode(orig.slice(i + q.length)));
+        }
+        function faqRender() {
+            var shown = 0;
+            $items.each(function () {
+                var $i = $(this), ok = (fCat === 'all' || $i.data('cat') === fCat) && (!fQ || fNorm($i.attr('data-search')).indexOf(fQ) > -1);
+                $i.toggleClass('d-none', !ok); if (ok) shown++;
+                faqHighlight($i.find('.faq-qt'), ok ? fQ : '');
+            });
+            $('#faqEmpty').prop('hidden', shown > 0); $('#faqClear').prop('hidden', !fQ);
+        }
+        $('.faq-chip').on('click', function () { $('.faq-chip').removeClass('active').attr('aria-selected', 'false'); $(this).addClass('active').attr('aria-selected', 'true'); fCat = $(this).data('cat'); faqRender(); });
+        var fT; $('#faqSearch').on('input', function () { var v = this.value; clearTimeout(fT); fT = setTimeout(function () { fQ = fNorm($.trim(v)); faqRender(); }, 150); });
+        $('#faqClear').on('click', function () { $('#faqSearch').val('').trigger('focus'); fQ = ''; faqRender(); });
+
+        var allOpen = false;
+        $('#faqToggleAll').on('click', function () {
+            allOpen = !allOpen;
+            $items.not('.d-none').each(function () {
+                var $i = $(this); if ($i.hasClass('open') === allOpen) return;
+                $i.toggleClass('open', allOpen).find('.faq-q').attr('aria-expanded', allOpen).end().find('.faq-a').stop(true, true)[allOpen ? 'slideDown' : 'slideUp'](reduceMotion ? 0 : 220);
+            });
+            $(this).text(allOpen ? 'بستن همه' : 'باز کردن همه');
+        });
+
+        $('#faqList').on('click', '.faq-helpful button', function () {          // بازخورد «مفید بود؟»
+            var $h = $(this).closest('.faq-helpful'); $h.html('<span class="thanks">ممنون از بازخورد شما ✓</span>');
+            // برای ذخیره واقعی: $.post('/faq/' + $h.data('id') + '/vote', {vote: ...})
+        });
+
+        if (location.hash && /^#q\d+$/.test(location.hash)) {                   // لینک مستقیم به یک سوال
+            var $t = $(location.hash); if ($t.length) setTimeout(function () { $t.find('.faq-q').trigger('click'); $('html, body').animate({ scrollTop: $t.offset().top - 110 }, 300); }, 300);
+        }
+    }
 });

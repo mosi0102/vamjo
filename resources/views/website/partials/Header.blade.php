@@ -4,14 +4,14 @@
     {{-- Desktop --}}
     <div class="container d-none d-lg-flex align-items-center desk-bar">
         <a class="brand-link" href="{{ url('/') }}" aria-label="وام‌جو">
-            <img class="logo" src="{{ asset('website/img/logo.png') }}" alt="وام‌جو" height="44">
+            <img class="logo" src="{{ asset('assets/images/logo.png') }}" alt="وام‌جو" height="44">
         </a>
         <ul class="nav-menu list-unstyled mb-0">
             <li><a class="nav-link {{ request()->is('/') ? 'active' : '' }}" href="{{ url('/') }}">صفحه نخست</a></li>
             <li><a class="nav-link {{ request()->is('ads*') ? 'active' : '' }}" href="{{ url('/ads') }}">آگهی‌های وام</a></li>
             <li><a class="nav-link" href="{{ url('/#banks') }}">بانک‌های تحت پوشش</a></li>
             <li><a class="nav-link {{ request()->is('rules') ? 'active' : '' }}" href="{{ url('/rules') }}">قوانین و مقررات</a></li>
-            <li><a class="nav-link" href="{{ url('/faq') }}">سوالات متداول</a></li>
+            <li><a class="nav-link {{ request()->is('faq') ? 'active' : '' }}" href="{{ url('/faq') }}">سوالات متداول</a></li>
         </ul>
         <div class="header-actions ms-auto">
             @guest
@@ -19,13 +19,13 @@
             @else
                 <a href="{{ url('/userPanel') }}" class="btn btn-ghost">پنل کاربری</a>
             @endguest
-            <a href="{{ url('/ads/create') }}" class="btn btn-brand" data-login-required data-verified-required><span class="plus-icon" aria-hidden="true">+</span> ثبت آگهی</a>
+            <a href="{{ url('/add') }}" class="btn btn-brand" data-login-required data-verified-required><span class="plus-icon" aria-hidden="true">+</span> ثبت آگهی</a>
         </div>
     </div>
 
     {{-- Mobile / Tablet --}}
     <div class="container d-flex d-lg-none align-items-center m-bar">
-        <a href="{{ url('/') }}" aria-label="وام‌جو"><img class="logo" src="{{ asset('website/img/logo.png') }}" alt="وام‌جو" height="36"></a>
+        <a href="{{ url('/') }}" aria-label="وام‌جو"><img class="logo" src="{{ asset('assets/images/logo.png') }}" alt="وام‌جو" height="36"></a>
         <div class="ms-auto d-flex align-items-center gap-2">
             @guest
                 <a href="{{ url('/login') }}" class="btn btn-brand btn-sm m-login" data-bs-toggle="modal" data-bs-target="#loginModal">ورود | ثبت نام</a>
@@ -48,8 +48,8 @@
         <div class="sheet-grid">
             <a href="{{ url('/#banks') }}" data-bs-dismiss="offcanvas"><span class="s-ic">🏦</span>بانک‌های تحت پوشش</a>
             <a href="{{ url('/rules') }}"><span class="s-ic">📜</span>قوانین و مقررات</a>
-            <a href="{{ url('/#faq') }}" data-bs-dismiss="offcanvas"><span class="s-ic">💬</span>سوالات متداول</a>
-            <a href="{{ url('/contact') }}"><span class="s-ic">☎️</span>تماس با ما</a>
+            <a href="{{ url('/faq') }}"><span class="s-ic">💬</span>سوالات متداول</a>
+            <a href="{{ url('/faq#contact') }}"><span class="s-ic">☎️</span>تماس با ما</a>
         </div>
     </div>
 </div>

@@ -17,8 +17,8 @@
     <link rel="stylesheet" href="{{ asset('website/css/bootstrap.min.css') }}" type="text/css">
     <link rel="stylesheet" href="{{ asset('website/css/line-awesome.css') }}" type="text/css">
     <link rel="stylesheet" href="{{ asset('website/css/main.css') }}" type="text/css">
-    <link rel="stylesheet" href="{{ asset('panel/css/main.css') }}" type="text/css">
     <link rel="stylesheet" href="{{ asset('website/css/fonts.css') }}" type="text/css">
+    <link rel="stylesheet" href="{{ asset('panel/css/main.css') }}" type="text/css">
     <link rel="stylesheet" href="{{ asset('website/css/loader.css') }}" type="text/css">
     @stack('styles')
 </head>
