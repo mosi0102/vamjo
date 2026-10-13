@@ -11,7 +11,7 @@
             <li><a class="nav-link {{ request()->is('ads*') ? 'active' : '' }}" href="{{ url('/ads') }}">آگهی‌های وام</a></li>
             <li><a class="nav-link" href="{{ url('/#banks') }}">بانک‌های تحت پوشش</a></li>
             <li><a class="nav-link {{ request()->is('rules') ? 'active' : '' }}" href="{{ url('/rules') }}">قوانین و مقررات</a></li>
-            <li><a class="nav-link" href="{{ url('/#faq') }}">سوالات متداول</a></li>
+            <li><a class="nav-link" href="{{ url('/faq') }}">سوالات متداول</a></li>
         </ul>
         <div class="header-actions ms-auto">
             @guest

@@ -21,7 +21,7 @@ return [
 
 
         // ----- مدیر / پشتیبان -----   (badge = تعداد موارد منتظر اقدام؛ از کنترلر/View Composer مقدار بدهید)
-        ['label' => 'داشبورد',          'icon' => 'dashboard', 'url' => '/adminPanel',               'active' => ['adminPanel'],                'roles' => ['adminPanel', 'support'], 'bottom' => true],
+        ['label' => 'داشبورد',          'icon' => 'dashboard', 'url' => '/adminPanel/dashboard',               'active' => ['adminPanel/dashboard*'],                'roles' => ['adminPanel', 'support'], 'bottom' => true],
         ['label' => 'کاربران',          'icon' => 'users',     'url' => '/adminPanel/users',         'active' => ['adminPanel/users*'],         'roles' => ['adminPanel', 'support']],
         ['label' => 'احراز هویت ها',    'icon' => 'shield',    'url' => '/adminPanel/verifications', 'active' => ['adminPanel/verifications*'], 'roles' => ['adminPanel', 'support'], 'bottom' => true, 'badge' => 7],
         ['label' => 'آگهی ها',          'icon' => 'book',      'url' => '/adminPanel/ads',           'active' => ['adminPanel/ads*'],           'roles' => ['adminPanel', 'support'], 'bottom' => true, 'badge' => 5],
