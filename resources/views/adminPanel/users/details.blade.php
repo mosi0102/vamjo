@@ -1,14 +1,14 @@
-@extends('userPanel.layouts.layout')
+@extends('userPanel.layouts.panel')
 
 @section('title', 'جزئیات کاربر')
 @section('page_title', 'جزئیات کاربر')
-@section('body_class', 'pn-adminPanel')
+@section('body_class', 'pn-admin')
 
 @php
     // نمونه داده؛ در پروژه واقعی از کنترلر پاس بدهید: compact('user', 'ads', 'requests', 'payments', 'logs')
     $fa = fn ($n) => strtr(number_format($n), ['0'=>'۰','1'=>'۱','2'=>'۲','3'=>'۳','4'=>'۴','5'=>'۵','6'=>'۶','7'=>'۷','8'=>'۸','9'=>'۹']);
     $faId = fn ($s) => strtr((string) $s, ['0'=>'۰','1'=>'۱','2'=>'۲','3'=>'۳','4'=>'۴','5'=>'۵','6'=>'۶','7'=>'۷','8'=>'۸','9'=>'۹']);
-    $isAdmin = (auth()->user()->role ?? request('role', 'adminPanel')) === 'adminPanel';
+    $isAdmin = \App\Support\PanelRole::isAdmin();
     $u = ['id' => 2001, 'name' => 'علی رضایی', 'mobile' => '09301021000', 'nid' => '0499370800', 'birth' => '۱۳۷۸/۰۵/۱۴', 'sheba' => 'IR062960000000100324200001', 'bank' => 'ملت', 'city' => 'سبزوار',
           'joined' => '۱۴۰۵/۰۶/۳۰ – ۱۴:۲۳', 'last' => '۲ ساعت پیش', 'ver' => 'verified', 'blocked' => false, 'ip' => '5.112.40.18'];
     $ph = 'data:image/svg+xml;utf8,' . rawurlencode('<svg xmlns="http://www.w3.org/2000/svg" width="320" height="200"><rect width="320" height="200" fill="#e4ebe6"/><rect x="60" y="30" width="200" height="140" rx="12" fill="#fff" stroke="#b9cbc0" stroke-width="4"/><circle cx="110" cy="85" r="18" fill="#9fb8ab"/><path d="M150 70h90M150 95h70M90 130h150" stroke="#9fb8ab" stroke-width="8" stroke-linecap="round"/></svg>');

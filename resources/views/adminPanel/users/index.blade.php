@@ -2,12 +2,12 @@
 
 @section('title', 'لیست کاربران')
 @section('page_title', 'کاربران')
-@section('body_class', 'pn-adminPanel')
+@section('body_class', 'pn-admin')
 
 @php
     // نمونه داده؛ در پروژه واقعی از کنترلر (با صفحه‌بندی سمت سرور) پاس بدهید: compact('users')
     $fa = fn ($n) => strtr(number_format($n), ['0'=>'۰','1'=>'۱','2'=>'۲','3'=>'۳','4'=>'۴','5'=>'۵','6'=>'۶','7'=>'۷','8'=>'۸','9'=>'۹']);
-    $isAdmin = (auth()->user()->role ?? request('role', 'adminPanel')) === 'adminPanel';
+    $isAdmin = \App\Support\PanelRole::isAdmin();
     $names = ['علی رضایی', 'مریم احمدی', 'حسین کریمی', 'زهرا محمدی', 'رضا نوری', 'سارا حسینی', 'محمد طاهری', 'نرگس صادقی', 'امیر جعفری', 'فاطمه کاظمی', 'مهدی رحیمی', 'لیلا موسوی'];
     $colors = ['#1f8a9e', '#7a5ac8', '#d6322c', '#2e9a4f', '#e07b00', '#3e4ea0'];
     $ver = ['verified' => ['approved', 'احراز شده'], 'pending' => ['pending', 'در انتظار بررسی'], 'unverified' => ['expired', 'احراز نشده'], 'rejected' => ['rejected', 'رد شده']];

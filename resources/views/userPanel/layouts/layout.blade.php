@@ -22,24 +22,22 @@
     <link rel="stylesheet" href="{{ asset('website/css/loader.css') }}" type="text/css">
     @stack('styles')
 </head>
-
-
 <body class="panel-body @yield('body_class')">
 @include('website.partials.loader')
 @php
-    // کاربر جاری (برای دمو مقدار پیش‌فرض دارد). نقش: user | adminPanel | support
+    // کاربر جاری (برای دمو مقدار پیش‌فرض دارد). نقش: user | admin | support
     $u = auth()->user();
-    // دمو بدون لاگین: آدرس‌های /adminPanel نقش adminPanel می‌گیرند؛ با ?role=support نقش پشتیبان قابل تست است
-    $role = $u->role ?? (in_array(request('role'), ['adminPanel', 'support']) ? request('role') : (request()->is('adminPanel*') ? 'adminPanel' : 'user'));
+    // نقش پنل: کاربر لاگین‌شده، یا (فقط در حالت local/debug) ?role=support که در سشن می‌ماند، یا بر اساس آدرس
+    $role = \App\Support\PanelRole::current();
+
     $pn = (object) [
-      'name' => $u->name ?? ($role === 'adminPanel' ? 'مدیر وامجو' : ($role === 'support' ? 'کارشناس پشتیبانی' : 'محمد حسین طاهری')),
+      'name' => $u->name ?? ($role === 'admin' ? 'مدیر وامجو' : ($role === 'support' ? 'کارشناس پشتیبانی' : 'محمد حسین طاهری')),
       'verified' => (bool) ($u->is_verified ?? false),
       'role' => $role,
       'role_label' => config('panel.roles')[$role] ?? '',
       'avatar' => $u->avatar ?? null,
     ];
 @endphp
-
 
 <div class="pn-app">
     @include('userPanel.partials.header')
@@ -57,12 +55,10 @@
 @include('userPanel.partials.bottom-nav')
 @include('userPanel.partials.logout-modal')
 
-
 <script src="{{ asset('website/js/jquery-3.6.4.min.js') }}"></script>
 <script src="{{ asset('website/js/bootstrap.bundle.js') }}"></script>
 <script src="{{ asset('website/js/loader.js') }}"></script>
 <script src="{{ asset('panel/js/main.js') }}"></script>
-
 @stack('scripts')
 </body>
 </html>

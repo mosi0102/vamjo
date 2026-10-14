@@ -4,7 +4,7 @@
     {{-- Desktop --}}
     <div class="container d-none d-lg-flex align-items-center desk-bar">
         <a class="brand-link" href="{{ url('/') }}" aria-label="وام‌جو">
-            <img class="logo" src="{{ asset('assets/images/logo.png') }}" alt="وام‌جو" height="44">
+            <img class="logo" src="{{ asset('website/img/logo.png') }}" alt="وام‌جو" height="44">
         </a>
         <ul class="nav-menu list-unstyled mb-0">
             <li><a class="nav-link {{ request()->is('/') ? 'active' : '' }}" href="{{ url('/') }}">صفحه نخست</a></li>

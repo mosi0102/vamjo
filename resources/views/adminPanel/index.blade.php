@@ -2,12 +2,12 @@
 
 @section('title', 'داشبورد مدیریت')
 @section('page_title', 'داشبورد')
-@section('body_class', 'pn-adminPanel pn-dashboard')
+@section('body_class', 'pn-admin pn-dashboard')
 
 @php
-    // نمونه داده؛ در پروژه واقعی از کنترلر پاس بدهید. نقش: adminPanel | support (با ?role=support تست کنید)
+    // نمونه داده؛ در پروژه واقعی از کنترلر پاس بدهید. نقش: admin | support (با ?role=support تست کنید)
     $fa = fn ($n) => strtr(number_format($n), ['0'=>'۰','1'=>'۱','2'=>'۲','3'=>'۳','4'=>'۴','5'=>'۵','6'=>'۶','7'=>'۷','8'=>'۸','9'=>'۹']);
-    $isAdmin = (auth()->user()->role ?? request('role', 'adminPanel')) === 'adminPanel';
+    $isAdmin = \App\Support\PanelRole::isAdmin();
     $kpis = [
       ['کل کاربران', $fa(1324), 'users', ''],
       ['ثبت نام امروز', $fa(18), 'plus', 'green'],
@@ -19,7 +19,7 @@
     if ($isAdmin) { $kpis[] = ['موجودی امانت', $fa(480000000) . ' <small>تومان</small>', 'wallet', 'green', '/adminPanel/finance']; $kpis[] = ['کمیسیون این ماه', $fa(36500000) . ' <small>تومان</small>', 'trend', 'green', '/adminPanel/finance']; }
     $chart = ['labels' => ['شنبه', 'یکشنبه', 'دوشنبه', 'سه شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'], 'pay' => [120, 95, 180, 140, 210, 160, 75], 'recv' => [14, 9, 22, 18, 26, 18, 11]];
     $kyc = [['علی رضایی', '۲ ساعت پیش'], ['مریم احمدی', '۳ ساعت پیش'], ['حسین کریمی', '۵ ساعت پیش'], ['زهرا محمدی', 'دیروز']];
-    $ads = [['وام ۳۰۰,۰۰۰,۰۰۰ بانک رسالت', 'سارا حسینی', '۱ ساعت پیش','8'], ['وام ۱۰۰,۰۰۰,۰۰۰ بانک شهر', 'امیر جعفری', '۴ ساعت پیش','7'], ['وام ۲۵۰,۰۰۰,۰۰۰ بانک تجارت', 'فاطمه کاظمی', 'دیروز','5']];
+    $ads = [['وام ۳۰۰,۰۰۰,۰۰۰ بانک رسالت', 'سارا حسینی', '۱ ساعت پیش'], ['وام ۱۰۰,۰۰۰,۰۰۰ بانک شهر', 'امیر جعفری', '۴ ساعت پیش'], ['وام ۲۵۰,۰۰۰,۰۰۰ بانک تجارت', 'فاطمه کاظمی', 'دیروز']];
     $tickets = [['عدم ثبت آگهی انتقال وام', 'رضا نوری', 'high'], ['پیگیری واریزی فروش امتیاز', 'نرگس صادقی', 'urgent'], ['مشکل در بارگذاری مدارک', 'مهدی رحیمی', 'normal']];
     $prio = ['normal' => 'متوسط', 'high' => 'زیاد', 'urgent' => 'فوری'];
     $dist = [['منتشر شده', 214, '#2e9a4f'], ['منتظر تایید', 5, '#d9a93f'], ['در حال معامله', 31, '#3e4ea0'], ['تکمیل شده', 98, '#1e5a45'], ['رد شده', 12, '#d33']];
@@ -76,7 +76,7 @@
                 <article class="pn-card at-q">
                     <header><h3>آگهی منتظر تایید</h3><a href="{{ url('/adminPanel/ads') }}" class="pn-link-arrow sm">همه @include('userPanel.partials.icon', ['name' => 'arrow'])</a></header>
                     @foreach ($ads as $r)
-                        <a href="{{ url('/adminPanel/ads') }}" class="at-q-row"> <img src="{{asset('website/img/bank/'.$r[3].'.png')}}" alt="" height="40"><span><b>{{ $r[0] }}</b><small>{{ $r[1] }} · {{ $r[2] }}</small></span><span class="at-q-go">بررسی</span></a>
+                        <a href="{{ url('/adminPanel/ads') }}" class="at-q-row"><span class="at-av sq" style="background:#e07b00">{{ mb_substr($r[1], 0, 1) }}</span><span><b>{{ $r[0] }}</b><small>{{ $r[1] }} · {{ $r[2] }}</small></span><span class="at-q-go">بررسی</span></a>
                     @endforeach
                 </article>
                 <article class="pn-card at-q">
