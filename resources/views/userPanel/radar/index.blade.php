@@ -27,6 +27,13 @@
 
 @section('main')
 
+    @if (session('success'))
+        <div class="alert alert-success pn-reveal" role="alert">{{ session('success') }}</div>
+    @endif
+    @if ($errors->any())
+        <div class="alert alert-danger pn-reveal" role="alert">{{ $errors->first() }}</div>
+    @endif
+
     <div class="pn-head pn-reveal">
         <span class="pn-head-ic">@include('userPanel.partials.icon', ['name' => 'radar'])</span>
         <div>
@@ -63,7 +70,7 @@
                             <b>{{ $r['name'] }}</b>
                             <label class="rd-switch" title="{{ $r['active'] ? 'غیرفعال کردن' : 'فعال کردن' }}"
                                    data-name="{{ $r['name'] }}"
-                                   data-url="{{ url('/userPanel/radar/' . $r['id'] . '/toggle') }}">
+                                   data-url="{{ route('user.radar.toggle', $r['id']) }}">
                                 <input type="checkbox"
                                        {{ $r['active'] ? 'checked' : '' }} aria-label="فعال بودن {{ $r['name'] }}"><i></i>
                             </label>
@@ -82,7 +89,7 @@
                 <button type="button" class="rd-ic-btn danger" data-bs-toggle="modal" data-bs-target="#confirmModal"
                         data-confirm-title="حذف رادار"
                         data-confirm-text="رادار «{{ $r['name'] }}» حذف شود؟ دیگر برای وام‌های جدید اطلاع‌رسانی نمی‌شود."
-                        data-confirm-action="{{ url('/userPanel/radar/' . $r['id']) }}" data-confirm-method="DELETE"
+                        data-confirm-action="{{ route('user.radar.destroy', $r['id']) }}" data-confirm-method="DELETE"
                         data-confirm-label="بله، حذف شود" data-confirm-tone="danger"
                         aria-label="حذف {{ $r['name'] }}"
                         title="حذف">@include('userPanel.partials.icon', ['name' => 'trash'])</button>
@@ -129,13 +136,13 @@
                             </div>
                         </div>
                         <div class="ad-actions">
-                            <a href="{{ url('/ads/' . $m['id']) }}"
+                            <a href="{{ route('site.ads.show', $m['id']) }}"
                                class="ad-act">@include('userPanel.partials.icon', ['name' => 'eye']) مشاهده آگهی</a>
                             <button type="button" class="ad-act danger" data-bs-toggle="modal"
                                     data-bs-target="#confirmModal"
                                     data-confirm-title="حذف از رادار"
                                     data-confirm-text="«{{ $title }}» از نتایج رادار حذف شود؟"
-                                    data-confirm-action="{{ url('/userPanel/radar/matches/' . $m['id']) }}"
+                                    data-confirm-action="{{ route('user.radar.matches.destroy', $m['match_id']) }}"
                                     data-confirm-method="DELETE" data-confirm-label="حذف از رادار"
                                     data-confirm-tone="danger">
                                 @include('userPanel.partials.icon', ['name' => 'trash']) حذف از رادار

@@ -18,7 +18,7 @@ class AdController extends Controller
     public function index(Request $request): View
     {
         $ads = Ad::query()
-            ->with(['bank', 'user'])
+            ->with(['bank', 'user', 'documents'])
             ->when($request->filled('state'), function ($query) use ($request) {
                 match ($request->string('state')->toString()) {
                     'pending' => $query->pendingReview(),

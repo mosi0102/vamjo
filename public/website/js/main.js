@@ -94,65 +94,51 @@ $(function () {
     }
 
     /* =====================================================
-       صفحه لیست آگهی‌ها (فیلتر، جستجو، مرتب‌سازی – سمت کاربر)
-       در پروژه واقعی می‌توانید این منطق را به کوئری‌استرینگ/Ajax سمت سرور وصل کنید.
+       صفحه لیست آگهی‌ها – فیلتر/جستجو/مرتب‌سازی سمت سرور (GET /ads)
+       قرارداد سرور: bank[]=slug، type[]=key، urgent=1، pay=1، q، sort=new|amount-desc|amount-asc|rate-asc
        ===================================================== */
     var $page = $('#adsPage');
     if ($page.length) {
-        var $grid = $('#adsGrid'), $items = $grid.children('.ad-item'), $empty = $('#adsEmpty');
+        var $form = $('#adsFilterForm'), $search = $('#adsSearch');
         var digits = '۰۱۲۳۴۵۶۷۸۹';
         var norm = function (s) {
             return String(s || '').replace(/ي/g, 'ی').replace(/ك/g, 'ک')
                 .replace(/[۰-۹]/g, function (d) { return digits.indexOf(d); })
-                .replace(/[,،٬\s]+/g, ' ').toLowerCase().trim();
+                .replace(/[,٬\s]+/g, ' ').toLowerCase().trim();
         };
-        var checked = function (name) { return $page.find('input[name="' + name + '"]:checked').map(function () { return this.value; }).get(); };
 
-        function apply(animate) {
-            var banks = checked('bank'), types = checked('type');
-            var urgent = $('#fUrgent').is(':checked'), pay = $('#fPay').is(':checked');
-            var q = norm($('#adsSearch').val()).replace(/ /g, '');
-            var sort = $('.sort-opt.active').data('sort') || 'new';
-            var shown = 0;
-
-            $items.sort(function (a, b) {
-                var da = $(a).data(), db = $(b).data();
-                if (sort === 'amount-desc') return db.amount - da.amount || da.order - db.order;
-                if (sort === 'amount-asc') return da.amount - db.amount || da.order - db.order;
-                if (sort === 'rate-asc') return da.rate - db.rate || da.order - db.order;
-                return da.order - db.order;
-            }).appendTo($grid);
-
-            $items.each(function () {
-                var $i = $(this), d = $i.data();
-                var ok = (!banks.length || banks.indexOf(d.bank) > -1) &&
-                    (!types.length || types.indexOf(d.type) > -1) &&
-                    (!urgent || +d.urgent === 1) && (!pay || +d.pay === 1) &&
-                    (!q || norm(d.search).replace(/ /g, '').indexOf(q) > -1);
-                $i.toggleClass('d-none', !ok);
-                if (ok) {
-                    if (animate && !reduceMotion) { $i.removeClass('pop'); void this.offsetWidth; $i.css('animation-delay', (shown * 60) + 'ms').addClass('pop'); }
-                    shown++;
-                }
-            });
-
-            $('#resultCount, #sheetCount').text(fa(shown));
-            $empty.prop('hidden', shown > 0);
-            var active = banks.length + types.length + (urgent ? 1 : 0) + (pay ? 1 : 0);
-            $('#filterBadge').text(fa(active)).prop('hidden', active === 0);
-        }
-
-        $page.on('change', 'input[type=checkbox]', function () { apply(true); });
-        var t; $('#adsSearch').on('input', function () { clearTimeout(t); t = setTimeout(function () { apply(true); }, 200); });
-
-        /* Sort dropdown */
-        $page.on('click', '.sort-opt', function () {
-            $('.sort-opt').removeClass('active'); $(this).addClass('active');
-            $('#sortLabel').text($(this).text());
-            apply(true);
+        var submitForm = function () { $form[0].submit(); };
+        var searchT;
+        $search.on('input', function () {
+            clearTimeout(searchT);
+            searchT = setTimeout(submitForm, 600);          // جستجو با فاصλه به سرور ارسال می‌شود
+        }).on('keydown', function (e) {
+            if (e.key === 'Enter') { e.preventDefault(); clearTimeout(searchT); submitForm(); }
         });
 
-        /* Bank list search */
+        $form.on('change', 'input[type=checkbox]', function () {
+            submitForm();
+        });
+
+        /* شمارنده فیلترهای فعال (badge) */
+        var refBadge = function () {
+            var n = $form.find('input[name="bank[]"]:checked').length + $form.find('input[name="type[]"]:checked').length
+                + ($form.find('#fUrgent').is(':checked') ? 1 : 0) + ($form.find('#fPay').is(':checked') ? 1 : 0);
+            $('#filterBadge').text(fa(n)).prop('hidden', n === 0);
+        };
+        $form.on('change', 'input[type=checkbox]', refBadge);
+        refBadge();
+
+        /* Sort dropdown: مقدار sort در hidden input ثبت و فرم ارسال می‌شود */
+        $page.on('click', '.sort-opt', function () {
+            $('.sort-opt').removeClass('active');
+            $(this).addClass('active');
+            $('#sortLabel').text($(this).text());
+            $('#sortInput').val($(this).data('sort'));
+            submitForm();
+        });
+
+        /* جستجوی لیست بانک‌ها (محلی، بدون ارسال به سرور) */
         $('#bankSearch').on('input', function () {
             var q = norm(this.value), n = 0;
             $('#bankSearchClear').prop('hidden', !q);
@@ -164,12 +150,19 @@ $(function () {
         });
         $('#bankSearchClear').on('click', function () { $('#bankSearch').val('').trigger('input').focus(); });
 
-        /* Reset */
+        /* Reset فیلترها */
         $('#clearAll, #emptyReset').on('click', function () {
-            $page.find('input[type=checkbox]').prop('checked', false);
-            $('#adsSearch').val(''); $('#bankSearch').val('').trigger('input');
-            apply(true);
+            $form.find('input[type=checkbox]').prop('checked', false);
+            $search.val('');
+            $('#sortInput').val('new');
+            $('.sort-opt').removeClass('active').filter('[data-sort="new"]').addClass('active');
+            $('#sortLabel').text('جدیدترین');
+            refBadge();
+            submitForm();
         });
+
+        /* دکمه اعمال فیلتر در موبایل (شیت فیلترها) */
+        $('#applyFilters').on('click', function () { submitForm(); });
 
         /* SEO text: نمایش بیشتر (موبایل) */
         $('#seoToggle').on('click', function () {
@@ -407,10 +400,33 @@ $(function () {
             .fail(function () { busy($b, false); $('#profileErr').text('ثبت نام انجام نشد؛ دوباره تلاش کنید.').removeClass('d-none'); });
     });
 
-    /* ---------- Bookmark ---------- */
+    /* ---------- نشان‌گذاری آگهی (برگزیده‌ها) | POST افزودن | DELETE حذف ---------- */
+    var miniToast = function (msg) {
+        var $t = $('<div class="wt-toast" role="status">').text(msg).appendTo('body');
+        requestAnimationFrame(function () { $t.addClass('show'); });
+        setTimeout(function () { $t.removeClass('show'); setTimeout(function () { $t.remove(); }, 350); }, 2200);
+    };
     $('#bookmarkBtn').on('click', function () {
         if (!isAuth) return;                      // برای مهمان، data-login-required مودال ورود را باز می‌کند
-        var on = !$(this).hasClass('on'); $(this).toggleClass('on', on).attr('aria-pressed', on);
+        var $b = $(this);
+        if ($b.prop('disabled')) return;
+        var removing = $b.hasClass('on');
+        var url = removing ? $b.data('remove') : $b.data('add');
+        if (!url) return;
+        $b.prop('disabled', true);
+        $.ajax({
+            url: url,
+            method: 'POST',
+            data: removing ? { _method: 'DELETE' } : {},
+            dataType: 'json',
+            headers: { 'X-CSRF-TOKEN': csrf }
+        })
+            .done(function () {
+                $b.toggleClass('on', !removing).attr('aria-pressed', !removing);
+                miniToast(removing ? 'آگهی از برگزیده‌ها حذف شد' : 'آگهی به برگزیده‌ها اضافه شد');
+            })
+            .fail(function () { miniToast('ثبت نشد؛ دوباره تلاش کنید'); })
+            .always(function () { $b.prop('disabled', false); });
     });
 
     /* =====================================================

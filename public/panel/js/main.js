@@ -79,7 +79,7 @@ $(function () {
                 io.unobserve(e.target);
             }
         });
-    }, {threshold: 0.08}) : null;
+    }, { threshold: 0.08 }) : null;
     $('.pn-reveal').each(function () {
         io ? io.observe(this) : $(this).addClass('in');
     });
@@ -96,7 +96,7 @@ $(function () {
                 $el.text(prefix + fa(target));
                 return;
             }
-            $({v: 0}).animate({v: target}, {
+            $({ v: 0 }).animate({ v: target }, {
                 duration: 1500,
                 step: function (now) {
                     $el.text(prefix + fa(Math.round(now)));
@@ -172,8 +172,8 @@ $(function () {
     /* نمودار ستونی (پرداختی / دریافتی) */
     var $chart = $('#pnChart');
     if ($chart.length) {
-        var labels = $chart.data('labels'), sets = {pay: $chart.data('pay'), recv: $chart.data('recv')};
-        var names = $chart.data('names') || {pay: 'پرداختی', recv: 'دریافتی'}, units = $chart.data('units') || null,
+        var labels = $chart.data('labels'), sets = { pay: $chart.data('pay'), recv: $chart.data('recv') };
+        var names = $chart.data('names') || { pay: 'پرداختی', recv: 'دریافتی' }, units = $chart.data('units') || null,
             $bars = $('#pnBars'), built = false, shownTotal = 0;
 
         function countTo($el, to) {
@@ -182,7 +182,7 @@ $(function () {
                 shownTotal = to;
                 return;
             }
-            $({v: shownTotal}).stop(true).animate({v: to}, {
+            $({ v: shownTotal }).stop(true).animate({ v: to }, {
                 duration: 900, step: function (n) {
                     $el.text(fa(Math.round(n)));
                 }, complete: function () {
@@ -225,7 +225,7 @@ $(function () {
                     drawChart('pay');
                     cio.disconnect();
                 }
-            }, {threshold: 0.25});
+            }, { threshold: 0.25 });
             cio.observe($chart[0]);
         } else {
             drawChart('pay');
@@ -351,7 +351,7 @@ $(function () {
             if (navigator.clipboard && window.isSecureContext) {
                 navigator.clipboard.writeText(text).then(done);
             } else {
-                var $ta = $('<textarea>').val(text).css({position: 'fixed', opacity: 0}).appendTo('body');
+                var $ta = $('<textarea>').val(text).css({ position: 'fixed', opacity: 0 }).appendTo('body');
                 $ta[0].select();
                 try {
                     document.execCommand('copy');
@@ -370,7 +370,7 @@ $(function () {
             var $b = $(e.relatedTarget);
             if (!$b.length) return;
             $('#payTitle').text($b.data('title'));
-            $('#payId').text('#' + Number($b.data('id')).toLocaleString('fa-IR', {useGrouping: false}));
+            $('#payId').text('#' + Number($b.data('id')).toLocaleString('fa-IR', { useGrouping: false }));
             $('#payAmount').text(fa($b.data('price')));
             $('#payBank').text($b.data('bank-l')).css('background', $b.data('bank-c'));
             $('#payForm').attr('action', $b.data('action'));          // POST /panel/requests/{id}/pay → ریدایرکت به زرین‌پال
@@ -416,7 +416,7 @@ $(function () {
             if (navigator.clipboard && window.isSecureContext) {
                 navigator.clipboard.writeText(text).then(done);
             } else {
-                var $ta = $('<textarea>').val(text).css({position: 'fixed', opacity: 0}).appendTo('body');
+                var $ta = $('<textarea>').val(text).css({ position: 'fixed', opacity: 0 }).appendTo('body');
                 $ta[0].select();
                 try {
                     document.execCommand('copy');
@@ -445,7 +445,7 @@ $(function () {
             var $b = $(e.relatedTarget);
             if (!$b.length) return;
             $('#trTitle').text($b.data('title'));
-            $('#trId').text('#' + Number($b.data('id')).toLocaleString('fa-IR', {useGrouping: false}));
+            $('#trId').text('#' + Number($b.data('id')).toLocaleString('fa-IR', { useGrouping: false }));
             $('#trBank').text($b.data('bank-l')).css('background', $b.data('bank-c'));
             $('#transferForm').attr('action', $b.data('action'));       // POST /panel/requests/{id}/confirm-transfer
             $('#trAgree').prop('checked', false);
@@ -456,9 +456,9 @@ $(function () {
                 $viewer.addClass('loading has-img');
                 $img.prop('hidden', false)
                     .off('load error').on('load', function () {
-                    $viewer.removeClass('loading').addClass('loaded');
-                    $('#docZoom').prop('hidden', false);
-                })
+                        $viewer.removeClass('loading').addClass('loaded');
+                        $('#docZoom').prop('hidden', false);
+                    })
                     .on('error', function () {
                         resetDoc();
                         $('#docEmpty').text('بارگذاری مدرک ممکن نشد');
@@ -627,7 +627,7 @@ $(function () {
             var $b = $(e.relatedTarget);
             if (!$b.length) return;
             $('#stLoan').text($b.data('title'));
-            $('#stId').text('#' + Number($b.data('id')).toLocaleString('fa-IR', {useGrouping: false}));
+            $('#stId').text('#' + Number($b.data('id')).toLocaleString('fa-IR', { useGrouping: false }));
             $('#stBank').text($b.data('bank-l')).css('background', $b.data('bank-c'));
             $('#stForm').attr('action', $b.data('action'));
             $('#stForm')[0].reset();
@@ -810,8 +810,8 @@ $(function () {
             $.ajax({
                 url: $sw.data('url'),
                 method: 'POST',
-                data: {_method: 'PATCH', active: on ? 1 : 0},
-                headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}
+                data: { _method: 'PATCH', active: on ? 1 : 0 },
+                headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
             })
                 .done(function () {
                     window.pnToast(msg);
@@ -1027,8 +1027,8 @@ $(function () {
                     e.preventDefault();
                     $dz.addClass('drag');
                 }).on('dragleave drop', function () {
-                $dz.removeClass('drag');
-            })
+                    $dz.removeClass('drag');
+                })
                 .on('drop', function (e) {
                     e.preventDefault();
                     var f = e.originalEvent.dataTransfer.files;
@@ -1153,7 +1153,7 @@ $(function () {
                 }
             });
             if (bad.length) {
-                $('html, body').animate({scrollTop: bad[0].offset().top - 120}, 400);
+                $('html, body').animate({ scrollTop: bad[0].offset().top - 120 }, 400);
                 bad[0].find('input:not([hidden]), select, textarea').first().trigger('focus');
                 return;
             }
@@ -1214,7 +1214,7 @@ $(function () {
             chk('message', $.trim($('#tkMessage').val()).length >= 10);
             if ($tkf.find('[data-field="attachment"]').hasClass('invalid')) bad.push($tkf.find('[data-field="attachment"]'));
             if (bad.length) {
-                $('html, body').animate({scrollTop: bad[0].offset().top - 110}, 350);
+                $('html, body').animate({ scrollTop: bad[0].offset().top - 110 }, 350);
                 bad[0].find('input:not([hidden]), textarea').first().trigger('focus');
                 return;
             }
@@ -1237,7 +1237,7 @@ $(function () {
     var $tkc = $('#tkMessages');
     if ($tkc.length) {
         var tkBottom = function (smooth) {
-            $tkc.stop(true).animate({scrollTop: $tkc[0].scrollHeight}, smooth && !reduceMotion ? 400 : 0);
+            $tkc.stop(true).animate({ scrollTop: $tkc[0].scrollHeight }, smooth && !reduceMotion ? 400 : 0);
         };
         tkBottom(false);
 
@@ -1304,7 +1304,7 @@ $(function () {
             }                                // POST /panel/tickets/{id}/reply (multipart)
 
             setTimeout(function () {                                                // دمو: افزودن پیام به گفت‌وگو
-                var now = new Date().toLocaleTimeString('fa-IR', {hour: '2-digit', minute: '2-digit'});
+                var now = new Date().toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
                 var adm = $('body').hasClass('pn-admin'), note = adm && $('#tkInternal').is(':checked');
                 var $m = $('<div class="tk-msg me' + (note ? ' note' : '') + '"><b class="tk-who"></b></div>');
                 $m.find('.tk-who').text(note ? 'یادداشت داخلی' : (adm ? 'پشتیبانی (شما)' : 'پیام شما'));
@@ -1355,12 +1355,24 @@ $(function () {
             return rem === 1;
         }
 
-        
+
         function vfShebaMsg() {
-            var n = pnShebaDigits($('#vfSheba').val()).length;
-            return n < 24
-                ? 'شماره شبا باید ۲۴ رقم بعد از IR باشد (اکنون ' + vfFa(n) + ' رقم).'
-                : 'رقم کنترلی شماره شبا درست نیست.';
+            var s = String($('#vfSheba').val() || '')
+                .toUpperCase()
+                .replace(/\s+/g, '');
+
+            var digits = pnShebaDigits(s);
+
+            if (digits.length < 24) {
+                return 'شماره شبا باید ۲۴ رقم بعد از IR باشد (اکنون ' +
+                    vfFa(digits.length) + ' رقم).';
+            }
+
+            if (digits.length !== 24 || !/^IR\d{24}$/.test(s)) {
+                return 'فرمت شماره شبا صحیح نیست.';
+            }
+
+            return 'شماره شبا معتبر نیست؛ لطفاً شماره را از روی اطلاعات بانکی بررسی کنید.';
         }
 
         var vfBanks = {
@@ -1437,7 +1449,7 @@ $(function () {
         var vfMonths = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
         var curY = 1405;
         try {
-            curY = +vfLat(new Intl.DateTimeFormat('en-u-ca-persian', {year: 'numeric'}).formatToParts(new Date()).filter(function (p) {
+            curY = +vfLat(new Intl.DateTimeFormat('en-u-ca-persian', { year: 'numeric' }).formatToParts(new Date()).filter(function (p) {
                 return p.type === 'year';
             })[0].value).replace(/\D/g, '');
         } catch (er) {
@@ -1516,7 +1528,7 @@ $(function () {
                 if ($f.hasClass('invalid') && !$(this).find('input')[0].files.length) $f.find('.f-err').text($(this).find('.dz-title').text() + ' را بارگذاری کنید.');
             });
             if (bad.length) {
-                $('html, body').animate({scrollTop: bad[0].offset().top - 110}, 350);
+                $('html, body').animate({ scrollTop: bad[0].offset().top - 110 }, 350);
                 bad[0].find('input:not([hidden]), select').first().trigger('focus');
                 return;
             }
@@ -1554,7 +1566,7 @@ $(function () {
                 }).join(',');
             }).join('\r\n');
             var a = document.createElement('a');
-            a.href = URL.createObjectURL(new Blob([csv], {type: 'text/csv;charset=utf-8;'}));
+            a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
             a.download = 'payments.csv';
             document.body.appendChild(a);
             a.click();
@@ -1610,7 +1622,7 @@ $(function () {
         };
 
         function fvRender() {
-            var cnt = {all: 0, active: 0, off: 0}, shown = 0;
+            var cnt = { all: 0, active: 0, off: 0 }, shown = 0;
             $fvGrid.children('.fv-item').each(function () {
                 var $i = $(this), removed = $i.attr('data-removed') === '1', grp = $i.data('group');
                 if (!removed) {
@@ -1681,8 +1693,8 @@ $(function () {
                     $.ajax({
                         url: $i.data('remove-url'),
                         method: 'POST',
-                        data: {_method: 'DELETE'},
-                        headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}
+                        data: { _method: 'DELETE' },
+                        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
                     });
                 }
             });
@@ -1792,7 +1804,7 @@ $(function () {
         $root.on('click', '[data-tpager] button', function () {
             page = +$(this).data('p');
             render(true);
-            $('html, body').animate({scrollTop: $root.offset().top - 100}, 250);
+            $('html, body').animate({ scrollTop: $root.offset().top - 100 }, 250);
         });
         $root.on('table:refresh', function () {
             counts();
@@ -1829,7 +1841,7 @@ $(function () {
             }).join(',');
         }).join('\r\n');
         var a = document.createElement('a');
-        a.href = URL.createObjectURL(new Blob([csv], {type: 'text/csv;charset=utf-8;'}));
+        a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
         a.download = $(this).data('texport') + '.csv';
         document.body.appendChild(a);
         a.click();
@@ -1905,15 +1917,15 @@ $(function () {
         $.ajax({
             url: $sw.data('url'),
             method: 'POST',
-            data: {_method: 'PATCH', featured: on ? 1 : 0},
-            headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}
+            data: { _method: 'PATCH', featured: on ? 1 : 0 },
+            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
         })
             .done(function () {
                 window.pnToast(msg);
             }).fail(function () {
-            $in.prop('checked', !on);
-            window.pnToast('تغییر انجام نشد');
-        });
+                $in.prop('checked', !on);
+                window.pnToast('تغییر انجام نشد');
+            });
     });
 
     /* ---------- بررسی مدارک احراز هویت ---------- */
@@ -2037,8 +2049,12 @@ $(function () {
             $('#arRate').text($b.data('rate'));
             $('#arSheba').text($b.data('sheba'));
             $('#arNote').text($b.data('note'));
-            $('#arDoc1').attr('src', $b.data('doc1'));
-            $('#arDoc2').attr('src', $b.data('doc2'));
+            /* مدرک بارگذاری‌شده یا پیام «ثبت نشده» */
+            $.each([[$('#arDoc1'), 'تصویر موجودی/امتیاز وام'], [$('#arDoc2'), 'کارت ملی فروشنده']], function (_, it) {
+                var $img = it[0], src = String($b.data($img.attr('id') === 'arDoc1' ? 'doc1' : 'doc2') || '');
+                $img.prop('hidden', !src).attr('src', src);
+                $img.closest('.at-doc').toggleClass('doc-empty', !src).find('figcaption').text(src ? it[1] : 'مدرک ثبت نشده');
+            });
             var ratio = (+$b.data('price-raw')) / (+$b.data('amount-raw')) * 100, ok = ratio >= 5 && ratio <= 30;
             $('#arCheck').attr('class', 'ar-price-check ' + (ok ? 'ok' : 'warn')).html('').append($('<span>').text(ok ? '✓ قیمت فروش (' + admFa(Math.round(ratio)) + '٪ مبلغ وام) در بازه توصیه سیستم (۵٪ تا ۳۰٪) است.' : '⚠ قیمت فروش ' + admFa(Math.round(ratio)) + '٪ مبلغ وام است و خارج از بازه توصیه (۵٪ تا ۳۰٪) قرار دارد.'));
             $('#arFeatured').prop('checked', +$b.data('featured') === 1);
@@ -2160,4 +2176,126 @@ $(function () {
     $(document).on('click', '.at-chip[data-canned]', function () {
         $('#tkText').val($(this).data('canned')).trigger('input').trigger('focus');
     });
+
+    /* =====================================================
+       ثبت آگهی جدید (پنل کاربر) – همان فرم سایت، درون لایه پنل
+       ارسال عادی فرم (POST user.ads.store)؛ سرور اعتبارسنجی نهایی را انجام می‌دهد.
+       ===================================================== */
+    var $adForm = $('#adForm');
+    if ($adForm.length) {
+        var adFa = function (s) {
+            return String(s).replace(/\d/g, function (d) { return '۰۱۲۳۴۵۶۷۸۹'.charAt(d); });
+        };
+        var adLat = function (s) {
+            return String(s || '').replace(/[۰-۹]/g, function (d) { return '۰۱۲۳۴۵۶۷۸۹'.indexOf(d); });
+        };
+        var adNum = function (v) { return +adLat(v).replace(/[^\d.]/g, '') || 0; };
+
+        /* فرمت ورودی‌ها (نمایش ارقام فارسی، ارسال لاتین به سرور) */
+        var fmMoney = function (el) {
+            var v = adLat(el.value).replace(/\D/g, '');
+            el.value = v ? adFa(Number(v).toLocaleString('en-US')) : '';
+        };
+        var fmInt = function (el) {
+            el.value = adFa(adLat(el.value).replace(/\D/g, '').slice(0, 3));
+        };
+        var fmDec = function (el) {
+            var v = adLat(el.value).replace(/[٫,]/g, '.').replace(/[^\d.]/g, '').replace(/(\..*)\./g, '$1').slice(0, 5);
+            el.value = adFa(v).replace('.', '٫');
+        };
+
+        $adForm.on('input', '[data-money]', function () {
+            fmMoney(this);
+            adReco(true);
+        })
+            .on('input', '[data-int]', function () { fmInt(this); })
+            .on('input', '[data-decimal]', function () { fmDec(this); });
+
+        /* شبا: هر مقدار (تایپ/پیست) به IR + ۲۴ رقم تبدیل می‌شود */
+        pnShebaField($('#fSheba'));
+
+        /* شماره توضیحات */
+        $('#fNote').on('input', function () {
+            $('#fNoteCount').text(adFa(this.value.length));
+        }).trigger('input');
+
+        /* توصیه سیستم: ۵٪ تا ۳۰٪ مبلغ وام */
+        function adReco(anim) {
+            var a = adNum($('#fAmount').val()), $box = $('#recoBox');
+            if (!a) {
+                $('#recoText').text('** تا ** میلیون تومان');
+                if ($box.length) $box.removeClass('live');
+                return;
+            }
+            var lo = a * 0.05, hi = a * 0.30, mil = hi >= 1e6 && lo >= 1e5;
+            var f = mil ? function (v) { return adFa(String(Math.round(v / 1e5) / 10).replace('.', '٫')); }
+                : function (v) { return adFa(Math.round(v).toLocaleString('en-US')); };
+            $('#recoText').text(f(lo) + ' تا ' + f(hi) + (mil ? ' میلیون تومان' : ' تومان'));
+            if (anim && $box.length) {
+                $box.removeClass('live');
+                void $box[0].offsetWidth;
+                $box.addClass('live');
+            }
+        }
+
+        /* بازسازی نمایش بعد از خطاهای سمت سرور (مقادیر old لاتین‌اند) */
+        $adForm.find('[data-money]').each(function () {
+            fmMoney(this);
+            adReco(false);
+        });
+        $adForm.find('[data-int], [data-decimal]').each(function () {
+            fmInt(this), fmDec(this);
+        });
+        (function () {
+            var v = pnShebaValue($('#fSheba').val());
+            if (v && v !== $('#fSheba').val()) $('#fSheba').val(v);
+        })();
+
+        $adForm.on('input change', '.f-input, #fAgree', function () {
+            $(this).closest('.f-field').removeClass('invalid');
+        });
+
+        /* اعتبارسنجی و ارسال */
+        $adForm.on('submit', function (e) {
+            var bad = [], chk = function (name, ok, msg) {
+                var $f = $adForm.find('[data-field="' + name + '"]'), $e = $f.find('.f-err');
+                if ($e.length && !$e.data('def')) $e.data('def', $e.text());
+                $f.toggleClass('invalid', !ok);
+                if (!ok) {
+                    if (msg) $e.text(msg);
+                    bad.push($f);
+                } else if ($e.data('def')) {
+                    $e.text($e.data('def'));
+                }
+            };
+            var months = adNum($('#fMonths').val()),
+                rate = $('#fRate').val() ? parseFloat(adLat($('#fRate').val()).replace('٫', '.')) : NaN;
+            chk('bank', !!$('#fBank').val());
+            chk('amount', adNum($('#fAmount').val()) > 0);
+            chk('months', months >= 1 && months <= 120);
+            chk('rate', !isNaN(rate) && rate >= 0 && rate <= 100);
+            chk('price', adNum($('#fPrice').val()) > 0);
+            chk('sheba', /^IR\d{24}$/.test($('#fSheba').val()),
+                'شماره شبا باید ۲۴ رقم بعد از IR باشد (اکنون ' + adFa(pnShebaDigits($('#fSheba').val()).length) + ' رقم).');
+            chk('note', $.trim($('#fNote').val()).length >= 10);
+            chk('doc_balance', !!$('#fDocBalance')[0] && $('#fDocBalance')[0].files.length > 0);
+            chk('doc_id', !!$('#fDocId')[0] && $('#fDocId')[0].files.length > 0);
+            chk('agree', $('#fAgree').is(':checked'));
+
+            if (bad.length) {
+                e.preventDefault();
+                $('html, body').animate({ scrollTop: bad[0].offset().top - 120 }, 400);
+                bad[0].find('input:not([hidden]), select, textarea').first().trigger('focus');
+                return;
+            }
+            /* ارسال عدد لاتین ساده به سرور */
+            $adForm.find('[data-money], [data-int]').each(function () {
+                this.value = adLat(this.value).replace(/\D/g, '');
+            });
+            $adForm.find('[data-decimal]').each(function () {
+                this.value = adLat(this.value).replace('٫', '.');
+            });
+            $(this).find('button[type=submit]').addClass('loading').prop('disabled', true).find('.spinner-border').removeClass('d-none');
+        });
+    }
 });

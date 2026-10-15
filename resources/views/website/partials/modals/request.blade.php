@@ -1,7 +1,7 @@
 {{-- مودال ثبت درخواست وام | ورودی: $ad و $fa --}}
 <div class="modal fade app-modal" id="requestModal" tabindex="-1" aria-labelledby="requestModalTitle" aria-hidden="true"
      data-min="{{ $ad['price'] }}" data-max="{{ $ad['max_offer'] }}"
-     data-url="{{ url('/ads/' . $ad['id'] . '/request') }}" data-pay="{{ url('/payment/' . $ad['id']) }}">
+     data-url="{{ route('site.ads.request', $ad['id']) }}" data-pay="{{ url('/payment/' . $ad['id']) }}">
     <div class="modal-dialog modal-dialog-centered modal-sheet">
         <div class="modal-content">
             <div class="sheet-handle d-sm-none" aria-hidden="true"></div>

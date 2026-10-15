@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Site\AdController as SiteAdController;
 use App\Models\ActivityLog;
 use App\Models\Ad;
 use App\Models\AdDocument;
@@ -37,6 +38,20 @@ class AdController extends Controller
             ->all();
 
         return view('userPanel.ads.index', compact('ads'));
+    }
+
+    /** فرم ثبت آگهی جدید (داخل پنل کاربر؛ نیازمند احراز هویت – middleware kyc) */
+    public function create(): View
+    {
+        return view('userPanel.ads.create', [
+            'banks' => Presenter::banks(Bank::query()->active()->ordered()->get()),
+        ]);
+    }
+
+    /** ذخیره آگهی جدید – منطق مشترک ثبت فرم سایت (اعتبارسنجی، ساخت آگهی و مدارک) */
+    public function store(Request $request): RedirectResponse
+    {
+        return app(SiteAdController::class)->store($request);
     }
 
     /** درخواست‌های ثبت‌شده روی یک آگهی */

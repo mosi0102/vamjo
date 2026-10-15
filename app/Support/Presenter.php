@@ -4,6 +4,7 @@ namespace App\Support;
 
 use App\Models\ActivityLog;
 use App\Models\Ad;
+use App\Models\AdDocument;
 use App\Models\AdOffer;
 use App\Models\Bank;
 use App\Models\Favorite;
@@ -218,6 +219,7 @@ class Presenter
 
         return [
             'id' => $ad?->id,
+            'match_id' => $match->id,
             'radar' => $match->radar_id,
             'bank' => $bank?->display_name ?? '',
             'image' => $bank?->image ?? '1',
@@ -360,6 +362,7 @@ class Presenter
     public static function adminAdRow(Ad $ad): array
     {
         $bank = $ad->bank;
+        $docs = $ad->documents->keyBy('kind');
 
         return [
             'id' => $ad->id,
@@ -367,6 +370,7 @@ class Presenter
             'bank' => $bank?->display_name ?? '',
             'bank_full' => $bank?->name ?? '',
             'l' => $bank?->initial ?? '',
+            'c' => $bank?->color ?? '#1e5a45',
             'image' => $bank?->image ?? '1',
             'amount' => $ad->amount,
             'price' => $ad->price,
@@ -377,6 +381,10 @@ class Presenter
             'city' => $ad->city ?? '',
             'status' => $ad->status,
             'featured' => (bool) $ad->featured,
+            'sheba' => $ad->sheba ?? '',
+            'note' => $ad->description ?? '',
+            'doc1' => $docs->get(AdDocument::KIND_BALANCE)?->url,
+            'doc2' => $docs->get(AdDocument::KIND_NATIONAL_CARD)?->url,
             'ago' => Fa::ago($ad->created_at),
             'age' => (int) $ad->created_at->diffInMinutes(now()),
         ];

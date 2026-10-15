@@ -19,7 +19,7 @@
 
                 <h2 class="m-title text-center" id="rdTitle">رادار جدید</h2>
 
-                <form method="POST" action="{{ url('/panel/radar') }}" id="rdForm" novalidate data-create-url="{{ url('/panel/radar') }}" data-update-url="{{ url('/panel/radar') }}">
+                <form method="POST" action="{{ route('user.radar.store') }}" id="rdForm" novalidate data-create-url="{{ route('user.radar.store') }}" data-update-url="{{ url('/userPanel/radar') }}">
                     @csrf
                     <input type="hidden" name="_method" id="rdMethod" value="POST">
 

@@ -6,6 +6,14 @@
 
 @php
     $fa = fn ($n) => strtr(number_format($n), ['0'=>'۰','1'=>'۱','2'=>'۲','3'=>'۳','4'=>'۴','5'=>'۵','6'=>'۶','7'=>'۷','8'=>'۸','9'=>'۹', ',' => '،']);
+    // فیلترهای فعال سمت سرور (قرارداد: bank[]=slug | type[]=key | urgent | pay | q | sort)
+    $sel = ['banks' => array_filter((array) request()->query('bank')), 'types' => array_filter((array) request()->query('type'))];
+    $sel['urgent'] = request()->boolean('urgent');
+    $sel['pay'] = request()->boolean('pay');
+    $sel['q'] = request()->string('q')->toString();
+    $sel['sort'] = in_array(request()->query('sort'), ['new', 'amount-desc', 'amount-asc', 'rate-asc'], true) ? request()->query('sort') : 'new';
+    $selectedBanks = collect($sel['banks']);
+    $selectedTypes = collect($sel['types']);
 @endphp
 
 @section('main')
@@ -34,6 +42,10 @@
                                 data-bs-target="#filtersSheet" aria-label="بستن"></button>
                     </div>
 
+                {{-- فیلترها به‌صورت فرم GET (ادغام سمت سرور + صفحه‌بndی) --}}
+                <form id="adsFilterForm" action="{{ url('/ads') }}" method="GET" role="form" aria-label="فیلتر آگهی‌ها">
+                    <input type="hidden" name="sort" id="sortInput" value="{{ $sel['sort'] }}">
+
                     <div class="filters-body">
                         {{-- بانک --}}
                         <div class="f-group">
@@ -46,7 +58,7 @@
                             <div class="f-list f-scroll" id="bankList">
                                 @foreach ($banks as $key => $b)
                                     <label class="chk bank-opt" data-name="{{ $b['n'] }}">
-                                        <input type="checkbox" name="bank" value="{{ $key }}">
+                                        <input type="checkbox" name="bank[]" value="{{ $key }}" @checked($selectedBanks->contains($key))>
                                         <span class="box"></span>
 
                                         <div class="chk-text d-flex">
@@ -64,7 +76,7 @@
                             <h3 class="f-title">نوع وام</h3>
                             <div class="f-list">
                                 @foreach ($types as $key => $name)
-                                    <label class="chk"><input type="checkbox" name="type" value="{{ $key }}"><span
+                                    <label class="chk"><input type="checkbox" name="type[]" value="{{ $key }}" @checked($selectedTypes->contains($key))><span
                                             class="box"></span><span class="chk-text">{{ $name }}</span></label>
                                 @endforeach
                             </div>
@@ -74,18 +86,18 @@
                         <div class="f-group">
                             <h3 class="f-title">گزینه های بیشتر</h3>
                             <div class="f-list">
-                                <label class="chk"><input type="checkbox" id="fUrgent"><span class="box"></span><span
+                                <label class="chk"><input type="checkbox" id="fUrgent" name="urgent" value="1" @checked($sel['urgent'])><span class="box"></span><span
                                         class="chk-text">وام فوری</span></label>
-                                <label class="chk"><input type="checkbox" id="fPay"><span class="box"></span><span
+                                <label class="chk"><input type="checkbox" id="fPay" name="pay" value="1" @checked($sel['pay'])><span class="box"></span><span
                                         class="chk-text">پرداخت از مبلغ وام</span></label>
                             </div>
                         </div>
                     </div>
+                </form>
 
                     <div class="filters-foot d-lg-none">
-                        <button type="button" class="btn btn-brand w-100" data-bs-dismiss="offcanvas"
-                                data-bs-target="#filtersSheet">مشاهده <span
-                                id="sheetCount">{{ $fa(count($ads)) }}</span> آگهی
+                        <button type="button" class="btn btn-brand w-100" id="applyFilters">
+                            مشاهده <span id="sheetCount">{{ $fa($total) }}</span> آگهی
                         </button>
                     </div>
                 </div>
@@ -94,13 +106,15 @@
             {{-- ===== Results ===== --}}
             <section class="col-lg-9">
 
+                {{-- جستجو (پارامتر q سمت سرور + debounce در main.js) --}}
                 <div class="search-box">
                     <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"
                          stroke-linecap="round" aria-hidden="true">
                         <circle cx="11" cy="11" r="8"/>
                         <path d="M21 21l-4.3-4.3"/>
                     </svg>
-                    <input type="search" id="adsSearch" placeholder="جستجو بر اساس نام بانک، نوع وام، مبلغ وام ..."
+                    <input type="search" id="adsSearch" name="q" form="adsFilterForm" value="{{ $sel['q'] }}"
+                           placeholder="جستجو بر اساس نام بانک، نوع وام، مبلغ وام ..."
                            autocomplete="off" aria-label="جستجو در آگهی‌ها">
                 </div>
 
@@ -113,32 +127,32 @@
                                  stroke-width="1.9" stroke-linecap="round" aria-hidden="true">
                                 <path d="M4 6h16M7 12h10M10 18h4"/>
                             </svg>
-                            فیلترها <b class="f-badge" id="filterBadge" hidden>۰</b>
+                            فیلترها <b class="f-badge" id="filterBadge" {{ count($selectedBanks) + count($selectedTypes) + (($sel['urgent'] ? 1 : 0) + ($sel['pay'] ? 1 : 0)) ? '' : 'hidden' }}>{{ $fa(count($selectedBanks) + count($selectedTypes) + ($sel['urgent'] ? 1 : 0) + ($sel['pay'] ? 1 : 0)) }}</b>
                         </button>
                         <div class="dropdown sort-dd">
                             <button class="tool-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <span class="muted">مرتب سازی بر اساس :</span> <b id="sortLabel">جدیدترین</b>
+                                <span class="muted">مرتب سازی بر اساس :</span> <b id="sortLabel">{{ ['new' => 'جدیدترین', 'amount-desc' => 'بیشترین مبلغ وام', 'amount-asc' => 'کمترین مبلغ وام', 'rate-asc' => 'کمترین سود'][$sel['sort']] }}</b>
                                 <span class="chev" aria-hidden="true"></span>
                             </button>
 
                             <ul class="dropdown-menu">
                                 <li>
-                                    <button type="button" class="dropdown-item sort-opt active" data-sort="new">
+                                    <button type="button" class="dropdown-item sort-opt {{ $sel['sort'] === 'new' ? 'active' : '' }}" data-sort="new">
                                         جدیدترین
                                     </button>
                                 </li>
                                 <li>
-                                    <button type="button" class="dropdown-item sort-opt" data-sort="amount-desc">بیشترین
+                                    <button type="button" class="dropdown-item sort-opt {{ $sel['sort'] === 'amount-desc' ? 'active' : '' }}" data-sort="amount-desc">بیشترین
                                         مبلغ وام
                                     </button>
                                 </li>
                                 <li>
-                                    <button type="button" class="dropdown-item sort-opt" data-sort="amount-asc">کمترین
+                                    <button type="button" class="dropdown-item sort-opt {{ $sel['sort'] === 'amount-asc' ? 'active' : '' }}" data-sort="amount-asc">کمترین
                                         مبلغ وام
                                     </button>
                                 </li>
                                 <li>
-                                    <button type="button" class="dropdown-item sort-opt" data-sort="rate-asc">کمترین
+                                    <button type="button" class="dropdown-item sort-opt {{ $sel['sort'] === 'rate-asc' ? 'active' : '' }}" data-sort="rate-asc">کمترین
                                         سود
                                     </button>
                                 </li>
@@ -148,7 +162,7 @@
                     </div>
                 </div>
 
-                <p class="result-count"><span id="resultCount">{{ $fa(count($ads)) }}</span> آگهی پیدا شد</p>
+                <p class="result-count"><span id="resultCount">{{ $fa($total) }}</span> آگهی پیدا شد</p>
 
                 <div class="row g-3 g-lg-4" id="adsGrid">
                     @foreach ($ads as $a)
@@ -163,7 +177,27 @@
                     @endforeach
                 </div>
 
-                <div class="empty-state" id="adsEmpty" hidden>
+                @php
+                    $pageFa = fn ($n) => strtr((string) $n, ['0'=>'۰','1'=>'۱','2'=>'۲','3'=>'۳','4'=>'۴','5'=>'۵','6'=>'۶','7'=>'۷','8'=>'۸','9'=>'۹']);
+                @endphp
+                @if ($paginator->lastPage() > 1)
+                    <nav class="mt-4" aria-label="صفحه‌بندی آگهی‌ها">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item {{ $paginator->onFirstPage() ? 'disabled' : '' }}">
+                                <a class="page-link" href="{{ $paginator->previousPageUrl() ?: '#' }}" rel="prev" aria-label="قبلی">‹</a>
+                            </li>
+                            @foreach ($paginator->getUrlRange(1, $paginator->lastPage()) as $page => $url)
+                                <li class="page-item {{ $paginator->currentPage() == $page ? 'active' : '' }}">
+                                    <a class="page-link" href="{{ $url }}">{{ $pageFa($page) }}</a>
+                                </li>
+                            @endforeach
+                            <li class="page-item {{ $paginator->hasMorePages() ? '' : 'disabled' }}">
+                                <a class="page-link" href="{{ $paginator->nextPageUrl() ?: '#' }}" rel="next" aria-label="بعدی">›</a>
+                            </li>
+                        </ul>
+                    </nav>
+                @endif
+                <div class="empty-state" id="adsEmpty" {{ $total > 0 ? 'hidden' : '' }}>
                     <div class="empty-ic" aria-hidden="true">
                         <img src="{{asset('website/img/empty.png')}}" style="width: 200px"/>
                     </div>

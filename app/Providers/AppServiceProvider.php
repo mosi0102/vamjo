@@ -6,6 +6,7 @@ use App\Models\Ad;
 use App\Models\KycVerification;
 use App\Models\Ticket;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 use Throwable;
 
@@ -24,7 +25,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // بج‌های منوی پنل مدیریت: تعداد موارد منتظر اقدام (احراز هویت، آگهی، تیکت)
+        Schema::defaultStringLength(191);
         View::composer('userPanel.partials.sidebar', function ($view) {
             $view->with('badges', $this->panelBadges());
         });

@@ -5,20 +5,24 @@
 @section('body_class', 'pn-myads')
 
 @php
-    // نمونه داده؛ در پروژه واقعی از کنترلر پاس بدهید: compact('ads')
-    // state: review (در انتظار ثبت) | transfer (در انتظار انتقال امتیاز) | completed | rejected
     $fa = fn ($n) => strtr(number_format($n), ['0'=>'۰','1'=>'۱','2'=>'۲','3'=>'۳','4'=>'۴','5'=>'۵','6'=>'۶','7'=>'۷','8'=>'۸','9'=>'۹']);
     $faId = fn ($n) => strtr((string) $n, ['0'=>'۰','1'=>'۱','2'=>'۲','3'=>'۳','4'=>'۴','5'=>'۵','6'=>'۶','7'=>'۷','8'=>'۸','9'=>'۹']);
-    $ads = [
-      ['id' => 1235896, 'bank' => 'رسالت','image'=>'8',   'l' => 'ر', 'c' => '#1f8a9e', 'amount' => 300000000, 'price' => 30000000, 'ago' => '۳ روز پیش', 'city' => 'سبزوار', 'views' => 124, 'offers' => 0, 'state' => 'review'],
-      ['id' => 1235897, 'bank' => 'جاویدان','image'=>'4', 'l' => 'ج', 'c' => '#e07b00', 'amount' => 300000000, 'price' => 30000000, 'ago' => '۳ روز پیش', 'city' => 'سبزوار', 'views' => 418, 'offers' => 8, 'new_offers' => 2, 'state' => 'transfer', 'deadline' => 7 * 86400 - 3600],
-      ['id' => 1235898, 'bank' => 'صادرات','image'=>'6', 'l' => 'ج', 'c' => '#e07b00', 'amount' => 300000000, 'price' => 30000000, 'ago' => '۳ روز پیش', 'city' => 'سبزوار', 'views' => 902, 'offers' => 5, 'state' => 'completed'],
-      ['id' => 1235899, 'bank' => 'مهر','image'=>'3', 'l' => 'ج', 'c' => '#e07b00', 'amount' => 300000000, 'price' => 30000000, 'ago' => '۳ روز پیش', 'city' => 'سبزوار', 'views' => 37, 'offers' => 0, 'state' => 'rejected', 'note' => 'تصویر مدرک خوانا نیست؛ آگهی را ویرایش و دوباره ارسال کنید.'],
+    $stateMap = [
+        'review'    => ['pending', 'در انتظار ثبت', 'review'],
+        'published' => ['approved', 'منتشر شده', 'progress'],
+        'transfer'  => ['pending', 'در انتظار انتقال امتیاز', 'progress'],
+        'completed' => ['approved', 'تکمیل شده', 'done'],
+        'rejected'  => ['rejected', 'رد شده', 'rejected'],
     ];
-    $stateMap = ['review' => ['pending', 'در انتظار ثبت', 'review'], 'transfer' => ['pending', 'در انتظار انتقال امتیاز', 'progress'], 'completed' => ['approved', 'تکمیل شده', 'done'], 'rejected' => ['rejected', 'رد شده', 'rejected']];
     $tabs = ['all' => 'همه', 'review' => 'در انتظار ثبت', 'progress' => 'در حال انجام', 'done' => 'تکمیل شده', 'rejected' => 'رد شده'];
-    $counts = collect($ads)->groupBy(fn ($a) => $stateMap[$a['state']][2])->map->count();
-    $counts['all'] = count($ads);
+    $c = collect($ads);
+    $counts = ['all' => $c->count()];
+    foreach ($ads as $a) {
+        $g = $stateMap[$a['state']][2] ?? null;
+        if ($g) {
+            $counts[$g] = ($counts[$g] ?? 0) + 1;
+        }
+    }
 @endphp
 
 @section('main')
@@ -29,9 +33,16 @@
             <h2>آگهی های من</h2>
             <p>تمامی آگهی هایی که گذاشته اید در این قسمت قابل مشاهده می باشد.</p>
         </div>
-        <a href="{{ url('/add') }}" target="_blank"
+        <a href="{{ route('user.ads.create') }}"
            class="btn btn-brand pn-head-act">@include('userPanel.partials.icon', ['name' => 'plus']) ثبت آگهی جدید</a>
     </div>
+
+    @if (session('success'))
+        <div class="alert alert-success pn-reveal" role="alert">{{ session('success') }}</div>
+    @endif
+    @if ($errors->any())
+        <div class="alert alert-danger pn-reveal" role="alert">{{ $errors->first() }}</div>
+    @endif
 
     <section class="pn-panel pn-reveal" style="--d:.08s">
 
@@ -89,25 +100,27 @@
                                             data-bs-target="#sellerTransferModal"
                                             data-id="{{ $a['id'] }}" data-title="{{ $title }}"
                                             data-bank-l="{{ $a['l'] }}" data-bank-c="{{ $a['c'] }}"
-                                            data-deadline="{{ $a['deadline'] }}"
-                                            data-action="{{ url('/panel/ads/' . $a['id'] . '/transfer') }}">
+                                            data-deadline="{{ $a['deadline'] ?? 0 }}"
+                                            data-action="{{ route('user.ads.transfer', $a['id']) }}">
                                         انتقال امتیاز @include('userPanel.partials.icon', ['name' => 'arrow'])
                                     </button>
                                 @endif
                             </div>
-                            @if ($a['state'] === 'transfer')
-                                <small class="rq-deadline">@include('userPanel.partials.icon', ['name' => 'clock']) ۷
-                                    روز مهلت انتقال امتیاز</small>
+                            @if ($a['state'] === 'transfer' && ! empty($a['deadline']))
+                                <small class="rq-deadline">@include('userPanel.partials.icon', ['name' => 'clock']) مهلت
+                                    انتقال امتیاز</small>
                             @endif
                         </div>
                     </div>
 
                     {{-- عملیات --}}
                     <div class="ad-actions">
-                        <a href="{{ url('/ads/' . $a['id']) }}"
-                           class="ad-act">@include('userPanel.partials.icon', ['name' => 'eye']) مشاهده آگهی</a>
+                        @if (in_array($a['state'], ['published', 'transfer'], true))
+                            <a href="{{ route('site.ads.show', $a['id']) }}"
+                               class="ad-act">@include('userPanel.partials.icon', ['name' => 'eye']) مشاهده آگهی</a>
+                        @endif
                         @if ($a['offers'] > 0)
-                            <a href="{{ url('/userPanel/ads/' . $a['id'] . '/offers') }}" class="ad-act highlight">
+                            <a href="{{ route('user.ads.offers', $a['id']) }}" class="ad-act highlight">
                                 @include('userPanel.partials.icon', ['name' => 'clipboard']) درخواست ها
                                 <span class="ad-badge">{{ $faId($a['offers']) }}</span>
                                 @if (! empty($a['new_offers']))
@@ -115,14 +128,14 @@
                                 @endif
                             </a>
                         @endif
-                        @if (in_array($a['state'], ['review', 'rejected']))
-                            <a href="{{ url('/userPanel/ads/' . $a['id'] . '/edit') }}"
+                        @if ($a['state'] === 'review' || $a['state'] === 'rejected')
+                            <a href="{{ route('user.ads.edit', $a['id']) }}"
                                class="ad-act">@include('userPanel.partials.icon', ['name' => 'edit']) ویرایش</a>
                             <button type="button" class="ad-act danger ms-lg-auto" data-bs-toggle="modal"
                                     data-bs-target="#confirmModal"
                                     data-confirm-title="حذف آگهی"
                                     data-confirm-text="آیا از حذف «{{ $title }}» مطمئن هستید؟ این کار قابل بازگشت نیست."
-                                    data-confirm-action="{{ url('/panel/ads/' . $a['id']) }}"
+                                    data-confirm-action="{{ route('user.ads.destroy', $a['id']) }}"
                                     data-confirm-method="DELETE" data-confirm-label="بله، حذف شود"
                                     data-confirm-tone="danger">
                                 @include('userPanel.partials.icon', ['name' => 'trash']) حذف
@@ -136,7 +149,7 @@
                          aria-hidden="true">@include('userPanel.partials.icon', ['name' => 'book'])</div>
                     <h3>هنوز آگهی ثبت نکرده‌اید</h3>
                     <p>اولین آگهی فروش امتیاز وام خود را ثبت کنید.</p>
-                    <a href="{{ url('/ads/create') }}" class="btn btn-brand">ثبت آگهی جدید</a>
+                    <a href="{{ route('user.ads.create') }}" class="btn btn-brand">ثبت آگهی جدید</a>
                 </div>
             @endforelse
         </div>

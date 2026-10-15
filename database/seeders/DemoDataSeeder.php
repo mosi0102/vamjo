@@ -179,7 +179,7 @@ class DemoDataSeeder extends Seeder
             [1, 'shahr', 100_000_000, 24, 23, 20_000_000, Ad::STATUS_PUBLISHED, false, 'تهران', 'marriage'],
             [4, 'javidan', 250_000_000, 48, 18, 45_000_000, Ad::STATUS_PUBLISHED, true, 'سبزوار', 'housing'],
             [6, 'tejarat', 120_000_000, 24, 20, 25_000_000, Ad::STATUS_PUBLISHED, false, 'اصفهان', 'child'],
-            [8, 'mehr', 100_000_000, 24, 23, 20_000_000, Ad::STATUS_PUBLISHED, false, 'تهران', 'mehrbani'],
+            [8, 'mehr-iran', 100_000_000, 24, 23, 20_000_000, Ad::STATUS_PUBLISHED, false, 'تهران', 'mehrbani'],
             [10, 'keshavarzi', 250_000_000, 36, 18, 45_000_000, Ad::STATUS_PUBLISHED, false, 'مشهد', 'commercial'],
             [3, 'saderat', 150_000_000, 36, 18, 30_000_000, Ad::STATUS_PENDING, false, 'نیشابور', 'medical'],
             [7, 'melli', 200_000_000, 48, 18, 40_000_000, Ad::STATUS_PENDING, false, 'شیراز', 'qarz'],

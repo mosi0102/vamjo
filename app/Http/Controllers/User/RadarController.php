@@ -85,8 +85,8 @@ class RadarController extends Controller
         return response()->json(['ok' => true, 'active' => $radar->is_active]);
     }
 
-    /** حذف یک نتیجه پیدا‌شده از لیست رادار */
-    public function destroyMatch(Request $request, RadarMatch $match): JsonResponse
+    /** حذف یک نتیجه پیدا‌شده از لیست رادار (فرم confirm modal یا ajax) */
+    public function destroyMatch(Request $request, RadarMatch $match): JsonResponse|RedirectResponse
     {
         $match->loadMissing('radar');
 
@@ -94,7 +94,9 @@ class RadarController extends Controller
 
         $match->delete();
 
-        return response()->json(['ok' => true]);
+        return $request->expectsJson()
+            ? response()->json(['ok' => true])
+            : back()->with('success', 'آگهی از نتایج رادار حذف شد.');
     }
 
     private function validated(Request $request): array
@@ -113,6 +115,20 @@ class RadarController extends Controller
 
         $bankName = Text::canonical($data['bank'] ?? null, Bank::query()->active()->pluck('name')->all());
         $bank = $bankName ? Bank::query()->where('name', $bankName)->first() : null;
+
+        // همان قید فرانت (rdFormErr): حداقل یکی از شرط‌ها اجباری است
+        if (! array_filter([
+            Iran::digits($data['min_amount'] ?? null) ?: null,
+            Iran::digits($data['max_amount'] ?? null) ?: null,
+            Iran::digits($data['min_months'] ?? null) ?: null,
+            ($data['max_rate'] ?? null) !== null && ($data['max_rate'] ?? null) !== '' ? $data['max_rate'] : null,
+            $bank?->id,
+            $data['city'] ?? null,
+        ])) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'name' => 'حداقل یکی از شرایط (مبلغ، اقساط، سود، بانک یا شهر) را وارد کنید.',
+            ]);
+        }
 
         return [
             'name' => $data['name'],

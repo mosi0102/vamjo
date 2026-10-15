@@ -24,29 +24,35 @@ class AdController extends Controller
     {
         $banks = Bank::query()->active()->ordered()->get();
 
-        $bankId = null;
-        if ($request->filled('bank')) {
-            $bank = $banks->firstWhere('slug', $request->string('bank')->toString())
-                ?? $banks->firstWhere('id', (int) $request->input('bank'));
-            $bankId = $bank?->id;
-        }
+        /**
+         * قرارداد فرانت‌اند (public/website/js/main.js بخش adsPage):
+         * فیلترها به‌صورت query string سمت سرور اعمال می‌شوند:
+         * bank[]=slug | type[]=key | urgent=1 | pay=1 | q | sort=new|amount-desc|amount-asc|rate-asc
+         */
+        $sort = $request->string('sort')->toString();
 
-        $ads = Ad::query()
-            ->published()
-            ->with('bank')
-            ->withCount('offers')
-            ->ofBank($bankId)
-            ->ofType($request->string('type')->toString() ?: null)
+        $filters = fn ($query) => $query
+            ->ofBank($request->input('bank') ?: $request->input('bank.0'))
+            ->ofType($request->input('type'))
             ->city($request->string('city')->toString() ?: null)
             ->amountFrom(Iran::digits($request->input('amount_min')) ?: null)
             ->amountTo(Iran::digits($request->input('amount_max')) ?: null)
             ->monthsTo(Iran::digits($request->input('months')) ?: null)
             ->rateTo($request->filled('rate') ? (float) Iran::toLatin($request->input('rate')) : null)
+            ->when($request->boolean('urgent'), fn ($q) => $q->urgent())
+            ->when($request->boolean('pay'), fn ($q) => $q->payable())
             ->search($request->string('q')->toString() ?: null)
-            ->when($request->string('sort')->toString() === 'cheap', fn ($q) => $q->orderBy('price'))
-            ->when($request->string('sort')->toString() === 'expensive', fn ($q) => $q->orderByDesc('amount'))
-            ->when(! in_array($request->string('sort')->toString(), ['cheap', 'expensive'], true),
-                fn ($q) => $q->orderByDesc('featured')->orderByDesc('published_at'))
+            ->when($sort === 'rate-asc', fn ($q) => $q
+                ->orderBy('rate')->orderByDesc('published_at'))
+            ->when($sort === 'amount-asc', fn ($q) => $q
+                ->orderBy('amount'))
+            ->when($sort === 'cheap', fn ($q) => $q->orderBy('price'))
+            ->when($sort === 'expensive' || $sort === 'amount-desc', fn ($q) => $q
+                ->orderByDesc('amount'))
+            ->when(in_array($sort, ['', 'new'], true), fn ($q) => $q
+                ->orderByDesc('featured')->orderByDesc('published_at'));
+
+        $ads = $filters(Ad::query()->published()->with('bank')->withCount('offers'))
             ->paginate(12)
             ->withQueryString();
 
@@ -57,6 +63,8 @@ class AdController extends Controller
             'types' => config('vamjou.loan_types'),
             'ads' => collect($ads->items())->map(fn (Ad $ad) => Presenter::siteAd($ad))->all(),
             'paginator' => $ads,
+            'total' => $ads->total(),
+            'current' => ['sort' => $sort ?: 'new'],
         ]);
     }
 

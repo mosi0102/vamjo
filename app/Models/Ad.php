@@ -171,14 +171,42 @@ class Ad extends Model
         return $query->where('featured', true);
     }
 
-    public function scopeOfBank(Builder $query, $bankId): Builder
+    /** فیلتر چند‌گانه بانک‌ها (slug یا id) در صفحه لیست آگهی‌ها */
+    public function scopeOfBank(Builder $query, $bankIds): Builder
     {
-        return $bankId ? $query->where('bank_id', $bankId) : $query;
+        $ids = array_values(array_filter((array) $bankIds));
+
+        if (! $ids) {
+            return $query;
+        }
+
+        $numeric = array_values(array_filter($ids, 'is_numeric'));
+        $strings = array_values(array_filter($ids, 'is_string'));
+
+        return $query->where(function (Builder $w) use ($numeric, $strings) {
+            $w->whereIn('bank_id', $numeric)
+                ->orWhereHas('bank', fn (Builder $b) => $b->whereIn('slug', $strings));
+        });
     }
 
-    public function scopeOfType(Builder $query, ?string $type): Builder
+    /** فیلتر چندگانه نوع وام */
+    public function scopeOfType(Builder $query, $types): Builder
     {
-        return $type ? $query->where('type', $type) : $query;
+        $valid = array_values(array_filter((array) $types));
+
+        return $valid ? $query->whereIn('type', $valid) : $query;
+    }
+
+    /** وام فوری (فیلتر گزینه‌های بیشتر) */
+    public function scopeUrgent(Builder $query): Builder
+    {
+        return $query->where('urgent', true);
+    }
+
+    /** آگهی قابل خرید (پرداخت از مبلغ وام) – در حال معامله نیست */
+    public function scopePayable(Builder $query): Builder
+    {
+        return $query->where('status', '!=', self::STATUS_TRANSFER);
     }
 
     public function scopeCity(Builder $query, ?string $city): Builder
@@ -214,6 +242,10 @@ class Ad extends Model
             fn (Builder $w) => $w->where('code', 'like', "%{$term}%")
                 ->orWhere('city', 'like', "%{$term}%")
                 ->orWhere('amount', 'like', "%{$term}%")
+                ->orWhereHas('bank', fn (Builder $b) => $b->where(function (Builder $bw) use ($term) {
+                    $bw->where('name', 'like', "%{$term}%")
+                        ->orWhere('short_name', 'like', "%{$term}%");
+                }))
         ));
     }
 }

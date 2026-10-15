@@ -1,19 +1,12 @@
 @extends('website.layouts.layout')
 
-@section('title', 'وام ۳۰۰,۰۰۰,۰۰۰ تومانی بانک رسالت | وام‌جو')
-@section('description', 'جزئیات آگهی وام ۳۰۰ میلیون تومانی بانک رسالت؛ نرخ سود، تعداد اقساط و شرایط ضامن.')
+@section('title', 'وام '.number_format($ad['amount']).' تومانی بانک '.$ad['bank_name'].' | وام‌جو')
+@section('description', 'جزئیات آگهی وام '.number_format($ad['amount']).' تومانی بانک '.$ad['bank_name'].'؛ نرخ سود، تعداد اقساط و شرایط ضامن.')
 @section('body_class', 'page-detail')
 
 @php
-    // نمونه داده؛ در پروژه واقعی از کنترلر پاس بدهید: return view('ads.detail.main', compact('ad', 'similar'));
     $fa = fn ($n) => strtr(number_format($n), ['0'=>'۰','1'=>'۱','2'=>'۲','3'=>'۳','4'=>'۴','5'=>'۵','6'=>'۶','7'=>'۷','8'=>'۸','9'=>'۹', ',' => ',']);
     $faDigits = fn ($s) => strtr((string) $s, ['0'=>'۰','1'=>'۱','2'=>'۲','3'=>'۳','4'=>'۴','5'=>'۵','6'=>'۶','7'=>'۷','8'=>'۸','9'=>'۹']);
-    $ad = [
-      'id' => 1, 'code' => '1235896','bank'=>'resalat', 'bank_name' => 'رسالت', 'city' => 'سبزوار','image'=>'8', 'ago' => '۳ روز پیش',
-      'amount' => 300000000, 'rate' => 2, 'months' => 60, 'installment' => 5100000, 'total' => 306000000,
-      'guarantor' => 'یک ضامن کارمند رسمی یا کاسب دارای جواز کسب معتبر',
-      'price' => 30000000, 'max_offer' => 45000000, 'offers' => 8, 'phone' => '05144444400'
-    ];
     $svg = [
       'wallet' => '<path d="M3 7a2 2 0 0 1 2-2h12v4"/><path d="M3 7v11a2 2 0 0 0 2 2h14a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1H5a2 2 0 0 1-2-2z"/><circle cx="16.5" cy="14.5" r="1.2"/>',
       'percent' => '<path d="M19 5L5 19"/><circle cx="7" cy="7" r="2.2"/><circle cx="17" cy="17" r="2.2"/>',
@@ -29,11 +22,6 @@
       ['calc', 'مبلغ هر قسط', $fa($ad['installment']) . ' تومان'],
       ['doc', 'مبلغ بازپرداخت نهایی', $fa($ad['total']) . ' تومان'],
       ['user', 'شرایط ضامن', $ad['guarantor']],
-    ];
-    $similar = [
-      ['id'=>11,'c'=>'#e07b00','l'=>'ج','amount'=>100000000,'buy'=>20000000,'months'=>24,'rate'=>23,'offers'=>8,'image'=>'8', 'bank_name' => 'رسالت'],
-      ['id'=>12,'c'=>'#3e4ea0','l'=>'ت','amount'=>250000000,'buy'=>45000000,'months'=>24,'rate'=>23,'offers'=>8,'image'=>'8', 'bank_name' => 'رسالت'],
-      ['id'=>13,'c'=>'#1f8a9e','l'=>'ر','amount'=>120000000,'buy'=>25000000,'months'=>24,'rate'=>23,'offers'=>8,'image'=>'8', 'bank_name' => 'رسالت'],
     ];
 @endphp
 
@@ -71,7 +59,7 @@
                             <span class="meta-i"><svg viewBox="0 0 24 24" aria-hidden="true"><path
                                         d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12"
                                                                                                              cy="9.5"
-                                                                                                             r="2.5"/></svg>{{ $ad['city'] }}</span>
+                                                                                                             r="2.5"/></svg>{{ $ad['city'] ?: '—' }}</span>
                         </div>
                     </div>
                 </div>
@@ -128,8 +116,12 @@
                     </div>
 
                     <div class="buy-actions">
-                        <button type="button" class="bookmark-btn" id="bookmarkBtn" aria-pressed="false"
-                                aria-label="ذخیره آگهی" data-login-required>
+                        {{-- برگزیده‌ها: افزودن/حذف با ajax (main.js بخش bookmark) --}}
+                        <button type="button" class="bookmark-btn {{ $isFavorite ? 'on' : '' }}" id="bookmarkBtn"
+                                aria-pressed="{{ $isFavorite ? 'true' : 'false' }}"
+                                aria-label="ذخیره آگهی" data-login-required
+                                data-add="{{ route('user.favorites.store', $ad['id']) }}"
+                                data-remove="{{ route('user.favorites.destroy', $ad['id']) }}">
                             <svg viewBox="0 0 24 24">
                                 <path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/>
                             </svg>
@@ -158,25 +150,6 @@
             </aside>
         </div>
 
-        {{-- ===== توضیحات ===== --}}
-        <article class="seo-text desc reveal">
-            <h2>وام فوری بانک رسالت</h2>
-            <p>برای دریافت وام فوری رسالت بانک لازم نیست به بانک رسالت مراجعه کنید. آخرین مرحله، مراجعه به سامانه‌ی
-                اعتبارسنجی مرآت و مشاهده‌ی میزان اعتبار است. حالا می‌توانید مراحل دریافت وام را شروع کنید. مراحل دریافت
-                وام در شعبه‌های بانک رسالت انجام می‌شوند. معمولا یک تا دو هفته بعد از تشکیل پرونده، وام شما واریز
-                می‌شود. وام این بانک را می‌توانید بین ۱ تا ۵ سال پرداخت کنید.</p>
-
-            <h3>پیگیری وام قرض‌الحسنه بانک رسالت</h3>
-            <p>وام قرض الحسنه رسالت ۲ درصد سود دارد و با کارمزد دو درصد نیز به شما تعلق می‌گیرد. سقف این وام ۲۰۰ میلیون
-                تومان است و برای دریافت آن به سپرده احتیاج دارید. برای دریافت وام قرض‌الحسنه‌ی بانک رسالت، سپرده‌ی شما
-                حداقل ۳ و حداقل ۶ ماه باید در حساب بماند. نسبت مبلغ وام به میزان سپرده ۱۰۰ درصد است؛ یعنی اگر خواب سپرده
-                ۶ ماه باشد، نسبت مبلغ وام ۱۰۰ درصد است و باید مبلغ آن را در ۱۲ ماه پرداخت کنید.</p>
-            <p>درصورتی‌که خواب سپرده بیشتر از ۶ ماه باشد، ۲ قسط به طول مدت بازپرداخت افزوده می‌شود. برای ثبت‌نام در وام
-                قرض‌الحسنه‌ی بانک رسالت باید در پیش‌خوان مجازی بانک رسالت ثبت‌نام کنید. ثبت‌نام در این پیش‌خوان با کد
-                ملی و شماره همراه احتیاج دارد. بعد از ثبت‌نام غیرحضوری، کارشناس‌های بانک با شما تماس می‌گیرند و مامور
-                بانک برای انجام مراحل احراز هویت و تطبیق مدارک به محل شما مراجعه می‌کند.</p>
-        </article>
-
         {{-- ===== آگهی‌های مشابه ===== --}}
         <section class="similar">
             <div class="section-head">
@@ -184,9 +157,11 @@
                 <a href="{{ url('/ads') }}" class="link-more">مشاهده همه <span aria-hidden="true">←</span></a>
             </div>
             <div class="row g-3 g-lg-4 similar-row">
-                @foreach ($similar as $a)
-                    <div class="col-md-6 col-lg-4 reveal">@include('website.partials.ad-card', ['a' => $a])</div>
-                @endforeach
+                @forelse ($similar as $a)
+                    <div class="col-md-6 col-lg-4 reveal">@include('website.partials.ad-card', ['a' => $a, 'fa' => $fa])</div>
+                @empty
+                    <p class="text-muted">آگهی مشابهی در همین بانک ثبت نشده است.</p>
+                @endforelse
             </div>
         </section>
     </div>

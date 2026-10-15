@@ -73,6 +73,13 @@ Route::prefix('userPanel')->name('user.')->middleware(['auth', 'active'])->group
     // آگهی های من (فروشنده)
     Route::prefix('ads')->name('ads.')->group(function () {
         Route::get('/', [User\AdController::class, 'index'])->name('index');
+
+        // ثبت آگهی جدید (همان منطق فرم سایت؛ نیازمند احراز هویت)
+        Route::middleware('kyc')->group(function () {
+            Route::get('/create', [User\AdController::class, 'create'])->name('create');
+            Route::post('/', [User\AdController::class, 'store'])->name('store');
+        });
+
         Route::get('/{ad}/offers', [User\AdController::class, 'offers'])->name('offers');
         Route::get('/{ad}/edit', [User\AdController::class, 'edit'])->name('edit');
         Route::put('/{ad}', [User\AdController::class, 'update'])->name('update');
