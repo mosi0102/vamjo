@@ -4,7 +4,7 @@
     {{-- Desktop --}}
     <div class="container d-none d-lg-flex align-items-center desk-bar">
         <a class="brand-link" href="{{ url('/') }}" aria-label="وام‌جو">
-            <img class="logo" src="{{ asset('assets/images/logo.png') }}" alt="وام‌جو" height="44">
+            <img class="logo" src="{{ asset('website/img/logo.png') }}" alt="وام‌جو" height="44">
         </a>
         <ul class="nav-menu list-unstyled mb-0">
             <li><a class="nav-link {{ request()->is('/') ? 'active' : '' }}" href="{{ url('/') }}">صفحه نخست</a></li>
@@ -25,7 +25,7 @@
 
     {{-- Mobile / Tablet --}}
     <div class="container d-flex d-lg-none align-items-center m-bar">
-        <a href="{{ url('/') }}" aria-label="وام‌جو"><img class="logo" src="{{ asset('assets/images/logo.png') }}" alt="وام‌جو" height="36"></a>
+        <a href="{{ url('/') }}" aria-label="وام‌جو"><img class="logo" src="{{ asset('website/img/logo.png') }}" alt="وام‌جو" height="36"></a>
         <div class="ms-auto d-flex align-items-center gap-2">
             @guest
                 <a href="{{ url('/login') }}" class="btn btn-brand btn-sm m-login" data-bs-toggle="modal" data-bs-target="#loginModal">ورود | ثبت نام</a>

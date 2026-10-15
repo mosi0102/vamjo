@@ -5,33 +5,7 @@
 @section('body_class', 'page-ads')
 
 @php
-    // نمونه داده؛ در پروژه واقعی از کنترلر پاس بدهید: return view('ads.main', compact('ads', 'banks', 'types'));
     $fa = fn ($n) => strtr(number_format($n), ['0'=>'۰','1'=>'۱','2'=>'۲','3'=>'۳','4'=>'۴','5'=>'۵','6'=>'۶','7'=>'۷','8'=>'۸','9'=>'۹', ',' => '،']);
-    $banks = [
-      'javidan' => ['n'=>' جاویدان', 'c'=>'#e07b00', 'l'=>'ج','image'=>'4'],
-      'resalat' => ['n'=>' رسالت', 'c'=>'#1f8a9e', 'l'=>'ر','image'=>'8'],
-      'saderat' => ['n'=>' صادرات', 'c'=>'#1b3a8a', 'l'=>'ص','image'=>'6'],
-      'shahr'   => ['n'=>' شهر', 'c'=>'#d6322c', 'l'=>'ش','image'=>'7'],
-      'keshavarzi' => ['n'=>' کشاورزی', 'c'=>'#4a7c3a', 'l'=>'ک','image'=>'5'],
-      'mehr'    => ['n'=>' قرض الحسنه مهر', 'c'=>'#2e9a4f', 'l'=>'م','image'=>'3'],
-      'tejarat' => ['n'=>' تجارت', 'c'=>'#3e4ea0', 'l'=>'ت','image'=>'9'],
-    ];
-    $types = ['qarz'=>'قرض الحسنه', 'marriage'=>'ازدواج', 'child'=>'فرزند آوری', 'housing'=>'مسکن', 'mehrbani'=>'مهربانی', 'commercial'=>'تجاری', 'medical'=>'درمانی'];
-    $rows = [
-      [1, 'javidan', 'qarz', 100000000, 20000000, 0, 1],
-      [2, 'resalat', 'marriage', 100000000, 20000000, 1, 0],
-      [3, 'tejarat', 'housing', 250000000, 20000000, 0, 0],
-      [4, 'shahr', 'child', 100000000, 20000000, 1, 0],
-      [5, 'mehr', 'mehrbani', 100000000, 20000000, 0, 1],
-      [6, 'keshavarzi', 'commercial', 100000000, 20000000, 0, 0],
-    ];
-    $ads = collect($rows)->map(fn ($r) => [
-      'id' => $r[0], 'bank' => $r[1], 'bank_name' => $banks[$r[1]]['n'], 'c' => $banks[$r[1]]['c'], 'l' => $banks[$r[1]]['l'],
-      'type' => $r[2], 'type_name' => $types[$r[2]], 'amount' => $r[3], 'buy' => $r[4], 'months' => 24, 'rate' => 23,
-      'offers' => 8, 'urgent' => $r[5], 'pay' => $r[6],'image'=>$banks[$r[1]]['image']
-    ])->all();
-
-
 @endphp
 
 @section('main')

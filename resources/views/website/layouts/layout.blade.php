@@ -8,8 +8,6 @@
     <title>@yield('title', 'وام‌جو')</title>
     <meta name="description" content="@yield('description')">
 
-    {{-- Bootstrap 5 RTL + فونت پشتیبان (در صورت نبودن فایل‌های یکان بخ) --}}
-
     <link rel="stylesheet" href="{{ asset('website/css/bootstrap.min.css') }}" type="text/css">
     <link rel="stylesheet" href="{{ asset('website/css/line-awesome.css') }}" type="text/css">
     <link rel="stylesheet" href="{{ asset('website/css/fonts.css') }}" type="text/css">

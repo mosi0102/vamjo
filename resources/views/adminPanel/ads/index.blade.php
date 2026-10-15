@@ -10,15 +10,6 @@
     $faId = fn ($s) => strtr((string) $s, ['0'=>'۰','1'=>'۱','2'=>'۲','3'=>'۳','4'=>'۴','5'=>'۵','6'=>'۶','7'=>'۷','8'=>'۸','9'=>'۹']);
     $isAdmin = (auth()->user()->role ?? request('role', 'adminPanel')) === 'adminPanel';
     $ph = 'data:image/svg+xml;utf8,' . rawurlencode('<svg xmlns="http://www.w3.org/2000/svg" width="480" height="300"><rect width="480" height="300" fill="#e4ebe6"/><rect x="120" y="30" width="240" height="240" rx="14" fill="#fff" stroke="#b9cbc0" stroke-width="5"/><path d="M160 90h160M160 130h160M160 170h100" stroke="#9fb8ab" stroke-width="12" stroke-linecap="round"/></svg>');
-    $banks = [['رسالت', 'ر', '8'], ['جاویدان', 'ج', '4'], ['شهر', 'ش', '7'], ['تجارت', 'ت', '9'], ['مهر', 'م', '3'], ['کشاورزی', 'ک', '5']];
-    $sellers = ['سارا حسینی', 'امیر جعفری', 'فاطمه کاظمی', 'علی رضایی', 'نرگس صادقی', 'مهدی رحیمی', 'لیلا موسوی', 'رضا نوری', 'محمد طاهری', 'زهرا محمدی'];
-    $status = ['pending', 'pending', 'pending', 'published', 'published', 'published', 'transfer', 'completed', 'rejected', 'published'];
-    $ads = [];
-    foreach ($status as $i => $st) {
-      $b = $banks[$i % 6]; $amount = [300, 100, 250, 300, 120, 100, 300, 250, 100, 200][$i] * 1000000;
-      $ads[] = ['id' => 1235890 + $i, 'bank' => $b[0], 'l' => $b[1],'image'=>$b[2], 'amount' => $amount, 'price' => (int) ($amount * [0.1, 0.2, 0.18, 0.1, 0.25, 0.2, 0.1, 0.18, 0.5, 0.15][$i]), 'months' => [24, 60, 36, 48, 24, 24, 60, 36, 24, 48][$i], 'rate' => [23, 4, 18, 23, 20, 23, 4, 18, 23, 20][$i],
-        'seller' => $sellers[$i], 'city' => ['سبزوار', 'مشهد', 'تهران', 'سبزوار', 'نیشابور', 'مشهد', 'تهران', 'سبزوار', 'اصفهان', 'شیراز'][$i], 'status' => $st, 'featured' => in_array($i, [3, 5]), 'ago' => ['۱ ساعت پیش', '۴ ساعت پیش', 'دیروز', '۲ روز پیش', '۳ روز پیش', '۴ روز پیش', '۵ روز پیش', '۶ روز پیش', '۷ روز پیش', '۸ روز پیش'][$i], 'age' => $i * 1300 + 60];
-    }
     $map = ['pending' => ['pending', 'منتظر تایید'], 'published' => ['approved', 'منتشر شده'], 'transfer' => ['pending', 'در حال معامله'], 'completed' => ['approved', 'تکمیل شده'], 'rejected' => ['rejected', 'رد شده']];
     $c = collect($ads);
     $cnt = ['pending' => $c->where('status', 'pending')->count(), 'published' => $c->where('status', 'published')->count(), 'featured' => $c->where('featured', true)->count(), 'rejected' => $c->where('status', 'rejected')->count(), 'all' => $c->count()];

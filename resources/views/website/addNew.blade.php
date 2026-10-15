@@ -5,8 +5,6 @@
 @section('body_class', 'page-create')
 
 @php
-    // نمونه داده؛ در پروژه واقعی از کنترلر پاس بدهید: compact('banks')
-    $banks = ['بانک جاویدان', 'بانک رسالت', 'بانک صادرات', 'بانک شهر', 'بانک کشاورزی', 'بانک قرض الحسنه مهر ایران', 'بانک تجارت', 'بانک ملت', 'بانک ملی', 'بانک سپه'];
 @endphp
 
 @section('main')
@@ -68,7 +66,7 @@
                         </div>
                         <div class="f-field" data-field="sheba">
                             <label for="fSheba">شماره شبا <span class="req">*</span></label>
-                            <input type="text" id="fSheba" name="sheba" class="f-input ltr" dir="ltr" inputmode="numeric" maxlength="26" autocomplete="off" placeholder="IR------------------------">
+                            <input type="text" id="fSheba" name="sheba" class="f-input ltr" dir="ltr" inputmode="numeric" autocomplete="off" placeholder="IR------------------------">
                             <p class="f-err">شماره شبا باید ۲۴ رقم (بعد از IR) باشد.</p>
                             <p class="f-hint">برای واریز وجه پس از تکمیل معامله</p>
                         </div>

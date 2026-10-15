@@ -19,12 +19,12 @@ return [
         ['label' => 'تیکت های پشتیبانی','icon' => 'chat',      'url' => '/userPanel/tickets',    'active' => ['userPanel/tickets*'],   'roles' => ['user']],
         ['label' => 'اطلاعات هویتی',    'icon' => 'idcard',    'url' => '/userPanel/verify',     'active' => ['userPanel/verify*'],    'roles' => ['user']],
 
-        // ----- مدیر / پشتیبان -----   (badge = تعداد موارد منتظر اقدام؛ از کنترلر/View Composer مقدار بدهید)
+        // ----- مدیر / پشتیبان -----   (بج تعداد موارد منتظر اقدام از AppServiceProvider تامین می‌شود)
         ['label' => 'داشبورد',          'icon' => 'dashboard', 'url' => '/adminPanel/dashboard',               'active' => ['adminPanel/dashboard'],                'roles' => ['admin', 'support'], 'bottom' => true],
         ['label' => 'کاربران',          'icon' => 'users',     'url' => '/adminPanel/users',         'active' => ['adminPanel/users*'],         'roles' => ['admin', 'support']],
-        ['label' => 'احراز هویت ها',    'icon' => 'shield',    'url' => '/adminPanel/verifications', 'active' => ['adminPanel/verifications*'], 'roles' => ['admin', 'support'], 'bottom' => true, 'badge' => 7],
-        ['label' => 'آگهی ها',          'icon' => 'book',      'url' => '/adminPanel/ads',           'active' => ['adminPanel/ads*'],           'roles' => ['admin', 'support'], 'bottom' => true, 'badge' => 5],
+        ['label' => 'احراز هویت ها',    'icon' => 'shield',    'url' => '/adminPanel/verifications', 'active' => ['adminPanel/verifications*'], 'roles' => ['admin', 'support'], 'bottom' => true],
+        ['label' => 'آگهی ها',          'icon' => 'book',      'url' => '/adminPanel/ads',           'active' => ['adminPanel/ads*'],           'roles' => ['admin', 'support'], 'bottom' => true],
         ['label' => 'امور مالی',        'icon' => 'card',      'url' => '/adminPanel/finance',       'active' => ['adminPanel/finance*'],       'roles' => ['admin']],
-        ['label' => 'تیکت های پشتیبانی','icon' => 'chat',      'url' => '/adminPanel/tickets',       'active' => ['adminPanel/tickets*'],       'roles' => ['admin', 'support'], 'bottom' => true, 'badge' => 4],
+        ['label' => 'تیکت های پشتیبانی','icon' => 'chat',      'url' => '/adminPanel/tickets',       'active' => ['adminPanel/tickets*'],       'roles' => ['admin', 'support'], 'bottom' => true],
     ],
 ];

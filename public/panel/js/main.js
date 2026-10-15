@@ -709,7 +709,7 @@ $(function () {
        ⚠️ PN_DEMO = true یعنی فعال/غیرفعال کردن رادار بدون بک‌اند شبیه‌سازی می‌شود.
           برای اتصال واقعی false کنید: PATCH /panel/radar/{id}/toggle {active:0|1}
        ===================================================== */
-    var PN_DEMO = true;
+    var PN_DEMO = false;
     var rdFaD = function (s) {
         return String(s).replace(/\d/g, function (d) {
             return '۰۱۲۳۴۵۶۷۸۹'.charAt(d);
@@ -720,6 +720,40 @@ $(function () {
             return '۰۱۲۳۴۵۶۷۸۹'.indexOf(d);
         });
     };
+
+    /* =====================================================
+       شماره شبا: یکدست‌سازی ورودی (تایپ، چسباندن و پر شدن خودکار)
+       هر مقدار به شکل «IR + ۲۴ رقم» تبدیل می‌شود؛ فاصله، خط تیره و ارقام فارسی/عربی هم پذیرفته می‌شود.
+       دلیل وجود: با maxlength و خواندن مقدار قبل از paste، شباهای قالّب‌دار (IR12 0120 ...) بریده می‌شدند.
+       ===================================================== */
+    function pnShebaDigits(v) {
+        return String(v || '')
+            .replace(/[۰-۹]/g, function (d) { return '۰۱۲۳۴۵۶۷۸۹'.indexOf(d); })
+            .replace(/[٠-٩]/g, function (d) { return '٠١٢٣٤٥٦٧٨٩'.indexOf(d); })
+            .replace(/\D/g, '')
+            .slice(0, 24);
+    }
+
+    function pnShebaValue(v) {
+        var d = pnShebaDigits(v);
+        return d ? 'IR' + d : '';
+    }
+
+    function pnShebaField($input, onUpdate) {
+        $input.on('input', function () {
+            var v = pnShebaValue(this.value);
+            if (v !== this.value) this.value = v;
+            if (onUpdate) onUpdate.call(this, pnShebaDigits(this.value));
+        }).on('paste drop', function (e) {
+            var ev = e.originalEvent || e,
+                dt = e.type === 'paste' ? ev.clipboardData : ev.dataTransfer,
+                txt = dt && dt.getData ? dt.getData('text') : '';
+            if (!txt) return;                       // متن قابل خواندن نبود → مسیر پیش‌فرض مرورگر
+            e.preventDefault();
+            this.value = pnShebaValue(txt);
+            $(this).trigger('input');
+        });
+    }
 
     if ($('#rdRadars').length) {
         var rdSel = 'all', $rdList = $('#rdList');
@@ -916,10 +950,7 @@ $(function () {
                 var v = edLat(this.value).replace(/[٫,]/g, '.').replace(/[^\d.]/g, '').replace(/(\..*)\./g, '$1').slice(0, 5);
                 this.value = edFa(v).replace('.', '٫');
             });
-        $('#edSheba').on('input', function () {
-            var d = edLat(this.value).replace(/^\s*ir/i, '').replace(/\D/g, '').slice(0, 24);
-            this.value = d ? 'IR' + d : '';
-        });
+        pnShebaField($('#edSheba'));
         $('#edNote').on('input', function () {
             $('#edNoteCount').text(edFa(this.value.length));
         }).trigger('input');
@@ -1091,10 +1122,14 @@ $(function () {
         $ed.on('submit', function (e) {
             e.preventDefault();
             var bad = [], chk = function (n, ok, msg) {
-                var $f = $ed.find('[data-field="' + n + '"]').toggleClass('invalid', !ok);
+                var $f = $ed.find('[data-field="' + n + '"]').toggleClass('invalid', !ok),
+                    $e = $f.find('.f-err');
+                if ($e.length && !$e.data('def')) $e.data('def', $e.text());
                 if (!ok) {
-                    if (msg) $f.find('.f-err').text(msg);
+                    if (msg) $e.text(msg);
                     bad.push($f);
+                } else if ($e.data('def')) {
+                    $e.text($e.data('def'));
                 }
             };
             var mo = edNum($('#edMonths').val()),
@@ -1104,7 +1139,8 @@ $(function () {
             chk('months', mo >= 1 && mo <= 120);
             chk('rate', !isNaN(rate) && rate >= 0 && rate <= 100);
             chk('price', edNum($('#edPrice').val()) > 0);
-            chk('sheba', /^IR\d{24}$/.test($('#edSheba').val()));
+            chk('sheba', /^IR\d{24}$/.test($('#edSheba').val()),
+                'شماره شبا باید ۲۴ رقم بعد از IR باشد (اکنون ' + edFa(pnShebaDigits($('#edSheba').val()).length) + ' رقم).');
             chk('note', $.trim($('#edNote').val()).length >= 10);
             $('.ed-dz').each(function () {
                 var $dz = $(this), $f = $dz.closest('.f-field'), has = $dz.data('hasNew')(),
@@ -1319,6 +1355,14 @@ $(function () {
             return rem === 1;
         }
 
+        
+        function vfShebaMsg() {
+            var n = pnShebaDigits($('#vfSheba').val()).length;
+            return n < 24
+                ? 'شماره شبا باید ۲۴ رقم بعد از IR باشد (اکنون ' + vfFa(n) + ' رقم).'
+                : 'رقم کنترلی شماره شبا درست نیست.';
+        }
+
         var vfBanks = {
             '010': 'مرکزی',
             '011': 'صنعت و معدن',
@@ -1374,12 +1418,13 @@ $(function () {
         $('#vfNid').on('input', function () {
             this.value = vfLat(this.value).replace(/\D/g, '').slice(0, 10);
         });
-        $('#vfSheba').on('input', function () {
-            var d = vfLat(this.value).replace(/^\s*ir/i, '').replace(/\D/g, '').slice(0, 24);
-            this.value = d ? 'IR' + d : '';
+        var vfShebaInfo = function (d) {
             var bank = d.length >= 7 ? vfBanks[d.substr(2, 3)] : '';                      // رقم‌های ۵ تا ۷ شبا = کد بانک
             $('#vfBankChip').text(bank ? 'بانک ' + bank : '').prop('hidden', !bank);
-        });
+            $('#vfShebaCount').text(vfFa(d.length) + ' از ' + vfFa(24)).toggleClass('ok', d.length === 24);
+        };
+        pnShebaField($('#vfSheba'), vfShebaInfo);
+        vfShebaInfo(pnShebaDigits($('#vfSheba').val()));
         $vf.on('input change', '.f-input', function () {
             $(this).closest('.f-field').removeClass('invalid');
             vfProgress();
@@ -1446,10 +1491,14 @@ $(function () {
         $vf.on('submit', function (e) {
             e.preventDefault();
             var bad = [], chk = function (n, ok, msg) {
-                var $f = $vf.find('[data-field="' + n + '"]').toggleClass('invalid', !ok);
+                var $f = $vf.find('[data-field="' + n + '"]').toggleClass('invalid', !ok),
+                    $e = $f.find('.f-err');
+                if ($e.length && !$e.data('def')) $e.data('def', $e.text());
                 if (!ok) {
-                    if (msg) $f.find('.f-err').text(msg);
+                    if (msg) $e.text(msg);
                     bad.push($f);
+                } else if ($e.data('def')) {
+                    $e.text($e.data('def'));
                 }
             };
             var nameOk = function (v) {
@@ -1459,7 +1508,7 @@ $(function () {
             chk('last', nameOk($('#vfLast').val()));
             chk('nid', vfNid(vfLat($('#vfNid').val())));
             chk('birth', !!$('#vfBirthVal').val());
-            chk('sheba', vfIban($('#vfSheba').val()));
+            chk('sheba', vfIban($('#vfSheba').val()), vfShebaMsg());
             chk('selfie', !!$('#vf_selfie')[0].files.length);
             chk('id_card', !!$('#vf_id_card')[0].files.length);
             $vf.find('.dz').each(function () {
@@ -1883,6 +1932,8 @@ $(function () {
             $('#kycApprove').prop('disabled', $('#kycChecks input:checked').length < 3);
         }
 
+        var kycStatusTxt = { pending: 'در انتظار بررسی', approved: 'تایید شده', rejected: 'رد شده' };
+
         $kyc.on('show.bs.modal', function (e) {
             var $b = $(e.relatedTarget);
             if (!$b.length) return;
@@ -1897,15 +1948,28 @@ $(function () {
             $('#kycSelfie').attr('src', $b.data('selfie'));
             $('#kycCard').attr('src', $b.data('idcard'));
             $('#kycForm').data('id', $b.data('id'));
+            $('#kycProfile').attr('href', $b.data('profile'));
             $('#kycChecks input').prop('checked', false);
             $('#kycReasonSel').val('');
             $('#kycReason').val('');
             $('#kycRejectBox .f-field').removeClass('invalid');
             kycMode_('approve');
             kycUpdate();
-            var st = $b.data('status'), done = st !== 'pending';
+
+            var hasDocs = String($b.data('has-docs')) === '1';
+            $('#kycNoDocs').prop('hidden', hasDocs);
+            $('.kyc-docs').toggle(hasDocs);
+
+            var st = String($b.data('status')), done = st !== 'pending';
             $('#kycActions, #kycChecks').toggleClass('d-none', done);
-            $('#kycDone').toggleClass('d-none', !done).text(st === 'approved' ? 'هویت این کاربر قبلاً تایید شده است.' : 'این درخواست قبلاً رد شده است.');
+            $('#kycReviewed').prop('hidden', !done);
+            $('#kycStatusPill').attr('class', 'pn-pill ' + st).text(kycStatusTxt[st] || st);
+            $('#kycReviewer').text($b.data('reviewer') || '—');
+            $('#kycReviewedAt').text($b.data('reviewed') || '—');
+            var reason = String($b.data('reason') || '');
+            $('#kycReasonWrap').prop('hidden', !reason);
+            $('#kycReasonShown').text(reason);
+            $('.kyc-result').prop('hidden', !done);
         });
         $('#kycChecks').on('change', 'input', kycUpdate);
         $('#kycRejectBtn').on('click', function () {
@@ -1936,22 +2000,8 @@ $(function () {
                 e.preventDefault();
                 return;
             }
-            if (!PN_DEMO) {
-                admBusy($(rej ? '#kycRejectGo' : '#kycApprove'), true);
-                return;
-            }
-            e.preventDefault();
-            var $b = $(rej ? '#kycRejectGo' : '#kycApprove');
-            admBusy($b, true);
-            setTimeout(function () {
-                admBusy($b, false);
-                bootstrap.Modal.getInstance($kyc[0]).hide();
-                if ($kycRow) {
-                    admSetRow($kycRow, rej ? 'rejected' : 'approved', rej ? 'rejected' : 'approved', rej ? 'رد شده' : 'تایید شده');
-                    $kycRow.find('.at-btn').removeClass('btn-brand').addClass('btn-ghost').text('مشاهده').attr('data-status', rej ? 'rejected' : 'approved').data('status', rej ? 'rejected' : 'approved');
-                }
-                window.pnToast(rej ? 'درخواست رد شد و به کاربر اطلاع داده شد' : 'هویت کاربر تایید شد');
-            }, 800);
+            /* تایید/رد روی سرور ثبت می‌شود و کاربر بلافاصله از وضعیت جدیدش مطلع می‌شود */
+            admBusy($(rej ? '#kycRejectGo' : '#kycApprove'), true);
         });
     }
 

@@ -8,17 +8,7 @@
     // نمونه داده؛ در پروژه واقعی از کنترلر پاس بدهید: compact('radars', 'matches', 'banks')
     $fa = fn ($n) => strtr(number_format($n), ['0'=>'۰','1'=>'۱','2'=>'۲','3'=>'۳','4'=>'۴','5'=>'۵','6'=>'۶','7'=>'۷','8'=>'۸','9'=>'۹']);
     $faId = fn ($n) => strtr((string) $n, ['0'=>'۰','1'=>'۱','2'=>'۲','3'=>'۳','4'=>'۴','5'=>'۵','6'=>'۶','7'=>'۷','8'=>'۸','9'=>'۹']);
-    $banks = ['بانک جاویدان', 'بانک رسالت', 'بانک صادرات', 'بانک شهر', 'بانک کشاورزی', 'بانک قرض الحسنه مهر ایران', 'بانک تجارت'];
 
-    $radars = [
-      ['id' => 1, 'name' => 'رادار رسالت', 'active' => true,  'min' => 200000000, 'max' => 300000000, 'months' => 24, 'rate' => 23, 'bank' => 'بانک رسالت',   'city' => 'سبزوار', 'sms' => true, 'panel' => true],
-      ['id' => 2, 'name' => 'وام های جاویدان', 'active' => true,  'min' => null, 'max' => 500000000, 'months' => null, 'rate' => null, 'bank' => 'بانک جاویدان', 'city' => '', 'sms' => true, 'panel' => true],
-      ['id' => 3, 'name' => 'وام ارزان مشهد', 'active' => false, 'min' => null, 'max' => null, 'months' => null, 'rate' => 20, 'bank' => '', 'city' => 'مشهد', 'sms' => false, 'panel' => true],
-    ];
-    $matches = [
-      ['id' => 1235896, 'radar' => 1, 'bank' => 'رسالت','image'=>'8',   'l' => 'ر', 'c' => '#1f8a9e', 'amount' => 300000000, 'price' => 30000000, 'ago' => '۳ روز پیش', 'city' => 'سبزوار', 'months' => 24, 'rate' => 23, 'found' => '۲ ساعت پیش', 'is_new' => true],
-      ['id' => 1235897, 'radar' => 2, 'bank' => 'جاویدان','image'=>'4', 'l' => 'ج', 'c' => '#e07b00', 'amount' => 300000000, 'price' => 30000000, 'ago' => '۳ روز پیش', 'city' => 'سبزوار', 'months' => 24, 'rate' => 23, 'found' => 'دیروز', 'is_new' => false],
-    ];
     $radarName = collect($radars)->pluck('name', 'id');
     $countOf = fn ($id) => collect($matches)->where('radar', $id)->count();
     $newOf = fn ($id) => collect($matches)->where('radar', $id)->where('is_new', true)->count();

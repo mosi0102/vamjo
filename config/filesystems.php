@@ -47,6 +47,19 @@ return [
             'report' => false,
         ],
 
+        /*
+         | مدارک و فایل‌های بارگذاری‌شده کاربران (آگهی، احراز هویت، پیوست تیکت)
+         | در public/uploads ذخیره می‌شود تا بدون storage:link هم قابل نمایش باشد.
+         */
+        'uploads' => [
+            'driver' => 'local',
+            'root' => public_path('uploads'),
+            'url' => env('APP_URL').'/uploads',
+            'visibility' => 'public',
+            'throw' => false,
+            'report' => false,
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

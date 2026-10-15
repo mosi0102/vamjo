@@ -9,15 +9,7 @@
     // state: review | rejected → قابل ویرایش | بقیه حالت‌ها فقط‌خواندنی
     $fa = fn ($n) => strtr(number_format($n), ['0'=>'۰','1'=>'۱','2'=>'۲','3'=>'۳','4'=>'۴','5'=>'۵','6'=>'۶','7'=>'۷','8'=>'۸','9'=>'۹']);
     $faId = fn ($n) => strtr((string) $n, ['0'=>'۰','1'=>'۱','2'=>'۲','3'=>'۳','4'=>'۴','5'=>'۵','6'=>'۶','7'=>'۷','8'=>'۸','9'=>'۹']);
-    $banks = ['بانک جاویدان', 'بانک رسالت', 'بانک صادرات', 'بانک شهر', 'بانک کشاورزی', 'بانک قرض الحسنه مهر ایران', 'بانک تجارت', 'بانک ملت', 'بانک ملی', 'بانک سپه'];
     $placeholder = 'data:image/svg+xml;utf8,' . rawurlencode('<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect width="200" height="200" fill="#e4ebe6"/><rect x="50" y="30" width="100" height="140" rx="10" fill="#fff" stroke="#b9cbc0" stroke-width="4"/><path d="M70 70h60M70 95h60M70 120h40" stroke="#9fb8ab" stroke-width="8" stroke-linecap="round"/></svg>');
-    $ad = [
-      'id' => 1235899, 'state' => 'rejected', 'note' => 'تصویر موجودی/امتیاز وام خوانا نیست؛ لطفاً تصویر واضح‌تری بارگذاری کنید.',
-      'bank' => 'بانک جاویدان', 'amount' => 300000000, 'months' => 60, 'rate' => '4', 'price' => 30000000,
-      'sheba' => 'IR062960000000100324200001', 'description' => 'ضامن کارمند رسمی است. معامله در سبزوار انجام می‌شود.',
-      'doc_balance' => ['url' => $placeholder, 'name' => 'balance.jpg', 'must_replace' => true],
-      'doc_id' => ['url' => $placeholder, 'name' => 'national-card.jpg', 'must_replace' => false],
-    ];
     $editable = in_array($ad['state'], ['review', 'rejected']);
     $stateText = ['review' => 'در انتظار ثبت', 'rejected' => 'رد شده', 'transfer' => 'در انتظار انتقال امتیاز', 'completed' => 'تکمیل شده'][$ad['state']] ?? '';
     $title = 'وام ' . $fa($ad['amount']) . ' تومان';
@@ -124,7 +116,7 @@
                         <div class="f-field" data-field="sheba">
                             <label for="edSheba">شماره شبا <span class="req">*</span></label>
                             <input type="text" id="edSheba" name="sheba" class="f-input ltr" dir="ltr"
-                                   inputmode="numeric" maxlength="26" autocomplete="off" value="{{ $ad['sheba'] }}"
+                                   inputmode="numeric" autocomplete="off" value="{{ $ad['sheba'] }}"
                                    placeholder="IR------------------------">
                             <p class="f-err">شماره شبا باید ۲۴ رقم (بعد از IR) باشد.</p>
                             <p class="f-hint">برای واریز وجه پس از تکمیل معامله</p>

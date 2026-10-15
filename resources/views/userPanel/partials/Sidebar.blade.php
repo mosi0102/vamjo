@@ -6,7 +6,7 @@
         <button type="button" class="pn-icon-btn pn-drawer-close" aria-label="بستن منو">@include('userPanel.partials.icon', ['name' => 'close'])</button>
     </div>
 
-    <a href="{{ url($role === 'user' ? '/panel/verify' : '/adminPanel') }}" class="pn-user" title="{{ $pn->name }}">
+    <a href="{{ url($role === 'user' ? '/userPanel/verify' : '/adminPanel') }}" class="pn-user" title="{{ $pn->name }}">
     <span class="pn-avatar">
       @if ($pn->avatar)<img src="{{ $pn->avatar }}" alt="">@else @include('userPanel.partials.icon', ['name' => 'user']) @endif
     </span>
@@ -24,11 +24,15 @@
     <nav class="pn-nav">
         @foreach (config('panel.menu') as $item)
             @continue(! in_array($role, $item['roles']))
-            @php $active = request()->is(...$item['active']); @endphp
+            @php
+                $active = request()->is(...$item['active']);
+                // بج زنده: تعداد موارد منتظر اقدام (از AppServiceProvider)
+                $badge = (int) ($badges[$item['url']] ?? 0);
+            @endphp
             <a href="{{ url($item['url']) }}" class="pn-link {{ $active ? 'active' : '' }}" data-label="{{ $item['label'] }}" @if ($active) aria-current="page" @endif>
                 <span class="pn-link-ic">@include('userPanel.partials.icon', ['name' => $item['icon']])</span>
                 <span class="pn-link-text">{{ $item['label'] }}</span>
-                @if (! empty($item['badge']))<span class="pn-link-badge">{{ strtr((string) $item['badge'], ['0'=>'۰','1'=>'۱','2'=>'۲','3'=>'۳','4'=>'۴','5'=>'۵','6'=>'۶','7'=>'۷','8'=>'۸','9'=>'۹']) }}</span>@endif
+                @if ($badge > 0)<span class="pn-link-badge">{{ strtr((string) $badge, ['0'=>'۰','1'=>'۱','2'=>'۲','3'=>'۳','4'=>'۴','5'=>'۵','6'=>'۶','7'=>'۷','8'=>'۸','9'=>'۹']) }}</span>@endif
             </a>
         @endforeach
 

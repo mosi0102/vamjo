@@ -186,7 +186,7 @@ $(function () {
           POST /auth/otp/verify  {phone, code}   → {ok:true}   (در خطا: HTTP 422)
           POST /ads/{id}/request {offer}         → {ok:true, redirect:"/payment/.."}
        ===================================================== */
-    var API = { demo: true };
+    var API = { demo: false };
     var csrf = $('meta[name="csrf-token"]').attr('content');
     var isAuth = String($('body').attr('data-auth')) === '1';
     var isVerified = String($('body').attr('data-verified')) === '1';   // احراز هویت (در پنل) انجام شده؟
@@ -322,21 +322,60 @@ $(function () {
         $otp.each(function (i) { this.value = t[i] || ''; $(this).toggleClass('filled', !!t[i]); });
         if (t.length === 5) $('#verifyOtp').trigger('click');
     });
+
     $('#verifyOtp').on('click', function () {
         var code = otpValue();
-        if (code.length < 5) { $('#otpBoxes').addClass('invalid'); $('#otpErr').text('کد ۵ رقمی را کامل وارد کنید.').removeClass('d-none'); return; }
-        var $b = $(this); if ($b.hasClass('loading')) return; busy($b, true);
-        post($lm.data('verify-url'), { phone: phone, code: code }, { ok: true, is_new: +phone.slice(-1) % 2 === 1, verified: false })  // دمو: رقم آخر فرد = کاربر جدید
+
+        if (code.length < 5) {
+            $('#otpBoxes').addClass('invalid');
+            $('#otpErr')
+                .text('کد ۵ رقمی را کامل وارد کنید.')
+                .removeClass('d-none');
+            return;
+        }
+
+        var $b = $(this);
+
+        if ($b.hasClass('loading')) return;
+
+        busy($b, true);
+
+        // تأیید واقعی کد از سمت سرور
+        post($lm.data('verify-url'), {
+            phone: phone,
+            code: code
+        })
             .done(function (res) {
-                busy($b, false); clearInterval(timerId); res = res || {};
-                if (res.is_new) { showStep('profile'); setTimeout(function () { $('#pfFirst').trigger('focus'); }, 150); }  // کاربر جدید → نام، نام خانوادگی، کد ملی
-                else { afterAuth(res); }                                                                                    // کاربر قبلی → ورود
+                busy($b, false);
+                clearInterval(timerId);
+
+                res = res || {};
+
+                if (!res.ok) {
+                    $('#otpBoxes').addClass('invalid');
+                    $('#otpErr')
+                        .text(res.message || 'کد وارد شده صحیح نیست.')
+                        .removeClass('d-none');
+                    $otp.val('').removeClass('filled').first().trigger('focus');
+                    return;
+                }
+
+                // کاربر جدید هم در سمت سرور ساخته شده و وارد حساب شده است.
+                // در نتیجه برای هر دو حالت مستقیماً ورود را تکمیل می‌کنیم.
+                afterAuth(res);
             })
-            .fail(function () {
-                busy($b, false); $('#otpBoxes').addClass('invalid'); $('#otpErr').text('کد وارد شده صحیح نیست.').removeClass('d-none');
+            .fail(function (xhr) {
+                busy($b, false);
+
+                var message = xhr.responseJSON?.message
+                    || 'کد وارد شده صحیح نیست یا اعتبار آن تمام شده است.';
+
+                $('#otpBoxes').addClass('invalid');
+                $('#otpErr').text(message).removeClass('d-none');
                 $otp.val('').removeClass('filled').first().trigger('focus');
             });
     });
+
     $('#resendOtp').on('click', function () { $otp.val('').removeClass('filled'); sendCode(); });
     $('#editPhone').on('click', function () { clearInterval(timerId); showStep('phone'); $('#phoneInput').trigger('focus'); });
     $lm.on('hidden.bs.modal', function () {
@@ -391,9 +430,26 @@ $(function () {
             var v = latin(this.value).replace(/[٫,]/g, '.').replace(/[^\d.]/g, '').replace(/(\..*)\./g, '$1').slice(0, 5);
             this.value = faDigits(v).replace('.', '٫');
         });
+        /* شبا: هر مقدار (تایپ/پیست) به IR + ۲۴ رقم تبدیل می‌شود؛ پیست قالّب‌دار هم درست خوانده می‌شود */
+        var shebaDigits = function (v) {
+            return latin(String(v || '')).replace(/[٠-٩]/g, function (d) { return '٠١٢٣٤٥٦٧٨٩'.indexOf(d); })
+                .replace(/\D/g, '').slice(0, 24);
+        };
+        var shebaValue = function (v) {
+            var d = shebaDigits(v);
+            return d ? 'IR' + d : '';
+        };
         $('#fSheba').on('input', function () {
-            var d = latin(this.value).replace(/^\s*ir/i, '').replace(/\D/g, '').slice(0, 24);
-            this.value = d ? 'IR' + d : '';
+            var v = shebaValue(this.value);
+            if (v !== this.value) this.value = v;
+        }).on('paste drop', function (e) {
+            var ev = e.originalEvent || e,
+                dt = e.type === 'paste' ? ev.clipboardData : ev.dataTransfer,
+                txt = dt && dt.getData ? dt.getData('text') : '';
+            if (!txt) return;
+            e.preventDefault();
+            this.value = shebaValue(txt);
+            $(this).trigger('input');
         });
 
         /* توصیه سیستم: ۵٪ تا ۳۰٪ مبلغ وام */
@@ -442,7 +498,12 @@ $(function () {
             if (!window.vamjoGate(true, null)) return;                  // لاگین + احراز هویت لازم است
 
             var bad = [];
-            var check = function (name, ok) { var $f = $form.find('[data-field="' + name + '"]'); $f.toggleClass('invalid', !ok); if (!ok) bad.push($f); };
+            var check = function (name, ok) {
+                var $f = $form.find('[data-field="' + name + '"]'), $e = $f.find('.f-err');
+                if ($e.length && !$e.data('def')) $e.data('def', $e.text());
+                $f.toggleClass('invalid', !ok);
+                if (!ok) bad.push($f); else if ($e.data('def')) $e.text($e.data('def'));
+            };
             var months = num($('#fMonths').val()), rate = $('#fRate').val() ? parseFloat(latin($('#fRate').val()).replace('٫', '.')) : NaN;
             check('bank', !!$('#fBank').val());
             check('amount', num($('#fAmount').val()) > 0);
@@ -450,6 +511,10 @@ $(function () {
             check('rate', !isNaN(rate) && rate >= 0 && rate <= 100);
             check('price', num($('#fPrice').val()) > 0);
             check('sheba', /^IR\d{24}$/.test($('#fSheba').val()));
+            if ($form.find('[data-field="sheba"]').hasClass('invalid')) {
+                $form.find('[data-field="sheba"] .f-err').text(
+                    'شماره شبا باید ۲۴ رقم بعد از IR باشد (اکنون ' + faDigits(shebaDigits($('#fSheba').val()).length) + ' رقم).');
+            }
             check('note', $.trim($('#fNote').val()).length >= 10);
             check('doc_balance', !!$('#fDocBalance')[0].files.length);
             check('doc_id', !!$('#fDocId')[0].files.length);

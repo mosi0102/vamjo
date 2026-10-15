@@ -15,7 +15,7 @@
     @stack('styles')
 </head>
 <body class="panel-body pn-blank @yield('body_class')">
-@include('partials.loader')
+@include('website.partials.loader')
 <header class="pr-top">
     <a href="{{ url('/') }}" aria-label="وام‌جو"><img src="{{ asset('assets/images/logo.png') }}" alt="وام‌جو" height="46"></a>
 </header>
