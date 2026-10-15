@@ -2,7 +2,7 @@
 <footer class="site-footer" id="footer">
     <div class="container">
         <div class="text-center">
-            <img class="logo logo-light mb-3" src="{{ asset('assets/images/logo.png') }}" alt="وام‌جو" height="46">
+            <img class="logo logo-light mb-3" src="{{ asset('website/img/logoWhite.png') }}" alt="وام‌جو" height="46">
             <p class="footer-text">لورم ایپسوم متن ساختگی با تولید سادگی نامفهوم از صنعت چاپ و با استفاده از طراحان گرافیک است. چاپگرها و متون بلکه روزنامه و مجله در ستون و سطرآنچنان که لازم است و برای شرایط فعلی تکنولوژی مورد نیاز و کاربردهای متنوع با هدف بهبود ابزارهای کاربردی می باشد. کتابهای زیادی در شصت و سه درصد گذشته حال و آینده.</p>
         </div>
 
@@ -21,7 +21,7 @@
             </div>
             <div class="col-lg-6">
                 <p class="mb-1 phones" dir="ltr"><span>۰۵۱ ۳۳۷ ۶۷۳۰۰</span><span class="sep">|</span><span>۰۹۰۵۱۳۱۵۰۰۳</span><span class="sep">|</span><span>۰۹۳۳-۴۱۷۵۷۰۰</span></p>
-                <p class="mb-0 text-lg-start">کارشناسان ما آماده پاسخ‌گویی هروز هفته در هر ۲۴ ساعت روز می باشد.</p>
+                <p class="mb-0 text-lg-end">کارشناسان ما آماده پاسخ‌گویی هروز هفته در هر ۲۴ ساعت روز می باشد.</p>
             </div>
         </div>
     </div>

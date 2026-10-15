@@ -2799,6 +2799,7 @@ html:not(.js) .spark-area {
 
     .rq-card {
         border-radius: 20px;
+
     }
 
     .rq-card:active {
@@ -5371,6 +5372,7 @@ html:not(.js) .spark-area {
         align-items: flex-start;
         padding: 1rem 1.1rem;
         gap: .6rem;
+
     }
 
     .tk-info h3 {
@@ -5737,6 +5739,7 @@ html.pn-root {
 
     .rq-card {
         border-radius: 18px;
+        padding: 0;
     }
 
     .rq-card .pn-bank.lg {
@@ -5844,6 +5847,7 @@ html.pn-root {
 
     .tk-main {
         padding: 1.05rem 1.35rem;
+        width: 100%;
     }
 
     .tk-chat {
