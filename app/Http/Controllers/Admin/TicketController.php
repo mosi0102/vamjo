@@ -56,6 +56,7 @@ class TicketController extends Controller
                 'dept' => $ticket->department,
                 'date' => Fa::dateTime($ticket->created_at, 'j F Y – H:i'),
                 'assignee' => $ticket->assignee?->display_name ?? '',
+                'assignee_id' => $ticket->assignee_id,
             ],
             'user' => [
                 'id' => $ticket->user?->id,
@@ -72,6 +73,7 @@ class TicketController extends Controller
                 'مشکل شما برطرف شد. در صورت نیاز دوباره پیام بدهید.',
                 'برای پیگیری بیشتر، شماره تراکنش و شناسه وام را ارسال کنید.',
             ],
+            'agents' => User::query()->staff()->get(['id', 'first_name', 'last_name', 'name']),
             'ticketModel' => $ticket,
         ]);
     }
@@ -80,21 +82,27 @@ class TicketController extends Controller
     public function reply(Request $request, Ticket $ticket): RedirectResponse
     {
         $data = $request->validate([
-            'message' => ['required', 'string', 'min:2', 'max:1500'],
+            'message' => ['nullable', 'string', 'required_without:attachment', 'min:2', 'max:1500'],
             'attachment' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:'.config('vamjou.uploads.max_size')],
         ], [], ['message' => 'متن پاسخ']);
 
         $file = $request->file('attachment');
+        $internal = $request->boolean('internal');
 
         $ticket->messages()->create([
             'user_id' => $request->user()->id,
-            'author_role' => 'support',
-            'body' => $data['message'],
+            'author_role' => $internal ? 'internal' : 'support',
+            'body' => $data['message'] ?? '',
             'attachment_path' => $file?->store("tickets/{$ticket->id}", config('vamjou.uploads.disk')),
             'attachment_name' => $file?->getClientOriginalName(),
             'attachment_size' => $file ? round(($file->getSize() ?: 0) / 1024).' KB' : null,
-            'is_read' => true,
+            'is_read' => ! $internal,
         ]);
+
+        // یادداشت داخلی وضعیت تیکت را تغییر نمی‌دهد
+        if ($internal) {
+            return back()->with('success', 'یادداشت داخلی ثبت شد.');
+        }
 
         $ticket->update([
             'status' => Ticket::STATUS_ANSWERED,
@@ -140,11 +148,5 @@ class TicketController extends Controller
         ActivityLog::record($ticket->user, 'ticket.closed', "بستن تیکت {$ticket->code} توسط پشتیبانی");
 
         return back()->with('success', 'تیکت بسته شد.');
-    }
-
-    /** لیست کارشناسان برای انتساب تیکت */
-    public function agents(): array
-    {
-        return User::query()->staff()->get()->all();
     }
 }

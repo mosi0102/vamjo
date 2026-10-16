@@ -5,14 +5,8 @@
 @section('body_class', 'pn-tickets')
 
 @php
-    // نمونه داده؛ در پروژه واقعی از کنترلر پاس بدهید: compact('tickets')
     // status: pending (در انتظار پاسخ) | answered (پاسخ داده شده) | closed (بسته شده)
     $faId = fn ($n) => strtr((string) $n, ['0'=>'۰','1'=>'۱','2'=>'۲','3'=>'۳','4'=>'۴','5'=>'۵','6'=>'۶','7'=>'۷','8'=>'۸','9'=>'۹']);
-    $tickets = [
-      ['id' => 136548, 'title' => 'عدم ثبت آگهی انتقال وام',          'status' => 'pending',  'date' => '۲۴ اردیبهشت ۱۴۰۵ – ۲۳:۱۶', 'priority' => 'high',   'dept' => 'آگهی ها',      'msgs' => 1, 'unread' => false],
-      ['id' => 136547, 'title' => 'پیگیری واریزی فروش امتیاز وام',    'status' => 'answered', 'date' => '۲۴ اردیبهشت ۱۴۰۵ – ۲۳:۱۶', 'priority' => 'normal', 'dept' => 'پرداخت ها',    'msgs' => 3, 'unread' => true],
-      ['id' => 136546, 'title' => 'محدود شدن حساب کاربری',            'status' => 'closed',   'date' => '۲۴ اردیبهشت ۱۴۰۵ – ۲۳:۱۶', 'priority' => 'urgent', 'dept' => 'حساب کاربری', 'msgs' => 4, 'unread' => false],
-    ];
     $statusMap = ['pending' => ['pending', 'در انتظار پاسخ'], 'answered' => ['approved', 'پاسخ داده شده'], 'closed' => ['expired', 'بسته شده']];
     $prioMap = ['low' => 'کم', 'normal' => 'متوسط', 'high' => 'زیاد', 'urgent' => 'فوری'];
     $tabs = ['all' => 'همه', 'pending' => 'در انتظار پاسخ', 'answered' => 'پاسخ داده شده', 'closed' => 'بسته شده'];
@@ -27,7 +21,7 @@
             <h2>تیکت های پشتیبانی</h2>
             <p>پیام ها و تیکت های خود را به پشتیبانی وامجو ارسال نمایید و با پشتیبانی گفت و گو داشته باشید.</p>
         </div>
-        <a href="{{ url('/userPanel/tickets/create') }}" class="btn btn-brand pn-head-act">@include('userPanel.partials.icon', ['name' => 'plus']) تیکت جدید</a>
+        <a href="{{ route('user.tickets.create') }}" class="btn btn-brand pn-head-act">@include('userPanel.partials.icon', ['name' => 'plus']) تیکت جدید</a>
     </div>
 
     <section class="pn-panel pn-reveal" style="--d:.08s">
@@ -47,7 +41,7 @@
         <div class="rq-list" id="rqList">
             @forelse ($tickets as $t)
                 @php [$pc, $pt] = $statusMap[$t['status']]; @endphp
-                <a href="{{ url('/userPanel/tickets/' . $t['id']) }}" class="rq-card tk-card tk-{{ $t['status'] }} pn-reveal" data-group="{{ $t['status'] }}" data-search="{{ $t['id'] }} {{ $t['title'] }} {{ $t['dept'] }}" style="--d:{{ .12 + $loop->index * .07 }}s">
+                <a href="{{ route('user.tickets.show', $t['id']) }}" class="rq-card tk-card tk-{{ $t['status'] }} pn-reveal" data-group="{{ $t['status'] }}" data-search="{{ $t['id'] }} {{ $t['code'] ?? $t['id'] }} {{ $t['title'] }} {{ $t['dept'] }}" style="--d:{{ .12 + $loop->index * .07 }}s">
                     <div class="tk-main">
                         <div class="tk-info">
                             <h3>{{ $t['title'] }}
@@ -55,7 +49,7 @@
                                 @if ($t['unread'])<span class="rd-new">پاسخ جدید</span>@endif
                             </h3>
                             <div class="rq-meta">
-                                <span class="tk-id">#{{ $faId($t['id']) }}</span>
+                                <span class="tk-id">#{{ $faId($t['code'] ?? $t['id']) }}</span>
                                 <span class="rq-meta-i">@include('userPanel.partials.icon', ['name' => 'calendar']){{ $t['date'] }}</span>
                                 <span class="rq-meta-i">@include('userPanel.partials.icon', ['name' => 'chat']){{ $faId($t['msgs']) }} پیام</span>
                                 <span class="tk-tag">{{ $t['dept'] }}</span>
@@ -70,7 +64,7 @@
                     <div class="rq-empty-ic" aria-hidden="true">@include('userPanel.partials.icon', ['name' => 'chat'])</div>
                     <h3>هنوز تیکتی ثبت نکرده‌اید</h3>
                     <p>برای ارتباط با پشتیبانی، یک تیکت جدید بسازید.</p>
-                    <a href="{{ url('/panel/tickets/create') }}" class="btn btn-brand">تیکت جدید</a>
+                    <a href="{{ route('user.tickets.create') }}" class="btn btn-brand">تیکت جدید</a>
                 </div>
             @endforelse
         </div>

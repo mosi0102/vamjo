@@ -51,7 +51,7 @@
                         <button type="button" class="btn btn-outline-danger-soft btn-lg" data-bs-dismiss="modal">لغو و بستن</button>
                     </div>
                 </form>
-                <p class="pay-secure tr-help">مشکلی در مدرک دیده می‌شود؟ <a href="{{ url('/panel/tickets') }}">ثبت تیکت پشتیبانی</a></p>
+                <p class="pay-secure tr-help">مشکلی در مدرک دیده می‌شود؟ <a href="{{ route('user.tickets.index') }}">ثبت تیکت پشتیبانی</a></p>
             </div>
         </div>
     </div>

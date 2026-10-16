@@ -187,7 +187,11 @@ class Presenter
                 LoanRequest::STATUS_REJECTED, LoanRequest::STATUS_CANCELLED, LoanRequest::STATUS_EXPIRED => 'rejected',
                 default => 'active',
             },
-            'doc' => null,
+            // مدرک انتقال ثبت‌شده توسط فروشنده (برای مودال تایید انتقال خریدار)
+            'doc' => $ad?->documents
+                ->where('kind', 'transfer_receipt')
+                ->sortByDesc('id')
+                ->first()?->url,
             'deadline' => Fa::remainingDays($request->pay_due_at ?? $request->transfer_due_at),
             'note' => $request->reject_reason,
         ];
@@ -318,7 +322,7 @@ class Presenter
         ];
     }
 
-    /** پیام تیکت در پنل کاربر */
+    /** پیام تیکت در پنل کاربر و پنل پشتیبانی */
     public static function ticketMessage(\App\Models\TicketMessage $message): array
     {
         $file = null;
@@ -331,7 +335,8 @@ class Presenter
         }
 
         return [
-            'from' => $message->isFromSupport() ? 'support' : 'user',
+            'from' => $message->isFromSupport() || $message->author_role === 'internal' ? 'support' : 'user',
+            'internal' => $message->author_role === 'internal',
             'time' => Fa::digits($message->created_at->format('H:i')),
             'text' => $message->body,
             'file' => $file,
@@ -413,6 +418,8 @@ class Presenter
             Fa::dateTime($transaction->paid_at ?? $transaction->created_at, 'j F – H:i'),
             (int) ($transaction->paid_at ?? $transaction->created_at)->diffInMinutes(now()),
             $transaction->type === Transaction::TYPE_PAYOUT ? ($transaction->sheba ?? '') : '',
+            $transaction->id,        // شناسه برای مسیرهای payout/refund (۱۰)
+            $transaction->user_id,   // شناسه کاربر برای لینک جزئیات (۱۱)
         ];
     }
 

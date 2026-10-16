@@ -5,19 +5,11 @@
 @section('body_class', 'pn-admin')
 
 @php
-    // نمونه داده؛ در پروژه واقعی از کنترلر (با صفحه‌بندی سمت سرور) پاس بدهید: compact('users')
+    // داده‌ها از Admin\UserController::index می‌آید: $users (صفحه جاری), $summary, $paginator
     $fa = fn ($n) => strtr(number_format($n), ['0'=>'۰','1'=>'۱','2'=>'۲','3'=>'۳','4'=>'۴','5'=>'۵','6'=>'۶','7'=>'۷','8'=>'۸','9'=>'۹']);
     $isAdmin = \App\Support\PanelRole::isAdmin();
-    $names = ['علی رضایی', 'مریم احمدی', 'حسین کریمی', 'زهرا محمدی', 'رضا نوری', 'سارا حسینی', 'محمد طاهری', 'نرگس صادقی', 'امیر جعفری', 'فاطمه کاظمی', 'مهدی رحیمی', 'لیلا موسوی'];
     $colors = ['#1f8a9e', '#7a5ac8', '#d6322c', '#2e9a4f', '#e07b00', '#3e4ea0'];
     $ver = ['verified' => ['approved', 'احراز شده'], 'pending' => ['pending', 'در انتظار بررسی'], 'unverified' => ['expired', 'احراز نشده'], 'rejected' => ['rejected', 'رد شده']];
-    $users = [];
-    foreach ($names as $i => $n) {
-      $v = ['verified', 'verified', 'pending', 'unverified', 'verified', 'rejected', 'verified', 'pending', 'verified', 'unverified', 'verified', 'verified'][$i];
-      $users[] = ['id' => 2001 + $i, 'name' => $n, 'mobile' => '0930' . (1021000 + $i * 137), 'nid' => '04993708' . str_pad($i, 2, '0', STR_PAD_LEFT), 'ver' => $v, 'blocked' => $i === 5,
-        'ads' => [5, 2, 0, 0, 7, 1, 3, 0, 4, 0, 6, 2][$i], 'reqs' => [10, 4, 1, 0, 12, 2, 5, 1, 3, 0, 9, 6][$i], 'paid' => [150000000, 42000000, 0, 0, 98000000, 12000000, 60000000, 0, 30000000, 0, 120000000, 54000000][$i],
-        'joined' => '۱۴۰۵/۰۶/' . str_pad(30 - $i, 2, '0', STR_PAD_LEFT), 'age' => $i * 1500 + 200];
-    }
     $faId = fn ($s) => strtr((string) $s, ['0'=>'۰','1'=>'۱','2'=>'۲','3'=>'۳','4'=>'۴','5'=>'۵','6'=>'۶','7'=>'۷','8'=>'۸','9'=>'۹']);
     $c = collect($users);
     $tabs = ['all' => 'همه', 'verified' => 'احراز شده', 'pending' => 'در انتظار بررسی', 'unverified' => 'احراز نشده', 'blocked' => 'مسدود'];
@@ -33,7 +25,7 @@
     </div>
 
     <section class="of-stats">
-        @foreach ([['کل کاربران', $faId(1324), 'users', ''], ['احراز شده', $faId(892), 'shield', 'green'], ['منتظر بررسی هویت', $faId(7), 'clock', 'amber'], ['مسدود شده', $faId(9), 'ban', '']] as $i => $s)
+        @foreach ([['کل کاربران', $faId($summary['total']), 'users', ''], ['احراز شده', $faId($summary['verified']), 'shield', 'green'], ['منتظر بررسی هویت', $faId($summary['pending']), 'clock', 'amber'], ['مسدود شده', $faId($summary['blocked']), 'ban', '']] as $i => $s)
             <article class="of-stat pn-reveal {{ $s[3] }}" style="--d:{{ .05 + $i * .05 }}s"><span class="of-stat-ic">@include('userPanel.partials.icon', ['name' => $s[2]])</span><div><small>{{ $s[0] }}</small><b>{{ $s[1] }}</b></div></article>
         @endforeach
     </section>

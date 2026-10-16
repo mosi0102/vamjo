@@ -5,23 +5,16 @@
 @section('body_class', 'pn-tickets pn-chat')
 
 @php
-    // نمونه داده؛ در پروژه واقعی از کنترلر پاس بدهید: compact('ticket', 'messages')
     $faId = fn ($n) => strtr((string) $n, ['0'=>'۰','1'=>'۱','2'=>'۲','3'=>'۳','4'=>'۴','5'=>'۵','6'=>'۶','7'=>'۷','8'=>'۸','9'=>'۹']);
-    $ticket = ['id' => 136548, 'title' => 'عدم ثبت آگهی انتقال وام', 'status' => 'answered', 'priority' => 'high', 'dept' => 'آگهی ها', 'date' => '۲۴ اردیبهشت ۱۴۰۵ – ۲۳:۱۶'];
-    $messages = [
-      ['from' => 'user',    'time' => '۲۳:۱۶', 'text' => 'لورم ایپسوم متن ساختگی با تولید سادگی نامفهوم از صنعت چاپ و با استفاده از طراحان گرافیک است. چاپگرها و متون بلکه روزنامه و مجله در ستون و سطرآنچنان که لازم است و برای شرایط فعلی تکنولوژی مورد نیاز و کاربردهای متنوع با هدف بهبود ابزارهای کاربردی می باشد. کتابهای زیادی در شصت و سه درصد گذشته حال و آینده.'],
-      ['from' => 'support', 'time' => '۰۹:۴۲', 'text' => 'لورم ایپسوم متن ساختگی با تولید سادگی نامفهوم از صنعت چاپ و با استفاده از طراحان گرافیک است. چاپگرها و متون بلکه روزنامه و مجله در ستون و سطرآنچنان که لازم است و برای شرایط فعلی تکنولوژی مورد نیاز و کاربردهای متنوع با هدف بهبود ابزارهای کاربردی می باشد. کتابهای زیادی در شصت و سه درصد گذشته حال و آینده و شناخت فراوان جامعه و متخصصان را می طلبد.'],
-      ['from' => 'user',    'time' => '۱۰:۰۵', 'text' => 'لورم ایپسوم متن ساختگی با تولید سادگی نامفهوم از صنعت چاپ و با استفاده از طراحان گرافیک است. چاپگرها و متون بلکه روزنامه و مجله در ستون و سطرآنچنان که لازم است.', 'file' => ['name' => 'IMG-20261218.JPG', 'size' => '۴.۶M', 'url' => '#']],
-    ];
     $closed = $ticket['status'] === 'closed';
     $statusMap = ['pending' => ['pending', 'در انتظار پاسخ'], 'answered' => ['approved', 'پاسخ داده شده'], 'closed' => ['expired', 'بسته شده']];
     $prioMap = ['low' => 'کم', 'normal' => 'متوسط', 'high' => 'زیاد', 'urgent' => 'فوری'];
-    [$pc, $pt] = $statusMap[$ticket['status']];
+    [$pc, $pt] = $statusMap[$ticket['status']] ?? ['pending', $ticket['status']];
 @endphp
 
 @section('main')
 
-    <a href="{{ url('/userPanel/tickets') }}"
+    <a href="{{ route('user.tickets.index') }}"
        class="of-back pn-reveal">@include('userPanel.partials.icon', ['name' => 'arrow']) بازگشت به تیکت ها</a>
 
     <div class="pn-head pn-reveal">
@@ -39,7 +32,7 @@
             <div class="tk-top-info">
                 <h3>{{ $ticket['title'] }}</h3>
                 <div class="rq-meta">
-                    <span class="tk-id">#{{ $faId($ticket['id']) }}</span>
+                    <span class="tk-id">#{{ $faId($ticket['code'] ?? $ticket['id']) }}</span>
                     <span class="pn-pill {{ $pc }}" id="tkStatus">{{ $pt }}</span>
                     <span class="tk-tag">{{ $ticket['dept'] }}</span>
                     <span class="tk-prio {{ $ticket['priority'] }}">{{ $prioMap[$ticket['priority']] }}</span>
@@ -50,7 +43,7 @@
                 <button type="button" class="ad-act danger" data-bs-toggle="modal" data-bs-target="#confirmModal"
                         data-confirm-title="بستن تیکت"
                         data-confirm-text="با بستن تیکت دیگر نمی‌توانید پیام جدید ارسال کنید. تیکت بسته شود؟"
-                        data-confirm-action="{{ url('/panel/tickets/' . $ticket['id'] . '/close') }}"
+                        data-confirm-action="{{ route('user.tickets.close', $ticket['id']) }}"
                         data-confirm-method="POST" data-confirm-label="بستن تیکت" data-confirm-tone="danger">
                     @include('userPanel.partials.icon', ['name' => 'close']) بستن تیکت
                 </button>
@@ -80,11 +73,11 @@
             <div class="tk-closed">
                 @include('userPanel.partials.icon', ['name' => 'lock'])
                 <span>این تیکت بسته شده است. برای ادامه، تیکت جدید ثبت کنید.</span>
-                <a href="{{ url('/panel/tickets/create') }}" class="btn btn-brand">تیکت جدید</a>
+                <a href="{{ route('user.tickets.create') }}" class="btn btn-brand">تیکت جدید</a>
             </div>
         @else
             <form id="tkReply" class="tk-reply" method="POST"
-                  action="{{ url('/panel/tickets/' . $ticket['id'] . '/reply') }}" enctype="multipart/form-data"
+                  action="{{ route('user.tickets.reply', $ticket['id']) }}" enctype="multipart/form-data"
                   novalidate>
                 @csrf
                 <div class="tk-attached" id="tkAttached" hidden>
@@ -95,7 +88,7 @@
                     <label class="tk-attach" for="tkFile"
                            tabindex="0">@include('userPanel.partials.icon', ['name' => 'clip'])
                         <span>انتخاب فایل ضمیمه</span></label>
-                    <input type="file" id="tkFile" name="attachment" accept="image/png,image/jpeg" hidden>
+                    <input type="file" id="tkFile" name="attachment" accept="image/png,image/jpeg,application/pdf" hidden>
                     <textarea id="tkText" name="message" rows="1" maxlength="1500"
                               placeholder="پاسخ خود را اینجا وارد نمایید" aria-label="متن پاسخ"></textarea>
                     <button type="submit" class="btn btn-brand tk-send" id="tkSend"><span

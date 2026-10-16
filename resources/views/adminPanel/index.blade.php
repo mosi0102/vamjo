@@ -5,26 +5,11 @@
 @section('body_class', 'pn-admin pn-dashboard')
 
 @php
-    // نمونه داده؛ در پروژه واقعی از کنترلر پاس بدهید. نقش: admin | support (با ?role=support تست کنید)
+    // داده‌ها از Admin\DashboardController::index می‌آید: $kpis, $chart, $kyc, $ads, $tickets, $dist, $acts
     $fa = fn ($n) => strtr(number_format($n), ['0'=>'۰','1'=>'۱','2'=>'۲','3'=>'۳','4'=>'۴','5'=>'۵','6'=>'۶','7'=>'۷','8'=>'۸','9'=>'۹']);
     $isAdmin = \App\Support\PanelRole::isAdmin();
-    $kpis = [
-      ['کل کاربران', $fa(1324), 'users', ''],
-      ['ثبت نام امروز', $fa(18), 'plus', 'green'],
-      ['احراز هویت منتظر بررسی', $fa(7), 'shield', 'amber', '/adminPanel/verifications'],
-      ['آگهی منتظر تایید', $fa(5), 'book', 'amber', '/adminPanel/ads'],
-      ['آگهی های فعال', $fa(214), 'check', ''],
-      ['تیکت های بی پاسخ', $fa(4), 'chat', 'amber', '/adminPanel/tickets'],
-    ];
-    if ($isAdmin) { $kpis[] = ['موجودی امانت', $fa(480000000) . ' <small>تومان</small>', 'wallet', 'green', '/adminPanel/finance']; $kpis[] = ['کمیسیون این ماه', $fa(36500000) . ' <small>تومان</small>', 'trend', 'green', '/adminPanel/finance']; }
-    $chart = ['labels' => ['شنبه', 'یکشنبه', 'دوشنبه', 'سه شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'], 'pay' => [120, 95, 180, 140, 210, 160, 75], 'recv' => [14, 9, 22, 18, 26, 18, 11]];
-    $kyc = [['علی رضایی', '۲ ساعت پیش'], ['مریم احمدی', '۳ ساعت پیش'], ['حسین کریمی', '۵ ساعت پیش'], ['زهرا محمدی', 'دیروز']];
-    $ads = [['وام ۳۰۰,۰۰۰,۰۰۰ بانک رسالت', 'سارا حسینی', '۱ ساعت پیش'], ['وام ۱۰۰,۰۰۰,۰۰۰ بانک شهر', 'امیر جعفری', '۴ ساعت پیش'], ['وام ۲۵۰,۰۰۰,۰۰۰ بانک تجارت', 'فاطمه کاظمی', 'دیروز']];
-    $tickets = [['عدم ثبت آگهی انتقال وام', 'رضا نوری', 'high'], ['پیگیری واریزی فروش امتیاز', 'نرگس صادقی', 'urgent'], ['مشکل در بارگذاری مدارک', 'مهدی رحیمی', 'normal']];
     $prio = ['normal' => 'متوسط', 'high' => 'زیاد', 'urgent' => 'فوری'];
-    $dist = [['منتشر شده', 214, '#2e9a4f'], ['منتظر تایید', 5, '#d9a93f'], ['در حال معامله', 31, '#3e4ea0'], ['تکمیل شده', 98, '#1e5a45'], ['رد شده', 12, '#d33']];
-    $distTotal = collect($dist)->sum(1);
-    $acts = [['shield', 'هویت «علی رضایی» توسط شما تایید شد.', '۱۰ دقیقه پیش'], ['book', 'آگهی ۱۲۳۵۸۹۶ منتشر و به‌عنوان ویژه ثبت شد.', '۱ ساعت پیش'], ['card', 'واریز ۲۷,۰۰۰,۰۰۰ تومان به فروشنده ثبت شد.', '۳ ساعت پیش'], ['chat', 'به تیکت ۱۳۶۵۴۸ پاسخ داده شد.', 'دیروز']];
+    $distTotal = max(1, collect($dist)->sum(1));
 @endphp
 
 @section('main')
@@ -80,9 +65,9 @@
                     @endforeach
                 </article>
                 <article class="pn-card at-q">
-                    <header><h3>تیکت های بی پاسخ</h3><a href="{{ url('/adminPanel/tickets') }}" class="pn-link-arrow sm">همه @include('userPanel.partials.icon', ['name' => 'arrow'])</a></header>
+                    <header><h3>تیکت های بی پاسخ</h3><a href="{{ route('admin.tickets.index') }}" class="pn-link-arrow sm">همه @include('userPanel.partials.icon', ['name' => 'arrow'])</a></header>
                     @foreach ($tickets as $r)
-                        <a href="{{ url('/adminPanel/tickets/136548') }}" class="at-q-row"><span class="at-av" style="background:#7a5ac8">{{ mb_substr($r[1], 0, 1) }}</span><span><b>{{ $r[0] }}</b><small>{{ $r[1] }}</small></span><span class="tk-prio {{ $r[2] }}">{{ $prio[$r[2]] }}</span></a>
+                        <a href="{{ route('admin.tickets.show', $r[3]) }}" class="at-q-row"><span class="at-av" style="background:#7a5ac8">{{ mb_substr($r[1], 0, 1) }}</span><span><b>{{ $r[0] }}</b><small>{{ $r[1] }}</small></span><span class="tk-prio {{ $r[2] }}">{{ $prio[$r[2]] ?? $r[2] }}</span></a>
                     @endforeach
                 </article>
             </section>

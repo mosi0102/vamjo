@@ -4,29 +4,15 @@
 @section('page_title', 'امور مالی')
 @section('body_class', 'pn-adminPanel')
 
-@php
-    // نمونه داده؛ در پروژه واقعی از کنترلر پاس بدهید: compact('transactions', 'summary')
-    // type: payment (پرداخت خریدار → امانت) | payout (واریز به فروشنده) | refund (برگشت وجه) | failed
+@php    // داده‌ها از Admin\FinanceController::index می‌آید: $rows (صفحه جاری), $summary, $rate, $paginator
+    // گروه: payment (پرداخت خریدار → امانت) | payout (واریز به فروشنده) | refund (برگشت وجه) | failed
     $fa = fn ($n) => strtr(number_format($n), ['0'=>'۰','1'=>'۱','2'=>'۲','3'=>'۳','4'=>'۴','5'=>'۵','6'=>'۶','7'=>'۷','8'=>'۸','9'=>'۹']);
     $faId = fn ($s) => strtr((string) $s, ['0'=>'۰','1'=>'۱','2'=>'۲','3'=>'۳','4'=>'۴','5'=>'۵','6'=>'۶','7'=>'۷','8'=>'۸','9'=>'۹']);
-    $rate = 5; // درصد کمیسیون
-    $rows = [
-      // [tx, group, user, role, loan, bank, paid, date, age, extra(sheba,seller)]
-      ['58963301', 'payout_due', 'سارا حسینی',  'فروشنده', 1235896, 'رسالت',   30000000, '۷ مهر – ۱۴:۲۳',  60,   'IR062960000000100324200001'],
-      ['58963298', 'payout_due', 'امیر جعفری',  'فروشنده', 1235897, 'شهر',     32000000, '۷ مهر – ۱۰:۰۵',  240,  'IR610610000000700140150007'],
-      ['58963290', 'escrow',     'علی رضایی',   'خریدار',  1235897, 'شهر',     32000000, '۶ مهر – ۱۶:۴۰',  1500, ''],
-      ['58963270', 'escrow',     'مریم احمدی',  'خریدار',  1235899, 'جاویدان', 20000000, '۶ مهر – ۱۱:۱۲',  1700, ''],
-      ['58963201', 'paid',       'فاطمه کاظمی', 'فروشنده', 1235890, 'مهر',     12000000, '۴ مهر – ۰۹:۳۰',  4300, 'IR540540000000800160170008'],
-      ['58963155', 'paid',       'نرگس صادقی',  'فروشنده', 1235885, 'تجارت',   45000000, '۳ مهر – ۱۷:۰۰',  5800, 'IR180120000000300600700003'],
-      ['58963100', 'refund',     'حسین کریمی',  'خریدار',  1235880, 'رسالت',   15000000, '۲ مهر – ۱۳:۲۰',  7200, ''],
-      ['58963044', 'failed',     'رضا نوری',    'خریدار',  1235875, 'کشاورزی',  25000000, '۱ مهر – ۱۲:۱۰',  8600, ''],
-      ['58962990', 'paid',       'مهدی رحیمی',  'فروشنده', 1235870, 'جاویدان', 30000000, '۳۰ شهریور – ۱۰:۱۰', 10000, 'IR150150000000500100110005'],
-    ];
     $type = ['payout_due' => ['واریز به فروشنده', 'pending', 'در انتظار واریز', 'send'], 'escrow' => ['پرداخت خریدار', 'pending', 'در امانت', 'card'], 'paid' => ['واریز به فروشنده', 'approved', 'واریز شده', 'check'], 'refund' => ['برگشت وجه', 'refund', 'برگشت داده شد', 'undo'], 'failed' => ['پرداخت خریدار', 'rejected', 'ناموفق', 'close']];
     $c = collect($rows);
     $cnt = ['all' => $c->count()] + $c->groupBy(1)->map->count()->all();
     $tabs = ['all' => 'همه', 'payout_due' => 'در انتظار واریز', 'escrow' => 'در امانت', 'paid' => 'واریز شده', 'refund' => 'برگشتی', 'failed' => 'ناموفق'];
-    $dueSum = $c->where(1, 'payout_due')->sum(6);
+    $dueSum = (int) ($summary['due_payout'] ?? 0);
 @endphp
 
 @section('main')
@@ -38,7 +24,7 @@
     </div>
 
     <section class="of-stats">
-        @foreach ([['حجم تراکنش ها (این ماه)', $fa(2480000000) . ' <small>تومان</small>', 'trend', ''], ['موجودی امانت', $fa(480000000) . ' <small>تومان</small>', 'shield', 'amber'], ['کمیسیون کسب شده (' . $faId($rate) . '٪)', $fa(36500000) . ' <small>تومان</small>', 'wallet', 'green'], ['واریزی های در انتظار', $fa($dueSum) . ' <small>تومان</small>', 'clock', 'amber']] as $i => $s)
+        @foreach ([['حجم تراکنش ها (این ماه)', $fa($summary['month_volume'] ?? 0) . ' <small>تومان</small>', 'trend', ''], ['موجودی امانت', $fa($summary['escrow'] ?? 0) . ' <small>تومان</small>', 'shield', 'amber'], ['کمیسیون کسب شده (' . $faId($rate) . '٪)', $fa($summary['commission'] ?? 0) . ' <small>تومان</small>', 'wallet', 'green'], ['واریزی های در انتظار', $fa($dueSum) . ' <small>تومان</small>', 'clock', 'amber']] as $i => $s)
             <article class="of-stat pn-reveal {{ $s[3] }}" style="--d:{{ .05 + $i * .05 }}s"><span class="of-stat-ic">@include('userPanel.partials.icon', ['name' => $s[2]])</span><div><small>{{ $s[0] }}</small><b>{!! $s[1] !!}</b></div></article>
         @endforeach
     </section>
@@ -70,11 +56,11 @@
                         <td class="at-actions">
                             @if ($r[1] === 'payout_due')
                                 <button type="button" class="btn btn-brand at-btn" data-bs-toggle="modal" data-bs-target="#payoutModal" data-tx="{{ $faId($r[0]) }}" data-seller="{{ $r[2] }}" data-sheba="{{ $r[9] }}" data-loan="#{{ $faId($r[4]) }} · بانک {{ $r[5] }}"
-                                        data-gross="{{ $fa($r[6]) }}" data-fee="{{ $fa($fee) }}" data-net="{{ $fa($net) }}" data-action="{{ url('/adminPanel/finance/payouts/' . $r[0]) }}">ثبت واریز</button>
+                                        data-gross="{{ $fa($r[6]) }}" data-fee="{{ $fa($fee) }}" data-net="{{ $fa($net) }}" data-action="{{ route('admin.finance.payout', $r[10]) }}">ثبت واریز</button>
                             @elseif ($r[1] === 'escrow')
                                 <button type="button" class="btn btn-ghost of-reject at-btn" data-bs-toggle="modal" data-bs-target="#confirmModal" data-confirm-title="برگشت وجه به خریدار" data-confirm-text="مبلغ {{ $fa($r[6]) }} تومان به حساب {{ $r[2] }} برگشت داده شود و معامله لغو شود؟"
-                                        data-confirm-action="{{ url('/adminPanel/finance/refunds/' . $r[0]) }}" data-confirm-method="POST" data-confirm-label="برگشت وجه" data-confirm-tone="danger" data-confirm-reason="1">برگشت وجه</button>
-                            @else<a href="{{ url('/adminPanel/users/2001') }}" class="rd-ic-btn" title="مشاهده کاربر" aria-label="مشاهده کاربر">@include('userPanel.partials.icon', ['name' => 'eye'])</a>@endif
+                                        data-confirm-action="{{ route('admin.finance.refund', $r[10]) }}" data-confirm-method="POST" data-confirm-label="برگشت وجه" data-confirm-tone="danger" data-confirm-reason="1">برگشت وجه</button>
+                            @else<a href="{{ route('admin.users.show', $r[11]) }}" class="rd-ic-btn" title="مشاهده کاربر" aria-label="مشاهده کاربر">@include('userPanel.partials.icon', ['name' => 'eye'])</a>@endif
                         </td>
                     </tr>
                 @endforeach

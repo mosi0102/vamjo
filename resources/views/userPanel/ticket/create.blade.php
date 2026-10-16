@@ -5,12 +5,12 @@
 @section('body_class', 'pn-tickets')
 
 @php
-    $depts = ['پرداخت ها', 'آگهی ها', 'درخواست ها', 'احراز هویت', 'حساب کاربری', 'مشکل فنی', 'سایر'];
+    $depts = $depts ?? ['پرداخت ها', 'آگهی ها', 'درخواست ها', 'احراز هویت', 'حساب کاربری', 'مشکل فنی', 'سایر'];
 @endphp
 
 @section('main')
 
-    <a href="{{ url('/userPanel/tickets') }}" class="of-back pn-reveal">@include('userPanel.partials.icon', ['name' => 'arrow']) بازگشت به تیکت ها</a>
+    <a href="{{ route('user.tickets.index') }}" class="of-back pn-reveal">@include('userPanel.partials.icon', ['name' => 'arrow']) بازگشت به تیکت ها</a>
 
     <div class="pn-head pn-reveal">
         <span class="pn-head-ic">@include('userPanel.partials.icon', ['name' => 'chat'])</span>
@@ -21,7 +21,7 @@
     </div>
 
     <section class="pn-panel pn-reveal" style="--d:.08s">
-        <form id="tkForm" class="tk-form dz-scope" action="{{ url('/panel/tickets') }}" method="POST" enctype="multipart/form-data" novalidate data-demo-redirect="{{ url('/panel/tickets/136548') }}">
+        <form id="tkForm" class="tk-form dz-scope" action="{{ route('user.tickets.store') }}" method="POST" enctype="multipart/form-data" novalidate>
             @csrf
 
             <div class="tk-sla">@include('userPanel.partials.icon', ['name' => 'clock']) پشتیبانی معمولاً ظرف <b>۲۴ ساعت</b> پاسخ می‌دهد. برای موارد فوری اولویت «فوری» را انتخاب کنید.</div>

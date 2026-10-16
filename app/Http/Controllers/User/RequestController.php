@@ -21,7 +21,7 @@ class RequestController extends Controller
         $user = $request->user();
 
         $requests = $user->purchases()
-            ->with('ad.bank')
+            ->with('ad.bank', 'ad.documents')
             ->latest()
             ->get()
             ->map(fn (LoanRequest $item) => Presenter::requestRow($item))

@@ -225,7 +225,7 @@ class Dashboard
     {
         return Ticket::query()->pendingAnswer()->with('user')->oldest('created_at')
             ->limit($limit)->get()
-            ->map(fn (Ticket $ticket) => [$ticket->subject, $ticket->user?->display_name ?? '', $ticket->priority])
+            ->map(fn (Ticket $ticket) => [$ticket->subject, $ticket->user?->display_name ?? '', $ticket->priority, $ticket->id])
             ->all();
     }
 

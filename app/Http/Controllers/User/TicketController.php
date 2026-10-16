@@ -20,6 +20,9 @@ class TicketController extends Controller
     {
         $tickets = $request->user()->tickets()
             ->withCount(['messages'])
+            ->withCount(['messages as unread_count' => fn ($query) => $query
+                ->where('author_role', 'support')
+                ->where('is_read', false)])
             ->latest('last_reply_at')
             ->latest()
             ->get()
@@ -83,9 +86,17 @@ class TicketController extends Controller
 
         $ticket->load('messages');
 
+        // پیام‌های کاربر خوانده و یادداشت‌های داخلی پشتیبانی مخفی می‌شوند
+        $ticket->messages()->where('author_role', '!=', 'internal')->update(['is_read' => true]);
+
+        $messages = $ticket->messages
+            ->filter(fn ($message) => $message->author_role !== 'internal')
+            ->map(fn ($message) => Presenter::ticketMessage($message))
+            ->all();
+
         return view('userPanel.ticket.show', [
             'ticket' => Presenter::ticketDetail($ticket),
-            'messages' => $ticket->messages->map(fn ($message) => Presenter::ticketMessage($message))->all(),
+            'messages' => $messages,
         ]);
     }
 
@@ -98,11 +109,11 @@ class TicketController extends Controller
         }
 
         $data = $request->validate([
-            'message' => ['required', 'string', 'min:2', 'max:1500'],
+            'message' => ['nullable', 'string', 'required_without:attachment', 'min:2', 'max:1500'],
             'attachment' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:'.config('vamjou.uploads.max_size')],
         ], [], ['message' => 'متن پیام']);
 
-        $this->attachMessage($ticket, $request, $data['message']);
+        $this->attachMessage($ticket, $request, $data['message'] ?? '');
 
         $ticket->update(['status' => Ticket::STATUS_PENDING, 'last_reply_at' => now()]);
 

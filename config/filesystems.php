@@ -54,7 +54,8 @@ return [
         'uploads' => [
             'driver' => 'local',
             'root' => public_path('uploads'),
-            'url' => env('APP_URL').'/uploads',
+            // آدرس نسبی به ریشه تا با تغییر هاست/پورت (localhost، artisan serve و غیره) نشکند
+            'url' => '/uploads',
             'visibility' => 'public',
             'throw' => false,
             'report' => false,

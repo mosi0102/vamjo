@@ -5,19 +5,12 @@
 @section('body_class', 'pn-requests')
 
 @php
-    // نمونه داده؛ در پروژه واقعی از کنترلر پاس بدهید: compact('requests')
     // step = مرحله جاری (۱ تا ۷) | state = active | completed | rejected
     $fa = fn ($n) => strtr(number_format($n), ['0'=>'۰','1'=>'۱','2'=>'۲','3'=>'۳','4'=>'۴','5'=>'۵','6'=>'۶','7'=>'۷','8'=>'۸','9'=>'۹']);
     $faId = fn ($n) => strtr((string) $n, ['0'=>'۰','1'=>'۱','2'=>'۲','3'=>'۳','4'=>'۴','5'=>'۵','6'=>'۶','7'=>'۷','8'=>'۸','9'=>'۹']);
     $steps = ['ثبت درخواست', 'تایید درخواست', 'پرداخت', 'تایید پرداخت', 'انتقال امتیاز', 'تایید انتقال', 'تکمیل'];
     $waiting = [1 => 'در انتظار ثبت', 2 => 'در انتظار تایید', 3 => 'در انتظار پرداخت', 4 => 'در انتظار تایید پرداخت', 5 => 'در انتظار انتقال امتیاز', 6 => 'در انتظار انتقال', 7 => 'در حال تکمیل'];
 
-    $requests = [
-      ['id' => 1235896, 'bank' => 'رسالت', 'image'=>'8',   'l' => 'ر', 'c' => '#1f8a9e', 'amount' => 300000000, 'price' => 30000000, 'ago' => '۳ روز پیش', 'city' => 'سبزوار', 'step' => 3, 'state' => 'active', 'deadline' => 7],
-      ['id' => 1235897, 'bank' => 'شهر', 'image'=>'7',     'l' => 'ش', 'c' => '#d6322c', 'amount' => 300000000, 'price' => 30000000, 'ago' => '۳ روز پیش', 'city' => 'سبزوار', 'step' => 6, 'state' => 'active', 'doc' => null,'deadline' => 7],
-      ['id' => 1235898, 'bank' => 'جاویدان', 'image'=>'4', 'l' => 'ج', 'c' => '#e07b00', 'amount' => 300000000, 'price' => 30000000, 'ago' => '۳ روز پیش', 'city' => 'سبزوار', 'step' => 7, 'state' => 'completed'],
-      ['id' => 1235899, 'bank' => 'جاویدان', 'image'=>'4', 'l' => 'ج', 'c' => '#e07b00', 'amount' => 300000000, 'price' => 30000000, 'ago' => '۳ روز پیش', 'city' => 'سبزوار', 'step' => 2, 'state' => 'rejected', 'note' => 'متاسفانه درخواست شما رد شد.'],
-    ];
     $group = fn ($r) => $r['state'] === 'completed' ? 'done' : ($r['state'] === 'rejected' ? 'rejected' : ($r['step'] === 3 ? 'pay' : 'progress'));
     $tabs = ['all' => 'همه', 'pay' => 'در انتظار پرداخت', 'progress' => 'در حال انجام', 'done' => 'تکمیل شده', 'rejected' => 'رد شده'];
     $counts = collect($requests)->groupBy($group)->map->count();
@@ -60,7 +53,7 @@
                     $pill = $r['state'] === 'completed' ? ['approved', 'تکمیل شده'] : ($r['state'] === 'rejected' ? ['rejected', 'رد شده'] : ['pending', $waiting[$r['step']]]);
                 @endphp
                 <article class="rq-card pn-reveal" data-group="{{ $g }}"
-                         data-search="{{ $r['id'] }} {{ $r['bank'] }} {{ $r['amount'] }} {{ $r['price'] }}"
+                         data-search="{{ $r['code'] ?? $r['id'] }} {{ $r['bank'] }} {{ $r['amount'] }} {{ $r['price'] }}"
                          style="--d:{{ .12 + $loop->index * .07 }}s">
                     <div class="rq-main">
                         <div class="rq-head">
@@ -68,10 +61,10 @@
                             <div class="rq-info">
                                 <h3>وام {{ $fa($r['amount']) }} تومان بانک {{ $r['bank'] }}</h3>
                                 <div class="rq-meta">
-                                    <button type="button" class="pn-id rq-id" data-copy="{{ $r['id'] }}"
+                                    <button type="button" class="pn-id rq-id" data-copy="{{ $r['code'] ?? $r['id'] }}"
                                             title="کپی شناسه وام">
                                         شناسه وام
-                                        <b>#{{ $faId($r['id']) }}</b>@include('userPanel.partials.icon', ['name' => 'copy'])
+                                        <b>#{{ $faId($r['code'] ?? $r['id']) }}</b>@include('userPanel.partials.icon', ['name' => 'copy'])
                                     </button>
                                     <span
                                         class="rq-meta-i">@include('userPanel.partials.icon', ['name' => 'calendar']){{ $r['ago'] }}</span>
@@ -105,7 +98,7 @@
                                             data-title="وام {{ $fa($r['amount']) }} تومان بانک {{ $r['bank'] }}"
                                             data-price="{{ $r['price'] }}" data-bank-l="{{ $r['l'] }}"
                                             data-bank-c="{{ $r['c'] }}"
-                                            data-action="{{ url('/panel/requests/' . $r['id'] . '/pay') }}">
+                                            data-action="{{ route('user.requests.pay', $r['id']) }}">
                                         پرداخت مبلغ وام @include('userPanel.partials.icon', ['name' => 'arrow'])
                                     </button>
                                 @endif
@@ -117,7 +110,7 @@
                                             data-title="وام {{ $fa($r['amount']) }} تومان بانک {{ $r['bank'] }}"
                                             data-bank-l="{{ $r['l'] }}" data-bank-c="{{ $r['c'] }}"
                                             data-doc="{{ $r['doc'] ?? '' }}"
-                                            data-action="{{ url('/panel/requests/' . $r['id'] . '/confirm-transfer') }}">
+                                            data-action="{{ route('user.requests.confirm', $r['id']) }}">
                                         مشاهده مدرک و تایید
                                         انتقال @include('userPanel.partials.icon', ['name' => 'arrow'])
                                     </button>
