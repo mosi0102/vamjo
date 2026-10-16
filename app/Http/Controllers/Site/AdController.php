@@ -14,7 +14,6 @@ use App\Support\Presenter;
 use App\Support\Text;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -23,12 +22,6 @@ class AdController extends Controller
     public function index(Request $request): View
     {
         $banks = Bank::query()->active()->ordered()->get();
-
-        /**
-         * قرارداد فرانت‌اند (public/website/js/main.js بخش adsPage):
-         * فیلترها به‌صورت query string سمت سرور اعمال می‌شوند:
-         * bank[]=slug | type[]=key | urgent=1 | pay=1 | q | sort=new|amount-desc|amount-asc|rate-asc
-         */
         $sort = $request->string('sort')->toString();
 
         $filters = fn ($query) => $query
@@ -56,6 +49,8 @@ class AdController extends Controller
             ->paginate(12)
             ->withQueryString();
 
+        // dd($ads->items());
+
         return view('website.list', [
             'banks' => $banks->mapWithKeys(fn (Bank $bank) => [
                 $bank->slug => $bank->toFilterArray(),
@@ -82,8 +77,33 @@ class AdController extends Controller
             ->published()
             ->with('bank')
             ->withCount('offers')
-            ->whereKeyNot($ad->id)
-            ->ofBank($ad->bank_id)
+            ->where('id', '!=', $ad->id)
+            ->where(function ($query) use ($ad) {
+                // بانک یکسان باشد
+                $query->where('bank_id', $ad->bank_id)
+
+                    // یا مبلغ وام در محدوده ۲۰ درصدی باشد
+                    ->orWhereBetween('amount', [
+                        (int) round($ad->amount * 0.8),
+                        (int) round($ad->amount * 1.2),
+                    ])
+
+                    // یا قیمت در محدوده ۳۰ درصدی باشد
+                    ->orWhereBetween('price', [
+                        (int) round($ad->price * 0.7),
+                        (int) round($ad->price * 1.3),
+                    ]);
+            })
+            ->orderByRaw(
+                'ABS(CAST(amount AS SIGNED) - CAST(? AS SIGNED)) / GREATEST(?, 1)
+     + ABS(CAST(price AS SIGNED) - CAST(? AS SIGNED)) / GREATEST(?, 1) ASC',
+                [
+                    $ad->amount,
+                    max((int) $ad->amount, 1),
+                    $ad->price,
+                    max((int) $ad->price, 1),
+                ]
+            )
             ->limit(3)
             ->get()
             ->map(fn (Ad $item) => Presenter::adCard($item))
@@ -134,9 +154,9 @@ class AdController extends Controller
             'rate' => $rate,
             'price' => $price,
             'max_price' => (int) round($amount * config('vamjou.price_recommendation.max') / 100),
-            'installment' => $months ? (int) round(($amount * (1 + $rate / 100 * $months / 12)) / $months) : null,
-            'total_repayment' => (int) round($amount * (1 + $rate / 100 * $months / 12)),
-            'guarantor' => $data['guarantor'] ?? null,
+            'installment' => $months ? (int) round(($amount * (1 + $rate / 100)) / $months) : null,
+            'total_repayment' => (int) round($amount * (1 + $rate / 100)),
+            'guarantor' => $data['note'] ?? null,
             'city' => $data['city'] ?? $request->user()->city,
             'description' => $data['note'] ?? null,
             'sheba' => strtoupper(Iran::toLatin($data['sheba'])),

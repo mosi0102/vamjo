@@ -15,8 +15,11 @@
                 <div class="offer-field text-start">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <label for="offerInput" class="offer-label">مبلغ پیشنهادی + مبلغ فروش</label>
-                        <span class="offer-range" dir="ltr">{{ number_format($ad['price']) }} تا {{ number_format($ad['max_offer']) }}</span>
-                    </div>
+                        <span class="offer-range" dir="rtl">
+       از {{ number_format($ad['price']) }}
+    تا {{ number_format($ad['max_offer']) }} تومان
+</span>
+ </div>
                     <div class="offer-input" dir="rtl">
                         <input type="text" id="offerInput" inputmode="numeric" autocomplete="off" placeholder="مثلا: ۳۰۰,۰۰۰,۰۰۰">
                         <span class="addon">تومان</span>

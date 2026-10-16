@@ -14,8 +14,11 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 class AdOffer extends Model
 {
     public const STATUS_PENDING = 'pending';
+
     public const STATUS_ACCEPTED = 'accepted';
+
     public const STATUS_REJECTED = 'rejected';
+
     public const STATUS_EXPIRED = 'expired';
 
     protected $fillable = ['ad_id', 'user_id', 'amount', 'note', 'status', 'expires_at', 'responded_at', 'ip'];
@@ -61,5 +64,20 @@ class AdOffer extends Model
             self::STATUS_EXPIRED => 'منقضی شده',
             default => $this->status,
         };
+    }
+
+    public function active(): bool
+    {
+        return $this->status === self::STATUS_PENDING && ! $this->isExpired();
+    }
+
+    public function scopeActive(Builder $query): Builder
+    {
+        return $query
+            ->where('status', self::STATUS_PENDING)
+            ->where(function (Builder $query) {
+                $query->whereNull('expires_at')
+                    ->orWhere('expires_at', '>', now());
+            });
     }
 }

@@ -43,7 +43,7 @@
                     </div>
 
                 {{-- فیلترها به‌صورت فرم GET (ادغام سمت سرور + صفحه‌بndی) --}}
-                <form id="adsFilterForm" action="{{ url('/ads') }}" method="GET" role="form" aria-label="فیلتر آگهی‌ها">
+                <form id="adsFilterForm" action="{{ url('/ads') }}" method="GET" role="form" aria-label="فیلتر آگهی‌ها" autocomplete="off">
                     <input type="hidden" name="sort" id="sortInput" value="{{ $sel['sort'] }}">
 
                     <div class="filters-body">
@@ -250,4 +250,7 @@
         </article>
         <button type="button" class="seo-toggle d-lg-none" id="seoToggle">نمایش بیشتر</button>
     </div>
+
+    {{-- منطق تعاملی فیلترها (ارسال خودکار فرم، جستجو با debounce، مرتب‌سازی، حذف فیلترها) --}}
+    <script src="{{ asset('website/js/ads-filters.js') }}?v=1" defer></script>
 @endsection

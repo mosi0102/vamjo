@@ -9,7 +9,6 @@ use App\Models\Ad;
 use App\Models\AdDocument;
 use App\Models\AdOffer;
 use App\Models\Bank;
-use App\Models\LoanRequest;
 use App\Support\Iran;
 use App\Support\Presenter;
 use App\Support\Text;
@@ -37,6 +36,8 @@ class AdController extends Controller
             })
             ->all();
 
+      
+
         return view('userPanel.ads.index', compact('ads'));
     }
 
@@ -59,11 +60,65 @@ class AdController extends Controller
     {
         $this->authorizeOwner($request, $ad);
 
-        $offers = $ad->offers()->with('buyer')->latest()->get()
-            ->map(fn (AdOffer $offer) => Presenter::offerRow($offer))
-            ->all();
+        $ad->load('bank');
 
-        $ad->load(['bank', 'offers']);
+        $offers = $ad->offers()
+            ->with('buyer')
+            ->latest()
+            ->get()
+            ->map(fn (AdOffer $offer) => Presenter::offerRow($offer));
+
+        $pending = $ad->offers()
+            ->pending()
+            ->where(function ($query) {
+                $query->whereNull('expires_at')
+                    ->orWhere('expires_at', '>', now());
+            })
+            ->get();
+
+        $activeOffers = $pending;
+
+        $best = (int) ($activeOffers->max('amount') ?? 0);
+        $avg = (int) round($activeOffers->avg('amount') ?? 0);
+
+        $statusMap = [
+            'pending' => ['pending', 'در انتظار پاسخ'],
+            'accepted' => ['success', 'تأیید شده'],
+            'rejected' => ['danger', 'رد شده'],
+            'expired' => ['muted', 'منقضی شده'],
+        ];
+
+        $tabs = [
+            'all' => 'همه',
+            'pending' => 'در انتظار',
+            'accepted' => 'تأیید شده',
+            'rejected' => 'رد شده',
+            'expired' => 'منقضی شده',
+        ];
+
+        $counts = [
+            'all' => $offers->count(),
+            'pending' => $offers->where('status', 'pending')->count(),
+            'accepted' => $offers->where('status', 'accepted')->count(),
+            'rejected' => $offers->where('status', 'rejected')->count(),
+            'expired' => $offers->where('status', 'expired')->count(),
+        ];
+
+        $groupOf = fn ($offer) => $offer['status'] ?? 'pending';
+
+        $fa = fn ($number) => number_format((int) $number);
+
+        $faId = fn ($number) => strtr((string) $number, [
+            '0' => '۰', '1' => '۱', '2' => '۲',
+            '3' => '۳', '4' => '۴', '5' => '۵',
+            '6' => '۶', '7' => '۷', '8' => '۸',
+            '9' => '۹',
+        ]);
+
+        $avatarColors = [
+            '#dcece5', '#f5e4cf', '#dce6f5',
+            '#f4dfe5', '#e7e0f5', '#e8edcf',
+        ];
 
         return view('userPanel.ads.offers', [
             'ad' => [
@@ -71,15 +126,23 @@ class AdController extends Controller
                 'code' => $ad->code,
                 'bank' => $ad->bank?->name ?? '',
                 'image' => $ad->bank?->image ?? '1',
-                'l' => $ad->bank?->initial ?? '',
-                'c' => $ad->bank?->color ?? '#1e5a45',
                 'amount' => $ad->amount,
                 'price' => $ad->price,
-                'max' => $ad->max_price ?: (int) round($ad->price * 1.5),
+                'best' => $best,
+                'avg' => $avg,
                 'city' => $ad->city ?? '',
                 'state' => $ad->statusLabel(),
             ],
             'offers' => $offers,
+            'pending' => $pending,
+            'best' => $best,
+            'statusMap' => $statusMap,
+            'tabs' => $tabs,
+            'counts' => $counts,
+            'groupOf' => $groupOf,
+            'fa' => $fa,
+            'faId' => $faId,
+            'avatarColors' => $avatarColors,
         ]);
     }
 
