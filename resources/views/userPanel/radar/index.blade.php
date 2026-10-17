@@ -5,7 +5,7 @@
 @section('body_class', 'pn-radar')
 
 @php
-    // نمونه داده؛ در پروژه واقعی از کنترلر پاس بدهید: compact('radars', 'matches', 'banks')
+    // داده‌ها از User\RadarController می‌آید: compact('radars', 'matches', 'banks')
     $fa = fn ($n) => strtr(number_format($n), ['0'=>'۰','1'=>'۱','2'=>'۲','3'=>'۳','4'=>'۴','5'=>'۵','6'=>'۶','7'=>'۷','8'=>'۸','9'=>'۹']);
     $faId = fn ($n) => strtr((string) $n, ['0'=>'۰','1'=>'۱','2'=>'۲','3'=>'۳','4'=>'۴','5'=>'۵','6'=>'۶','7'=>'۷','8'=>'۸','9'=>'۹']);
 

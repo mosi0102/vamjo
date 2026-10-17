@@ -5,7 +5,7 @@
 @section('body_class', 'pn-edit')
 
 @php
-    // نمونه داده؛ در پروژه واقعی از کنترلر پاس بدهید: compact('ad', 'banks')
+    // داده‌ها از User\AdController@edit می‌آید: compact('ad', 'banks')
     // state: review | rejected → قابل ویرایش | بقیه حالت‌ها فقط‌خواندنی
     $fa = fn ($n) => strtr(number_format($n), ['0'=>'۰','1'=>'۱','2'=>'۲','3'=>'۳','4'=>'۴','5'=>'۵','6'=>'۶','7'=>'۷','8'=>'۸','9'=>'۹']);
     $faId = fn ($n) => strtr((string) $n, ['0'=>'۰','1'=>'۱','2'=>'۲','3'=>'۳','4'=>'۴','5'=>'۵','6'=>'۶','7'=>'۷','8'=>'۸','9'=>'۹']);
@@ -38,7 +38,7 @@
             <h3>این آگهی قابل ویرایش نیست</h3>
             <p>آگهی در وضعیت «{{ $stateText }}» قرار دارد و تغییر اطلاعات آن ممکن نیست. برای هرگونه تغییر با پشتیبانی
                 تماس بگیرید.</p>
-            <a href="{{ url('/panel/ads') }}" class="btn btn-brand">بازگشت به آگهی ها</a>
+            <a href="{{ route('user.ads.index') }}" class="btn btn-brand">بازگشت به آگهی ها</a>
         </section>
     @else
         <div class="ed-wrap mx-auto">
@@ -51,7 +51,7 @@
                 </div>
             @endif
 
-            <form id="adEditForm" action="{{ url('/panel/ads/' . $ad['id']) }}" method="POST"
+            <form id="adEditForm" action="{{ route('user.ads.update', $ad['id']) }}" method="POST"
                   enctype="multipart/form-data" novalidate>
                 @csrf @method('PUT')
 
@@ -177,7 +177,7 @@
                             data-bs-target="#confirmModal"
                             data-confirm-title="حذف آگهی"
                             data-confirm-text="آیا از حذف «{{ $title }}» مطمئن هستید؟ این کار قابل بازگشت نیست."
-                            data-confirm-action="{{ url('/panel/ads/' . $ad['id']) }}" data-confirm-method="DELETE"
+                            data-confirm-action="{{ route('user.ads.destroy', $ad['id']) }}" data-confirm-method="DELETE"
                             data-confirm-label="بله، حذف شود" data-confirm-tone="danger">
                         @include('userPanel.partials.icon', ['name' => 'trash']) حذف آگهی
                     </button>

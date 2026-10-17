@@ -29,7 +29,8 @@ class AdminPanelPagesTest extends TestCase
         $this->assertStringNotContainsString('۱۳۲۴', $html);
 
         // صف تیکت‌های بی‌پاسخ به لیست واقعی لینک می‌دهد
-        $pendingTicket = \App\Models\Ticket::query()->pendingAnswer()->first();
+        // صف داشبورد قدیمی‌ترین‌ها را نشان می‌دهد؛ همان تیکت باید در صفحه باشد.
+        $pendingTicket = \App\Models\Ticket::query()->pendingAnswer()->oldest('created_at')->first();
         if ($pendingTicket) {
             $this->assertStringContainsString(route('admin.tickets.show', $pendingTicket->id), $html);
         }

@@ -16,13 +16,17 @@
         <h1 class="pn-bar-title">@yield('page_title')</h1>
 
         <div class="pn-push">
-            {{-- اعلان‌ها (نمونه) --}}
+            {{-- اعلان‌ها = آخرین رویدادهای ثبت‌شده کاربر؛ «جدید» یعنی امروز --}}
             @php
-                $notifs = [
-                  ['icon' => 'check',  'text' => 'آگهی «وام ۳۰۰ میلیونی بانک رسالت» توسط اپراتور تایید شد.', 'time' => '۲ ساعت پیش', 'new' => true],
-                  ['icon' => 'doc',    'text' => 'یک پیشنهاد جدید برای آگهی شما ثبت شد.',                    'time' => 'دیروز',     'new' => true],
-                  ['icon' => 'shield', 'text' => 'برای ثبت آگهی، احراز هویت خود را تکمیل کنید.',             'time' => '۳ روز پیش', 'new' => false],
-                ];
+                $notifs = auth()->user()
+                    ?->activityLogs()->with('actor')->latest()->limit(5)
+                    ->get()
+                    ->map(fn ($log) => [
+                        'icon' => $log->icon(),
+                        'text' => $log->description ?? $log->action,
+                        'time' => \App\Support\Fa::ago($log->created_at),
+                        'new'  => $log->created_at->isToday(),
+                    ])->all();
             @endphp
             <div class="pn-notif" id="pnNotif">
                 <button type="button" class="pn-icon-btn pn-bell" id="pnBell" aria-label="اعلان‌ها" aria-expanded="false" aria-controls="pnNotifPanel">

@@ -1,15 +1,9 @@
 @extends('userPanel.layouts.Blank')
 
 @php
-    // نمونه داده؛ در پروژه واقعی از کنترلر (بعد از Verify درگاه) پاس بدهید: compact('status', 'payment')
-    // تست: /payment/result?status=failed
-    $status = request('status') === 'failed' ? 'failed' : 'success';
+    // داده‌ها از Site\PaymentController@result می‌آید: compact('status', 'payment')
     $ok = $status === 'success';
     $fa = fn ($n) => strtr(number_format($n), ['0'=>'۰','1'=>'۱','2'=>'۲','3'=>'۳','4'=>'۴','5'=>'۵','6'=>'۶','7'=>'۷','8'=>'۸','9'=>'۹']);
-    $payment = [
-      'amount' => 30000000, 'paid_at' => '۷ مهر ۱۴۰۵ – ۱۴:۲۳', 'ref' => '58963215', 'tx' => '58963215',
-      'request_id' => 1235896, 'reason' => 'انصراف از پرداخت در درگاه',
-    ];
 @endphp
 
 @section('title', $ok ? 'پرداخت موفق' : 'پرداخت ناموفق')

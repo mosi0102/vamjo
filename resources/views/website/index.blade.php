@@ -57,7 +57,7 @@
                     <h2 class="section-title">آگهی‌های ویژه</h2>
                     <p class="section-sub">جدیدترین و پربازدیدترین آگهی‌ها</p>
                 </div>
-                <a href="#" class="link-more">مشاهده همه <span aria-hidden="true">←</span></a>
+                <a href="{{ route('site.ads') }}" class="link-more">مشاهده همه <span aria-hidden="true">←</span></a>
             </div>
             <div class="row g-4">
                 @foreach ($ads as $a)
@@ -73,17 +73,18 @@
     <section class="stats">
         <div class="container">
             <div class="row g-4 text-center">
+                {{-- آمار از دیتابیس: Site\HomeController@index --}}
                 <div class="col-6 col-lg-3">
-                    <div class="stat-num"><span class="count" data-count="500">۰</span>+</div>
+                    <div class="stat-num"><span class="count" data-count="{{ $stats['ads'] }}">۰</span>+</div>
                     <p>آگهی ثبت شده<br>واگذاری وام</p></div>
                 <div class="col-6 col-lg-3">
-                    <div class="stat-num"><span class="count" data-count="1300">۰</span>+</div>
+                    <div class="stat-num"><span class="count" data-count="{{ $stats['users'] }}">۰</span>+</div>
                     <p>کاربر احراز هویت<br>شده در سامانه</p></div>
                 <div class="col-6 col-lg-3">
-                    <div class="stat-num"><span class="count" data-count="10">۰</span>+</div>
+                    <div class="stat-num"><span class="count" data-count="{{ $stats['banks'] }}">۰</span>+</div>
                     <p>بانک‌های تحت پوشش<br>سامانه وام اینجا</p></div>
                 <div class="col-6 col-lg-3">
-                    <div class="stat-num"><span class="count" data-count="650">۰</span>+</div>
+                    <div class="stat-num"><span class="count" data-count="{{ $stats['deals'] }}">۰</span>+</div>
                     <p>ثبت معامله موفق و<br>امن در سامانه</p></div>
             </div>
         </div>
@@ -94,8 +95,8 @@
         <div class="container">
             <div class="text-center mb-5">
                 <h2 class="section-title d-inline-block">راهنمای ثبت درخواست امتیاز</h2>
-                <p class="section-sub">لورم ایپسوم متن ساختگی با تولید سادگی نامفهوم از صنعت چاپ و با استفاده از طراحان
-                    گرافیک است</p>
+                <p class="section-sub">در چهار گام ساده، امتیاز وام خود را بفروشید یا وام مورد نیاز خود را با خیال
+                    راحت خریداری کنید</p>
             </div>
             <div class="row g-4 steps-row">
                 <div class="col-6 col-lg-3 step">
@@ -141,27 +142,15 @@
 
                 <div class="col-lg-7">
                     <div class="faq-list" id="faqList">
-                        <div class="faq-item open">
-                            <button class="faq-q" type="button" aria-expanded="true">در صورتی که شخص فروشنده وام امتیاز
-                                انتقال ندهد چه میشود؟<span class="chev" aria-hidden="true"></span></button>
-                            <div class="faq-a"><p>هزینه پرداخت شده شما در سامانه به امانت می ماند و تا انتقال قطعی
-                                    امتیاز و تایید طرفین بر انجام معامله هزینه انتقال داده نمیشود. در صورت عدم انتقال
-                                    معامله تا ۷ روز تمام هزینه به شما بازگشت داده میشود.</p></div>
-                        </div>
-                        <div class="faq-item">
-                            <button class="faq-q" type="button" aria-expanded="false">چه تضمینی برای انتقال امتیاز وام
-                                هست؟<span class="chev" aria-hidden="true"></span></button>
-                            <div class="faq-a"><p>اشخاص فروشنده امتیاز توسط سامانه احراز و بررسی میشوند و با توجه به
-                                    مدارک ارائه شده امکان ثبت آگهی برایشان فراهم میشود. در صورت عدم توان انجام معامله
-                                    حساب شخص به حالت تعلیق در می آید.</p></div>
-                        </div>
-                        <div class="faq-item">
-                            <button class="faq-q" type="button" aria-expanded="false">سامانه وام اینجا چه اعتباراتی برای
-                                اعتماد سازی دارد؟<span class="chev" aria-hidden="true"></span></button>
-                            <div class="faq-a"><p>این سامانه دارای مجوز فعالیت میباشد و همچنین دارای نماد اعتماد
-                                    الکترونیک می باشد. همچنین تمامی معاملات انجام شده ثبت میشود و در اختیار طرفین قرار
-                                    میگیرد.</p></div>
-                        </div>
+                        {{-- سوالات از جدول Faqs (فعال و مرتب‌شده) --}}
+                        @forelse ($faqs as $i => $f)
+                            <div class="faq-item {{ $i === 0 ? 'open' : '' }}">
+                                <button class="faq-q" type="button" aria-expanded="{{ $i === 0 ? 'true' : 'false' }}">{{ $f->question }}<span class="chev" aria-hidden="true"></span></button>
+                                <div class="faq-a"><p>{{ $f->answer }}</p></div>
+                            </div>
+                        @empty
+                            <p class="text-muted">فعلا سوال ثبت نشده است.</p>
+                        @endforelse
                     </div>
                 </div>
             </div>

@@ -115,6 +115,7 @@ class Dashboard
         }
 
         return [
+            'id' => $ad->id,
             'bank' => $ad->bank?->name ?? '',
             'image' => $ad->bank?->image ?? '1',
             'l' => $ad->bank?->initial ?? '',

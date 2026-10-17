@@ -1,4 +1,4 @@
-@extends('userPanel.layouts.panel')
+@extends('userPanel.layouts.layout')
 
 @section('title', 'جزئیات کاربر')
 @section('page_title', 'جزئیات کاربر')

@@ -5,12 +5,12 @@
 @section('body_class', 'pn-dashboard')
 
 @php
-    // نمونه داده؛ در پروژه واقعی از کنترلر پاس بدهید: compact('stats', 'requests', 'auction', 'chart', 'activities', 'verifySteps')
+    // داده‌ها از User\DashboardController می‌آید: stats، quick، verifySteps، requests، auction، chart، activities
     $fa = fn ($n) => strtr(number_format($n), ['0'=>'۰','1'=>'۱','2'=>'۲','3'=>'۳','4'=>'۴','5'=>'۵','6'=>'۶','7'=>'۷','8'=>'۸','9'=>'۹']);
     $u = auth()->user();
     $isVerified = (bool) ($u->is_verified ?? false);
     $isUser = ($u->role ?? 'user') === 'user';
-    $firstName = explode(' ', trim($u->name ?? 'محمد حسین طاهری'))[0] ?? '';
+    $firstName = explode(' ', trim($u->name ?? ''))[0] ?? 'کاربر';
 
     // مسیر اسپارک‌لاین (SVG)
     $spark = function (array $v) {
@@ -20,47 +20,10 @@
       return [$line, $line . " L$w,$h L0,$h Z"];
     };
 
-    $stats = [
-      ['label' => 'تعداد آگهی های من',   'icon' => 'doc',       'value' => 5,         'prefix' => '+', 'tone' => '',      'trend' => '۲+ این ماه',  'up' => true, 'spark' => [1, 1, 2, 2, 3, 4, 5]],
-      ['label' => 'تعداد درخواست های من','icon' => 'clipboard', 'value' => 10,        'prefix' => '+', 'tone' => '',      'trend' => '۴+ این ماه',  'up' => true, 'spark' => [2, 3, 3, 5, 6, 8, 10]],
-      ['label' => 'کل مبلغ پرداختی من',  'icon' => 'wallet',    'value' => 150000000, 'unit' => 'تومان', 'tone' => 'red',  'trend' => '۱۲٪ بیشتر',   'up' => false, 'spark' => [20, 35, 30, 60, 55, 90, 150]],
-      ['label' => 'کل مبلغ دریافتی من',  'icon' => 'bag',       'value' => 150000000, 'unit' => 'تومان', 'tone' => 'green', 'trend' => '۸٪ بیشتر',    'up' => true, 'spark' => [10, 25, 40, 38, 80, 110, 150]],
-    ];
-
-    $quick = [
-      ['label' => 'ثبت آگهی جدید',  'sub' => 'وام خود را بفروشید', 'icon' => 'plus',  'url' => $isVerified ? '/ads/create' : '/panel/verify', 'locked' => ! $isVerified],
-      ['label' => 'مشاهده آگهی ها', 'sub' => 'وام مورد نیاز را پیدا کنید', 'icon' => 'book',  'url' => '/ads', 'locked' => false],
-      ['label' => 'رادار وام',      'sub' => 'اعلان آگهی‌های مرتبط',     'icon' => 'radar', 'url' => '/panel/radar', 'locked' => false],
-      ['label' => 'تیکت پشتیبانی',  'sub' => 'پاسخ‌گویی ۲۴ ساعته',       'icon' => 'chat',  'url' => '/panel/tickets', 'locked' => false],
-    ];
-
-    $verifySteps = [['سلفی با کارت ملی', false], ['تصویر کارت ملی', false], ['شماره شبا', false], ['تاریخ تولد', false]];
     $verifyDone = collect($verifySteps)->where(1, true)->count();
-    $verifyPct = (int) round($verifyDone / count($verifySteps) * 100);
+    $verifyPct = (int) round($verifyDone / max(count($verifySteps), 1) * 100);
 
-    $requests = [
-      ['id' => 1235896, 'bank' => 'رسالت',   'l' => 'ر','image'=>'8', 'c' => '#1f8a9e', 'amount' => 300000000, 'price' => 30000000, 'status' => 'pending'],
-      ['id' => 1235897, 'bank' => 'جاویدان', 'l' => 'ج','image'=>'4', 'c' => '#e07b00', 'amount' => 100000000, 'price' => 30000000, 'status' => 'approved'],
-      ['id' => 1235898, 'bank' => 'مهر',     'l' => 'م','image'=>'3', 'c' => '#2e9a4f', 'amount' => 300000000, 'price' => 30000000, 'status' => 'pending'],
-    ];
     $statusMap = ['pending' => 'در انتظار تایید', 'approved' => 'تایید شده', 'rejected' => 'رد شده'];
-
-    $auction = ['bank' => 'مهر','image'=>'3', 'l' => 'م', 'c' => '#2e9a4f', 'amount' => 1000000000, 'months' => 40, 'rate' => 23,
-                'min_buy' => 100000000, 'offers' => 8, 'remaining' => 2 * 86400 + 23 * 3600 + 12 * 60 + 57];
-
-    // نمودار: مبلغ‌ها به میلیون تومان
-    $chart = [
-      'labels' => ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور'],
-      'pay'    => [20, 35, 15, 60, 45, 90],
-      'recv'   => [10, 25, 40, 30, 70, 110],
-    ];
-
-    $activities = [
-      ['icon' => 'clipboard', 'text' => 'درخواست وام ۳۰۰ میلیونی بانک رسالت ثبت شد.', 'time' => '۲ ساعت پیش'],
-      ['icon' => 'check',     'text' => 'درخواست شما برای وام جاویدان تایید شد.',      'time' => 'دیروز'],
-      ['icon' => 'card',      'text' => 'پرداخت ۳۰,۰۰۰,۰۰۰ تومان با موفقیت انجام شد.', 'time' => '۳ روز پیش'],
-      ['icon' => 'user',      'text' => 'حساب کاربری شما ایجاد شد.',                   'time' => 'هفته پیش'],
-    ];
 @endphp
 
 @section('main')
@@ -248,16 +211,17 @@
 
         <div class="pn-col-side">
             {{-- مزایده --}}
+            @isset($auction['id'])
             <section class="pn-reveal" style="--d:.28s">
                 <div class="pn-sec-head"><h3>آگهی های مزایده</h3></div>
                 <article class="pn-card pn-auction">
                     <div class="pn-auction-top">
-                        <img src="{{asset('website/img/bank/'.$r['image'].'.png')}}" alt="" height="90">
+                        <img src="{{asset('website/img/bank/'.$auction['image'].'.png')}}" alt="" height="90">
                         <div>
                             <div class="pn-auction-amount"><b>{{ $fa($auction['amount']) }}</b> <small>تومان</small>
                                 <b>
                                     بانک
-                                    {{ $r['bank'] }}
+                                    {{ $auction['bank'] }}
                                 </b>
 
                             </div>
@@ -266,8 +230,7 @@
                     </div>
                     <div class="ad-bar"><span>حداقل مبلغ خرید:</span><span>{{ $fa($auction['min_buy']) }} تومان</span>
                     </div>
-                    <div class="ad-foot"><span>{{ $fa($auction['offers']) }} پیشنهاد ثبت شده</span><a
-                                href="{{ url('/ads/1') }}">اطلاعات بیشتر ←</a></div>
+                    <div class="ad-foot"><span>{{ $fa($auction['offers']) }} پیشنهاد ثبت شده</span><a href="{{ url('/ads/' . $auction['id']) }}">اطلاعات بیشتر ←</a></div>
                     <div class="pn-cd" data-remaining="{{ $auction['remaining'] }}" role="timer"
                          aria-label="زمان باقی‌مانده مزایده">
                         @foreach ([['s', 'ثانیه'], ['m', 'دقیقه'], ['h', 'ساعت'], ['d', 'روز']] as $k => $un)
@@ -281,6 +244,7 @@
                     </div>
                 </article>
             </section>
+            @endisset
 
             {{-- فعالیت‌های اخیر --}}
             <section class="pn-reveal" style="--d:.34s">

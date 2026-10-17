@@ -1184,7 +1184,7 @@ $(function () {
                 this.value = edLat(this.value).replace('٫', '.');
             });
             edSaving = true;
-            this.submit();                                                   // PUT /panel/ads/{id} (multipart)
+            this.submit();                                                   // PUT /userPanel/ads/{id} (multipart)
         });
     }
 
