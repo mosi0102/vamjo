@@ -17,7 +17,15 @@
         <div class="form-wrap">
             <h1 class="section-title">ثبت آگهی فروش امتیاز وام</h1>
             <p class="section-sub mb-4">اطلاعات وام خود را با دقت وارد کنید. آگهی شما پس از تایید اپراتور منتشر خواهد شد.</p>
-
+@if ($errors->any())
+    <div class="alert alert-danger pn-reveal" style="background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+        <ul style="margin: 0; padding-right: 20px;">
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
             <form id="adForm" action="{{ url('/ads') }}" method="POST" enctype="multipart/form-data" novalidate>
                 @csrf
 
@@ -33,6 +41,15 @@
                             </select>
                             <p class="f-err">بانک یا صندوق را انتخاب کنید.</p>
                         </div>
+                        <div class="f-field" data-field="type">
+                        <label for="fType">نوع وام <span class="req">*</span></label>
+                        <select id="fType" name="type" class="f-input f-select @error('type') is-invalid @enderror">
+                            @foreach (config('vamjou.loan_types', []) as $key => $label)
+                                <option value="{{ $key }}" @selected(old('type', 'qarz') === $key)>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                        <p class="f-err">@error('type') {{ $message }} @else نوع وام را انتخاب کنید. @enderror</p>
+                    </div>
                         <div class="f-field" data-field="amount">
                             <label for="fAmount">مبلغ وام (تومان) <span class="req">*</span></label>
                             <input type="text" id="fAmount" name="amount" class="f-input" data-money inputmode="numeric" autocomplete="off" placeholder="مثلا: ۳۰۰,۰۰۰,۰۰۰">

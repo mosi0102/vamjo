@@ -130,6 +130,7 @@ class Presenter
             'bank' => $ad->bank?->name ?? '',
             'amount' => $ad->amount,
             'months' => $ad->months,
+            'type'=>$ad->type,
             'rate' => rtrim(rtrim(number_format($ad->rate, 2, '.', ''), '0'), '.'),
             'price' => $ad->price,
             'sheba' => $ad->sheba ?? '',

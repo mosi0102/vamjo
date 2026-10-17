@@ -151,7 +151,7 @@ class Ad extends Model
 
         $months = max((int) $this->months, 1);
 
-        return (int) round($this->amount * (1 + ($this->rate / 100) * $months / 12));
+        return (int) round($this->amount * (1 + $this->rate / 100));
     }
 
     /* ------------------------------ اسکوپ‌ها ------------------------------ */

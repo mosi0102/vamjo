@@ -47,6 +47,18 @@
                         </select>
                         <p class="f-err">@error('bank') {{ $message }} @else بانک یا صندوق را انتخاب کنید. @enderror</p>
                     </div>
+
+                    {{-- ✅ نوع وام --}}
+                    <div class="f-field" data-field="type">
+                        <label for="fType">نوع وام <span class="req">*</span></label>
+                        <select id="fType" name="type" class="f-input f-select @error('type') is-invalid @enderror">
+                            @foreach (config('vamjou.loan_types', []) as $key => $label)
+                                <option value="{{ $key }}" @selected(old('type', 'qarz') === $key)>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                        <p class="f-err">@error('type') {{ $message }} @else نوع وام را انتخاب کنید. @enderror</p>
+                    </div>
+
                     <div class="f-field" data-field="amount">
                         <label for="fAmount">مبلغ وام (تومان) <span class="req">*</span></label>
                         <input type="text" id="fAmount" name="amount" class="f-input @error('amount') is-invalid @enderror" data-money inputmode="numeric" autocomplete="off" value="{{ old('amount') }}" placeholder="مثلا: ۳۰۰,۰۰۰,۰۰۰">

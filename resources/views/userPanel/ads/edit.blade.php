@@ -13,6 +13,7 @@
     $editable = in_array($ad['state'], ['review', 'rejected']);
     $stateText = ['review' => 'در انتظار ثبت', 'rejected' => 'رد شده', 'transfer' => 'در انتظار انتقال امتیاز', 'completed' => 'تکمیل شده'][$ad['state']] ?? '';
     $title = 'وام ' . $fa($ad['amount']) . ' تومان';
+    $currentType = old('type', $ad['type'] ?? 'qarz');
 @endphp
 
 @section('main')
@@ -47,7 +48,7 @@
                 <div class="ed-reject pn-reveal" role="alert">
                     <span class="ed-reject-ic">@include('userPanel.partials.icon', ['name' => 'alert'])</span>
                     <div><b>دلیل رد شدن آگهی</b>
-                        <p>{{ $ad['note'] }}</p></div>
+                        <p>{{ $ad['reject_reason'] ?? $ad['note'] ?? '' }}</p></div>
                 </div>
             @endif
 
@@ -63,32 +64,44 @@
                     <div class="f-grid">
                         <div class="f-field" data-field="bank">
                             <label for="edBank">بانک یا صندوق <span class="req">*</span></label>
-                            <select id="edBank" name="bank" class="f-input f-select">
+                            <select id="edBank" name="bank" class="f-input f-select @error('bank') is-invalid @enderror">
                                 <option value="" disabled>انتخاب کنید...</option>
                                 @foreach ($banks as $b)
-                                    <option value="{{ $b }}" @selected($b === $ad['bank'])>{{ $b }}</option>
+                                    <option value="{{ $b }}" @selected(old('bank', $ad['bank']) === $b)>{{ $b }}</option>
                                 @endforeach
                             </select>
-                            <p class="f-err">بانک یا صندوق را انتخاب کنید.</p>
+                            <p class="f-err">@error('bank') {{ $message }} @else بانک یا صندوق را انتخاب کنید. @enderror</p>
                         </div>
+
+                        {{-- ✅ نوع وام --}}
+                        <div class="f-field" data-field="type">
+                            <label for="edType">نوع وام <span class="req">*</span></label>
+                            <select id="edType" name="type" class="f-input f-select @error('type') is-invalid @enderror">
+                                @foreach (config('vamjou.loan_types', []) as $key => $label)
+                                    <option value="{{ $key }}" @selected($currentType === $key)>{{ $label }}</option>
+                                @endforeach
+                            </select>
+                            <p class="f-err">@error('type') {{ $message }} @else نوع وام را انتخاب کنید. @enderror</p>
+                        </div>
+
                         <div class="f-field" data-field="amount">
                             <label for="edAmount">مبلغ وام (تومان) <span class="req">*</span></label>
-                            <input type="text" id="edAmount" name="amount" class="f-input" data-money
-                                   inputmode="numeric" autocomplete="off" value="{{ $fa($ad['amount']) }}"
+                            <input type="text" id="edAmount" name="amount" class="f-input @error('amount') is-invalid @enderror" data-money
+                                   inputmode="numeric" autocomplete="off" value="{{ old('amount', $fa($ad['amount'])) }}"
                                    placeholder="مثلا: ۳۰۰,۰۰۰,۰۰۰">
-                            <p class="f-err">مبلغ وام را وارد کنید.</p>
+                            <p class="f-err">@error('amount') {{ $message }} @else مبلغ وام را وارد کنید. @enderror</p>
                         </div>
                         <div class="f-field" data-field="months">
                             <label for="edMonths">تعداد اقساط (ماه) <span class="req">*</span></label>
-                            <input type="text" id="edMonths" name="months" class="f-input" data-int inputmode="numeric"
-                                   autocomplete="off" value="{{ $faId($ad['months']) }}" placeholder="مثلا: ۶۰">
-                            <p class="f-err">تعداد اقساط را بین ۱ تا ۱۲۰ ماه وارد کنید.</p>
+                            <input type="text" id="edMonths" name="months" class="f-input @error('months') is-invalid @enderror" data-int inputmode="numeric"
+                                   autocomplete="off" value="{{ old('months', $faId($ad['months'])) }}" placeholder="مثلا: ۶۰">
+                            <p class="f-err">@error('months') {{ $message }} @else تعداد اقساط را بین ۱ تا ۱۲۰ ماه وارد کنید. @enderror</p>
                         </div>
                         <div class="f-field" data-field="rate">
                             <label for="edRate">نرخ سود بانکی (درصد) <span class="req">*</span></label>
-                            <input type="text" id="edRate" name="rate" class="f-input" data-decimal inputmode="decimal"
-                                   autocomplete="off" value="{{ $faId($ad['rate']) }}" placeholder="مثلا: ۴">
-                            <p class="f-err">نرخ سود را بین ۰ تا ۱۰۰ وارد کنید.</p>
+                            <input type="text" id="edRate" name="rate" class="f-input @error('rate') is-invalid @enderror" data-decimal inputmode="decimal"
+                                   autocomplete="off" value="{{ old('rate', $faId($ad['rate'])) }}" placeholder="مثلا: ۴">
+                            <p class="f-err">@error('rate') {{ $message }} @else نرخ سود را بین ۰ تا ۱۰۰ وارد کنید. @enderror</p>
                         </div>
                     </div>
                 </section>
@@ -102,9 +115,9 @@
                     <div class="f-grid">
                         <div class="f-field" data-field="price">
                             <label for="edPrice">قیمت پیشنهادی فروش (تومان) <span class="req">*</span></label>
-                            <input type="text" id="edPrice" name="price" class="f-input" data-money inputmode="numeric"
-                                   autocomplete="off" value="{{ $fa($ad['price']) }}" placeholder="مثلا: ۳۰۰,۰۰۰,۰۰۰">
-                            <p class="f-err">قیمت پیشنهادی فروش را وارد کنید.</p>
+                            <input type="text" id="edPrice" name="price" class="f-input @error('price') is-invalid @enderror" data-money inputmode="numeric"
+                                   autocomplete="off" value="{{ old('price', $fa($ad['price'])) }}" placeholder="مثلا: ۳۰۰,۰۰۰,۰۰۰">
+                            <p class="f-err">@error('price') {{ $message }} @else قیمت پیشنهادی فروش را وارد کنید. @enderror</p>
                             <div class="reco-box" id="edReco" aria-live="polite">
                                 <svg viewBox="0 0 24 24" aria-hidden="true">
                                     <path
@@ -115,10 +128,10 @@
                         </div>
                         <div class="f-field" data-field="sheba">
                             <label for="edSheba">شماره شبا <span class="req">*</span></label>
-                            <input type="text" id="edSheba" name="sheba" class="f-input ltr" dir="ltr"
-                                   inputmode="numeric" autocomplete="off" value="{{ $ad['sheba'] }}"
+                            <input type="text" id="edSheba" name="sheba" class="f-input ltr @error('sheba') is-invalid @enderror" dir="ltr"
+                                   inputmode="numeric" autocomplete="off" value="{{ old('sheba', $ad['sheba']) }}"
                                    placeholder="IR------------------------">
-                            <p class="f-err">شماره شبا باید ۲۴ رقم (بعد از IR) باشد.</p>
+                            <p class="f-err">@error('sheba') {{ $message }} @else شماره شبا باید ۲۴ رقم (بعد از IR) باشد. @enderror</p>
                             <p class="f-hint">برای واریز وجه پس از تکمیل معامله</p>
                         </div>
                     </div>
@@ -131,10 +144,10 @@
                         <h2>توضیحات تکمیلی</h2></header>
                     <div class="f-field" data-field="note">
                         <label for="edNote">شرایط ضامن و توضیحات <span class="req">*</span></label>
-                        <textarea id="edNote" name="note" class="f-input" rows="4" maxlength="500"
-                                  placeholder="توضیحات مربوط به شرایط ضامن، شهر و نحوه انتقال را بنویسید...">{{ $ad['description'] }}</textarea>
+                        <textarea id="edNote" name="note" class="f-input @error('note') is-invalid @enderror" rows="4" maxlength="500"
+                                  placeholder="توضیحات مربوط به شرایط ضامن، شهر و نحوه انتقال را بنویسید...">{{ old('note', $ad['description']) }}</textarea>
                         <div class="ed-count"><span id="edNoteCount">۰</span> / ۵۰۰</div>
-                        <p class="f-err">توضیحات را بنویسید (حداقل ۱۰ کاراکتر).</p>
+                        <p class="f-err">@error('note') {{ $message }} @else توضیحات را بنویسید (حداقل ۱۰ کاراکتر). @enderror</p>
                     </div>
                 </section>
 
