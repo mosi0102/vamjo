@@ -100,6 +100,7 @@ class Presenter
 
         return [
             'id' => $ad->id,
+            'code' => $ad->code,
             'bank' => $bank?->display_name ?? '',
             'bank_full' => $bank?->name ?? '',
             'image' => $bank?->image ?? '1',
@@ -125,6 +126,7 @@ class Presenter
 
         return [
             'id' => $ad->id,
+            'code' => $ad->code,
             'state' => $ad->state,
             'note' => $ad->reject_reason,
             'bank' => $ad->bank?->name ?? '',
@@ -173,7 +175,8 @@ class Presenter
 
         return [
             'id' => $request->id,
-            'code' => $request->code,
+            // شناسه وام در همه بخش‌ها بر واقعه آگهی نمایش داده می‌شود (ستون code جدول ads)
+            'code' => $ad?->code ?? $request->code,
             'bank' => $bank?->display_name ?? '',
             'image' => $bank?->image ?? '1',
             'l' => $bank?->initial ?? '',
@@ -195,6 +198,42 @@ class Presenter
                 ->first()?->url,
             'deadline' => Fa::remainingDays($request->pay_due_at ?? $request->transfer_due_at),
             'note' => $request->reject_reason,
+        ];
+    }
+
+    /**
+     * ردیف «درخواست های من» برای درخواست‌های هنوز تایید‌نشده (AdOffer).
+     * تا وقتی فروشنده درخواست را تایید نکرده، معامله (LoanRequest) ساخته نمی‌شود؛
+     * درخواست‌های در انتظار/رد شده/منقضی را با همان شکل requestRow نمایش می‌دهیم.
+     */
+    public static function pendingOfferRow(AdOffer $offer): array
+    {
+        $ad = $offer->ad;
+        $bank = $ad?->bank;
+
+        $expired = $offer->isExpired();
+        $rejected = $offer->status === AdOffer::STATUS_REJECTED;
+
+        return [
+            'id' => 'o'.$offer->id,
+            // شناسه وام = ستون code جدول ads
+            'code' => $ad?->code ?? (string) $offer->id,
+            'bank' => $bank?->display_name ?? '',
+            'image' => $bank?->image ?? '1',
+            'l' => $bank?->initial ?? '',
+            'c' => $bank?->color ?? '#1e5a45',
+            'amount' => (int) ($ad?->amount ?? 0),
+            'price' => $offer->amount,
+            'ago' => Fa::ago($offer->created_at),
+            'city' => $ad?->city ?? '',
+            // مرحله ۲ = تایید درخواست (فروشنده هنوز پاسخ نداده)
+            'step' => 2,
+            'state' => $rejected || $expired ? 'rejected' : 'active',
+            'doc' => null,
+            'deadline' => null,
+            'note' => $rejected
+                ? 'درخواست شما از سمت فروشنده رد شد.'
+                : ($expired ? 'مهلت بررسی درخواست به پایان رسید.' : 'در انتظار تایید فروشنده؛ پس از تایید، معامله در همین صفحه ساخته می‌شود.'),
         ];
     }
 
@@ -224,6 +263,7 @@ class Presenter
 
         return [
             'id' => $ad?->id,
+            'code' => (string) ($ad?->code ?? ''),
             'match_id' => $match->id,
             'radar' => $match->radar_id,
             'bank' => $bank?->display_name ?? '',

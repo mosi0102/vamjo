@@ -276,6 +276,12 @@ $(function () {
 
     /* بعد از ورود/ثبت نام موفق */
     function afterAuth(res) {
+        // ورود با OTP سشن را regenerate می‌کند و توکن CSRF صفحه عوض می‌شود؛ بدون این به‌روزرسانی درخواست‌های بعدی 419 می‌گیرند
+        if (res && res.csrf) {
+            csrf = res.csrf;
+            $('meta[name="csrf-token"]').attr('content', csrf);
+            $('input[name="_token"]').val(csrf);
+        }
         isAuth = true; isVerified = !!(res && res.verified); freshLogin = true;
         $('body').attr({ 'data-auth': 1, 'data-verified': isVerified ? 1 : 0 });
         var go = intent, needV = go && (go.type === 'request' || go.verified);

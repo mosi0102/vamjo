@@ -370,7 +370,7 @@ $(function () {
             var $b = $(e.relatedTarget);
             if (!$b.length) return;
             $('#payTitle').text($b.data('title'));
-            $('#payId').text('#' + Number($b.data('id')).toLocaleString('fa-IR', { useGrouping: false }));
+            $('#payId').text('#' + String($b.data('code') || $b.data('id')).replace(/\d/g, function (d) { return '۰۱۲۳۴۵۶۷۸۹'.charAt(d); }));
             $('#payAmount').text(fa($b.data('price')));
             $('#payBank').text($b.data('bank-l')).css('background', $b.data('bank-c'));
             $('#payForm').attr('action', $b.data('action'));          // POST /panel/requests/{id}/pay → ریدایرکت به زرین‌پال
@@ -445,7 +445,7 @@ $(function () {
             var $b = $(e.relatedTarget);
             if (!$b.length) return;
             $('#trTitle').text($b.data('title'));
-            $('#trId').text('#' + Number($b.data('id')).toLocaleString('fa-IR', { useGrouping: false }));
+            $('#trId').text('#' + String($b.data('code') || $b.data('id')).replace(/\d/g, function (d) { return '۰۱۲۳۴۵۶۷۸۹'.charAt(d); }));
             $('#trBank').text($b.data('bank-l')).css('background', $b.data('bank-c'));
             $('#transferForm').attr('action', $b.data('action'));       // POST /panel/requests/{id}/confirm-transfer
             $('#trAgree').prop('checked', false);
@@ -627,7 +627,7 @@ $(function () {
             var $b = $(e.relatedTarget);
             if (!$b.length) return;
             $('#stLoan').text($b.data('title'));
-            $('#stId').text('#' + Number($b.data('id')).toLocaleString('fa-IR', { useGrouping: false }));
+            $('#stId').text('#' + String($b.data('code') || $b.data('id')).replace(/\d/g, function (d) { return '۰۱۲۳۴۵۶۷۸۹'.charAt(d); }));
             $('#stBank').text($b.data('bank-l')).css('background', $b.data('bank-c'));
             $('#stForm').attr('action', $b.data('action'));
             $('#stForm')[0].reset();
@@ -2039,7 +2039,7 @@ $(function () {
             $arBtn = $b;
             $arRow = $b.closest('tr');
             $('#arTitle').text($b.data('title'));
-            $('#arId').text('#' + admFa($b.data('id')));
+            $('#arId').text('#' + admFa($b.data('code') || $b.data('id')));
             $('#arSeller').text($b.data('seller'));
             $('#arCity').text($b.data('city'));
             $('#arBank').text('بانک ' + $b.data('bank'));

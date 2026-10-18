@@ -119,9 +119,9 @@
                                             <span class="rd-new">جدید</span>
                                         @endif</h3>
                                     <div class="rq-meta">
-                                        <button type="button" class="pn-id rq-id" data-copy="{{ $m['id'] }}"
+                                        <button type="button" class="pn-id rq-id" data-copy="{{ $m['code'] ?? $m['id'] }}"
                                                 title="کپی شناسه وام">شناسه وام
-                                            <b>#{{ $faId($m['id']) }}</b>@include('userPanel.partials.icon', ['name' => 'copy'])
+                                            <b>#{{ $faId($m['code'] ?? $m['id']) }}</b>@include('userPanel.partials.icon', ['name' => 'copy'])
                                         </button>
                                         <span class="rq-meta-i">@include('userPanel.partials.icon', ['name' => 'calendar']){{ $m['ago'] }}</span>
                                         <span class="rq-meta-i">@include('userPanel.partials.icon', ['name' => 'pin']){{ $m['city'] }}</span>

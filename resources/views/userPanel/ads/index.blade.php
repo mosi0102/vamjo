@@ -66,17 +66,16 @@
             @forelse ($ads as $a)
                 @php [$pillCls, $pillText, $group] = $stateMap[$a['state']]; $title = 'وام ' . $fa($a['amount']) . ' تومان بانک ' . $a['bank']; @endphp
                 <article class="rq-card ad-card-my pn-reveal" data-group="{{ $group }}"
-                         data-search="{{ $a['id'] }} {{ $a['bank'] }} {{ $a['amount'] }} {{ $a['price'] }}"
+                         data-search="{{ $a['code'] ?? $a['id'] }} {{ $a['bank'] }} {{ $a['amount'] }} {{ $a['price'] }}"
                          style="--d:{{ .12 + $loop->index * .07 }}s">
                     <div class="rq-main">
                         <div class="rq-head">
                             <img src="{{asset('website/img/bank/'.$a['image'].'.png')}}" alt="" height="90">
                             <div class="rq-info">
                                 <h3>{{ $title }}</h3>
-                                <div class="rq-meta">
-                                    <button type="button" class="pn-id rq-id" data-copy="{{ $a['id'] }}"
+                                <div class="rq-meta">                                     <button type="button" class="pn-id rq-id" data-copy="{{ $a['code'] ?? $a['id'] }}"
                                             title="کپی شناسه وام">شناسه وام
-                                        <b>#{{ $faId($a['id']) }}</b>@include('userPanel.partials.icon', ['name' => 'copy'])
+                                        <b>#{{ $faId($a['code'] ?? $a['id']) }}</b>@include('userPanel.partials.icon', ['name' => 'copy'])
                                     </button>
                                     <span
                                         class="rq-meta-i">@include('userPanel.partials.icon', ['name' => 'calendar']){{ $a['ago'] }}</span>
@@ -98,7 +97,7 @@
                                 @if ($a['state'] === 'transfer')
                                     <button type="button" class="btn btn-brand rq-cta" data-bs-toggle="modal"
                                             data-bs-target="#sellerTransferModal"
-                                            data-id="{{ $a['id'] }}" data-title="{{ $title }}"
+                                            data-id="{{ $a['id'] }}" data-code="{{ $a['code'] ?? $a['id'] }}" data-title="{{ $title }}"
                                             data-bank-l="{{ $a['l'] }}" data-bank-c="{{ $a['c'] }}"
                                             data-deadline="{{ $a['deadline'] ?? 0 }}"
                                             data-action="{{ route('user.ads.transfer', $a['id']) }}">

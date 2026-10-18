@@ -74,7 +74,6 @@ Route::prefix('userPanel')->name('user.')->middleware(['auth', 'active'])->group
     Route::prefix('ads')->name('ads.')->group(function () {
         Route::get('/', [User\AdController::class, 'index'])->name('index');
 
-        // ثبت آگهی جدید (همان منطق فرم سایت؛ نیازمند احراز هویت)
         Route::middleware('kyc')->group(function () {
             Route::get('/create', [User\AdController::class, 'create'])->name('create');
             Route::post('/', [User\AdController::class, 'store'])->name('store');

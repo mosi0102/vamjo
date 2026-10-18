@@ -76,7 +76,8 @@ class UserController extends Controller
             ->get()
             ->map(fn (LoanRequest $item) => [
                 ($item->ad?->title() ?? 'معامله'),
-                $item->code,
+                // شناسه وام = ستون code جدول ads (وشلما کد معامله)
+                $item->ad?->code ?? $item->code,
                 $item->stepLabel(),
                 $item->isCompleted() ? 'approved' : ($item->status === LoanRequest::STATUS_ACTIVE ? 'pending' : 'rejected'),
                 Fa::digits(number_format($item->amount)),

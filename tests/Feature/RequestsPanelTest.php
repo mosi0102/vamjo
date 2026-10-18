@@ -22,9 +22,9 @@ class RequestsPanelTest extends TestCase
 
         $html = $this->actingAs($user)->get(route('user.requests'))->getContent();
 
-        // هر معامله کاربر روی صفحه با شناسه کد معامله دیده می‌شود
+        // شناسه وام در همه بخش‌ها = ستون code جدول ads (نه کد معامله)
         foreach ($deals as $deal) {
-            $this->assertStringContainsString((string) $deal->code, $html);
+            $this->assertStringContainsString((string) $deal->ad?->code, $html);
         }
 
         // دکمه تایید انتقال برای معامله مرحله ۶ با مسیر واقعی رندر می‌شود

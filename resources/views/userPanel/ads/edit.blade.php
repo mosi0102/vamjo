@@ -28,7 +28,7 @@
             <p>اطلاعات آگهی خود را ویرایش کنید؛ آگهی پس از ذخیره دوباره برای تایید اپراتور ارسال می‌شود.</p>
         </div>
         <div class="ed-meta">
-            <span class="pn-id">شناسه وام <b>#{{ $faId($ad['id']) }}</b></span>
+            <span class="pn-id">شناسه وام <b>#{{ $faId($ad['code'] ?? $ad['id']) }}</b></span>
             <span class="pn-pill {{ $ad['state'] === 'rejected' ? 'rejected' : 'pending' }}">{{ $stateText }}</span>
         </div>
     </div>

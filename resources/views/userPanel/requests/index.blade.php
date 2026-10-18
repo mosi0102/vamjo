@@ -94,7 +94,7 @@
                                 @if ($r['state'] === 'active' && $r['step'] === 3)
                                     <button type="button" class="btn btn-brand rq-cta" data-bs-toggle="modal"
                                             data-bs-target="#payModal"
-                                            data-id="{{ $r['id'] }}"
+                                            data-id="{{ $r['id'] }}" data-code="{{ $r['code'] ?? '' }}"
                                             data-title="وام {{ $fa($r['amount']) }} تومان بانک {{ $r['bank'] }}"
                                             data-price="{{ $r['price'] }}" data-bank-l="{{ $r['l'] }}"
                                             data-bank-c="{{ $r['c'] }}"
@@ -106,7 +106,7 @@
                                 @if ($r['state'] === 'active' && $r['step'] === 6)
                                     <button type="button" class="btn btn-brand rq-cta" data-bs-toggle="modal"
                                             data-bs-target="#transferModal"
-                                            data-id="{{ $r['id'] }}"
+                                            data-id="{{ $r['id'] }}" data-code="{{ $r['code'] ?? '' }}"
                                             data-title="وام {{ $fa($r['amount']) }} تومان بانک {{ $r['bank'] }}"
                                             data-bank-l="{{ $r['l'] }}" data-bank-c="{{ $r['c'] }}"
                                             data-doc="{{ $r['doc'] ?? '' }}"

@@ -1,4 +1,3 @@
-
 @extends('userPanel.layouts.layout')
 
 @section('title', 'درخواست‌های ثبت‌شده برای آگهی')
@@ -6,13 +5,15 @@
 @section('body_class', 'pn-offers')
 
 @php
-    $title = 'وام ' . number_format($ad['amount'])
-        . ' تومان بانک ' . $ad['bank'];
-
+    // ✅ تبدیل اعداد به فارسی
     $toFa = fn ($value) => strtr((string) $value, [
         '0'=>'۰', '1'=>'۱', '2'=>'۲', '3'=>'۳', '4'=>'۴',
         '5'=>'۵', '6'=>'۶', '7'=>'۷', '8'=>'۸', '9'=>'۹',
     ]);
+
+    // ✅ استفاده از $toFa در عنوان برای فارسی‌سازی مبلغ
+    $title = 'وام ' . $toFa(number_format($ad['amount']))
+        . ' تومان بانک ' . $ad['bank'];
 @endphp
 
 @section('main')
@@ -45,7 +46,8 @@
 
             <div class="rq-meta">
                 <span class="pn-id">
-                    شناسه وام <b>#{{ $ad['code'] }}</b>
+                    {{-- ✅ شناسه وام فارسی --}}
+                    شناسه وام <b>#{{ $toFa($ad['code']) }}</b>
                 </span>
 
                 <span class="rq-meta-i">
@@ -301,6 +303,7 @@
 
                                 @if ($status === 'pending')
 
+                                    {{-- ✅ استفاده از مسیرهای Flat برای جلوگیری از خطای بایندینگ --}}
                                     <button
                                         type="button"
                                         class="btn btn-ghost of-reject"
@@ -308,7 +311,7 @@
                                         data-bs-target="#confirmModal"
                                         data-confirm-title="رد درخواست"
                                         data-confirm-text="درخواست {{ $name }} به مبلغ {{ $fa($amount) }} تومان رد شود؟"
-                                        data-confirm-action="{{ route('user.offers.reject', [$ad['id'], $o['id']]) }}"
+                                        data-confirm-action="{{ route('user.offers.reject.flat', $o['id']) }}"
                                         data-confirm-method="POST"
                                         data-confirm-label="رد درخواست"
                                         data-confirm-tone="danger"
@@ -324,7 +327,7 @@
                                         data-bs-target="#confirmModal"
                                         data-confirm-title="تأیید درخواست"
                                         data-confirm-text="درخواست {{ $name }} به مبلغ {{ $fa($amount) }} تومان تأیید شود؟"
-                                        data-confirm-action="{{ route('user.offers.accept', [$ad['id'], $o['id']]) }}"
+                                        data-confirm-action="{{ route('user.offers.accept.flat', $o['id']) }}"
                                         data-confirm-method="POST"
                                         data-confirm-label="بله، تأیید شود"
                                         data-confirm-tone="brand"
@@ -340,7 +343,8 @@
                             @if ($status === 'pending')
                                 <small class="rq-deadline">
                                     @include('userPanel.partials.icon', ['name' => 'clock'])
-                                    {{ $o['expires'] ?? 'مهلت پاسخ مشخص نشده' }}
+                                    {{-- ✅ اینجا دیگر زمان منفی و ممیزدار نمایش داده نمی‌شود --}}
+                                    {{ $toFa($o['expires'] ?? 'مهلت پاسخ مشخص نشده') }}
                                     تا پایان مهلت پاسخ
                                 </small>
                             @endif

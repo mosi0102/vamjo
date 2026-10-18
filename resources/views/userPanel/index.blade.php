@@ -7,6 +7,7 @@
 @php
     // داده‌ها از User\DashboardController می‌آید: stats، quick، verifySteps، requests، auction، chart، activities
     $fa = fn ($n) => strtr(number_format($n), ['0'=>'۰','1'=>'۱','2'=>'۲','3'=>'۳','4'=>'۴','5'=>'۵','6'=>'۶','7'=>'۷','8'=>'۸','9'=>'۹']);
+    $faId = fn ($n) => strtr((string) $n, ['0'=>'۰','1'=>'۱','2'=>'۲','3'=>'۳','4'=>'۴','5'=>'۵','6'=>'۶','7'=>'۷','8'=>'۸','9'=>'۹']);
     $u = auth()->user();
     $isVerified = (bool) ($u->is_verified ?? false);
     $isUser = ($u->role ?? 'user') === 'user';
@@ -175,7 +176,7 @@
                             <img src="{{asset('website/img/bank/'.$r['image'].'.png')}}" alt="" height="90">
                             <div class="pn-req-info">
                                 <h4>وام {{ $fa($r['amount']) }} تومان بانک {{ $r['bank'] }}</h4>
-                                <span class="pn-id">شناسه وام <b>#{{($r['id']) }}</b></span>
+                                <span class="pn-id">شناسه وام <b>#{{ ($faId)($r['code'] ?? $r['id'] ?? '') }}</b></span>
                             </div>
                             <div class="pn-req-end">
                                 <span class="pn-pill {{ $r['status'] }}">{{ $statusMap[$r['status']] }}</span>

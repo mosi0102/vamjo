@@ -36,12 +36,10 @@ class AdController extends Controller
             })
             ->all();
 
-      
-
         return view('userPanel.ads.index', compact('ads'));
     }
 
-    /** فرم ثبت آگهی جدید (داخل پنل کاربر؛ نیازمند احراز هویت – middleware kyc) */
+    /** فرم ثبت آگهی جدید */
     public function create(): View
     {
         return view('userPanel.ads.create', [
@@ -49,7 +47,7 @@ class AdController extends Controller
         ]);
     }
 
-    /** ذخیره آگهی جدید – منطق مشترک ثبت فرم سایت (اعتبارسنجی، ساخت آگهی و مدارک) */
+    /** ذخیره آگهی جدید */
     public function store(Request $request): RedirectResponse
     {
         return app(SiteAdController::class)->store($request);
@@ -62,11 +60,37 @@ class AdController extends Controller
 
         $ad->load('bank');
 
+        // ✅ محاسبه دقیق زمان باقی‌مانده و جلوگیری از نمایش زمان منفی
         $offers = $ad->offers()
             ->with('buyer')
             ->latest()
             ->get()
-            ->map(fn (AdOffer $offer) => Presenter::offerRow($offer));
+            ->map(function (AdOffer $offer) {
+                $row = Presenter::offerRow($offer);
+
+                if (($row['status'] ?? 'pending') === 'pending') {
+                    // اگر فیلد expires_at خالی بود، ۷ روز بعد از ثبت در نظر گرفته می‌شود
+                    $deadline = $offer->expires_at ?? $offer->created_at->copy()->addDays(7);
+
+                    if ($deadline->isPast()) {
+                        $row['status'] = 'expired';
+                        $row['expires'] = 'مهلت به پایان رسیده';
+                    } else {
+                        // محاسبه دستی و تمیز زمان باقی‌مانده
+                        $minutes = now()->diffInMinutes($deadline, false);
+                        $h = floor($minutes / 60);
+                        $m = $minutes % 60;
+
+                        $parts = [];
+                        if ($h > 0) $parts[] = $h . ' ساعت';
+                        if ($m > 0) $parts[] = $m . ' دقیقه';
+
+                        $row['expires'] = implode(' و ', $parts) ?: 'کمتر از ۱ دقیقه';
+                    }
+                }
+
+                return $row;
+            });
 
         $pending = $ad->offers()
             ->pending()
@@ -106,7 +130,15 @@ class AdController extends Controller
 
         $groupOf = fn ($offer) => $offer['status'] ?? 'pending';
 
-        $fa = fn ($number) => number_format((int) $number);
+        // ✅ اعداد فارسی با جداکننده هزارگان
+        $fa = function ($number) {
+            return strtr(number_format((int) $number), [
+                '0' => '۰', '1' => '۱', '2' => '۲',
+                '3' => '۳', '4' => '۴', '5' => '۵',
+                '6' => '۶', '7' => '۷', '8' => '۸',
+                '9' => '۹',
+            ]);
+        };
 
         $faId = fn ($number) => strtr((string) $number, [
             '0' => '۰', '1' => '۱', '2' => '۲',
@@ -159,7 +191,7 @@ class AdController extends Controller
         ]);
     }
 
-    /** ذخیره ویرایش آگهی (آگهی دوباره به صف بررسی می‌رود) */
+    /** ذخیره ویرایش آگهی */
     public function update(Request $request, Ad $ad): RedirectResponse
     {
         $this->authorizeOwner($request, $ad);
@@ -203,7 +235,7 @@ class AdController extends Controller
             'amount' => $amount,
             'months' => $months,
             'rate' => $rate,
-            'type'=>$request->type,
+            'type' => $request->type,
             'price' => (int) Iran::digits($data['price']),
             'max_price' => (int) round($amount * config('vamjou.price_recommendation.max') / 100),
             'total_repayment' => (int) round($amount * (1 + $rate / 100)),
@@ -251,7 +283,7 @@ class AdController extends Controller
         return redirect()->route('user.ads.index')->with('success', 'آگهی حذف شد.');
     }
 
-    /** ثبت اطلاعات انتقال امتیاز توسط فروشنده */
+    /** ثبت اطلاعات انتقال امتیاز */
     public function transfer(Request $request, Ad $ad): RedirectResponse
     {
         $this->authorizeOwner($request, $ad);

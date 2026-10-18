@@ -5,6 +5,7 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Models\Ad;
+use App\Models\AdOffer;
 use App\Models\LoanRequest;
 use App\Models\Transaction;
 use App\Support\Code;
@@ -15,17 +16,26 @@ use Illuminate\View\View;
 
 class RequestController extends Controller
 {
-    /** درخواست های من (خریدار) */
+    /** درخواست های من (خریدار) – معامله‌ها + درخواست‌های در انتظار تایید فروشنده */
     public function index(Request $request): View
     {
         $user = $request->user();
 
-        $requests = $user->purchases()
+        $dealRows = $user->purchases()
             ->with('ad.bank', 'ad.documents')
             ->latest()
             ->get()
-            ->map(fn (LoanRequest $item) => Presenter::requestRow($item))
-            ->all();
+            ->map(fn (LoanRequest $item) => Presenter::requestRow($item));
+
+        // درخواست‌های خرید که هنوز تایید نشده‌اند (AdOffer) – تایید شده‌ها از طریق معامله نمایش داده می‌شوند
+        $offerRows = $user->offers()
+            ->whereIn('status', [AdOffer::STATUS_PENDING, AdOffer::STATUS_REJECTED, AdOffer::STATUS_EXPIRED])
+            ->with('ad.bank')
+            ->latest()
+            ->get()
+            ->map(fn (AdOffer $item) => Presenter::pendingOfferRow($item));
+
+        $requests = $dealRows->toBase()->merge($offerRows->toBase())->all();
 
         return view('userPanel.requests.index', compact('requests'));
     }

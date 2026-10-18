@@ -90,6 +90,8 @@ class Dashboard
 
             return [
                 'id' => $ad?->id,
+                // شناسه وام در نمایش = ستون code جدول ads (id برای لینک حفظ می‌شود)
+                'code' => (string) ($ad?->code ?? ''),
                 'bank' => $bank?->name ?? '',
                 'l' => $bank?->initial ?? '',
                 'image' => $bank?->image ?? '1',

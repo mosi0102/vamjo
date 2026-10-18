@@ -50,7 +50,7 @@
                         $checkable = $isAdmin && in_array($a['status'], ['pending', 'published']);
                     @endphp
                     <tr data-groups="{{ $a['status'] }}{{ $a['featured'] ? ' featured' : '' }}" data-search="{{ $a['id'] }} {{ $a['code'] }} {{ $a['bank'] }} {{ $a['seller'] }} {{ $a['amount'] }}" data-amount="{{ $a['amount'] }}" data-price="{{ $a['price'] }}" data-age="{{ $a['age'] }}">
-                        <td data-label="آگهی"><div class="at-user"><span class="at-av sq" style="background:{{ $a['c'] }}">{{ $a['l'] }}</span><span class="at-name"><b>{{ $title }}</b><small>شناسه #{{ $faId($a['id']) }} · {{ $a['city'] }}</small></span></div></td>
+                        <td data-label="آگهی"><div class="at-user"><span class="at-av sq" style="background:{{ $a['c'] }}">{{ $a['l'] }}</span><span class="at-name"><b>{{ $title }}</b><small>شناسه #{{ $faId($a['code'] ?? $a['id']) }} · {{ $a['city'] }}</small></span></div></td>
                         <td data-label="فروشنده">{{ $a['seller'] }}</td>
                         <td data-label="مبلغ وام">{{ $fa($a['amount']) }}</td>
                         <td data-label="قیمت فروش"><b>{{ $fa($a['price']) }}</b></td>
@@ -63,7 +63,7 @@
                         </td>
                         <td class="at-actions">
                             <button type="button" class="btn {{ $a['status'] === 'pending' ? 'btn-brand' : 'btn-ghost' }} at-btn" data-bs-toggle="modal" data-bs-target="#adReviewModal"
-                                    data-id="{{ $a['id'] }}" data-title="{{ $title }}" data-bank="{{ $a['bank'] }}" data-amount="{{ $fa($a['amount']) }}" data-amount-raw="{{ $a['amount'] }}" data-price="{{ $fa($a['price']) }}" data-price-raw="{{ $a['price'] }}"
+                                    data-id="{{ $a['id'] }}" data-code="{{ $a['code'] ?? $a['id'] }}" data-title="{{ $title }}" data-bank="{{ $a['bank'] }}" data-amount="{{ $fa($a['amount']) }}" data-amount-raw="{{ $a['amount'] }}" data-price="{{ $fa($a['price']) }}" data-price-raw="{{ $a['price'] }}"
                                     data-months="{{ $faId($a['months']) }}" data-rate="{{ $faId($a['rate']) }}" data-seller="{{ $a['seller'] }}" data-city="{{ $a['city'] }}" data-sheba="{{ $a['sheba'] }}"
                                     data-note="{{ $a['note'] }}" data-status="{{ $a['status'] }}" data-featured="{{ $a['featured'] ? 1 : 0 }}" data-admin-panel="{{ $isAdmin ? 1 : 0 }}" data-doc1="{{ $a['doc1'] ?? '' }}" data-doc2="{{ $a['doc2'] ?? '' }}">{{ $a['status'] === 'pending' ? 'بررسی' : 'مشاهده' }}</button>
                         </td>

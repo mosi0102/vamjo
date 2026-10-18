@@ -123,6 +123,8 @@ class OtpController extends Controller
             'is_new' => $isNew,
             'verified' => (bool) $user->is_verified,
             'redirect' => $this->homeFor($user),
+            // regenerate سشن پس از ورود توکن CSRF را عوض می‌کند؛ فرانت با این توکن صفحه را به‌روز می‌کند
+            'csrf' => csrf_token(),
             'message' => $isNew
                 ? 'حساب کاربری شما ساخته شد و با موفقیت وارد شدید.'
                 : 'با موفقیت وارد حساب کاربری شدید.',
@@ -175,7 +177,7 @@ class OtpController extends Controller
 
         $this->login($user, $request);
 
-        return response()->json(['ok' => true, 'is_new' => false, 'verified' => $user->is_verified]);
+        return response()->json(['ok' => true, 'is_new' => false, 'verified' => $user->is_verified, 'csrf' => csrf_token()]);
     }
 
     /* ------------------------- نسخه سرور-محور صفحه /login ------------------------- */
