@@ -95,7 +95,10 @@ class AdController extends Controller
             ->where(fn ($query) => $query->whereNull('city')->orWhere('city', $ad->city))
             ->where(fn ($query) => $query->whereNull('max_amount')->orWhere('max_amount', '>=', $ad->amount))
             ->where(fn ($query) => $query->whereNull('min_amount')->orWhere('min_amount', '<=', $ad->amount))
-            ->where(fn ($query) => $query->whereNull('months')->orWhere('months', '>=', $ad->months))
+            // «حداقل اقساط» رادار: وام با تعداد اقساط بیشتر یا برابر تعریف کاربر منطبق است
+            ->where(fn ($query) => $query->whereNull('months')->orWhere('months', '<=', $ad->months))
+            // بازه نرخ سود رادار: از min_rate تا max_rate (هر کدام اختیاری)
+            ->where(fn ($query) => $query->whereNull('min_rate')->orWhere('min_rate', '<=', $ad->rate))
             ->where(fn ($query) => $query->whereNull('max_rate')->orWhere('max_rate', '>=', $ad->rate))
             ->get();
 

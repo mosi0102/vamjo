@@ -277,7 +277,7 @@ class DemoDataSeeder extends Seeder
             'buyer_id' => $users[0]->id,
             'seller_id' => $ad->user_id,
             'amount' => $accepted?->amount ?? 45_000_000,
-            'price' => $ad->amount,
+            'price' => $accepted?->amount ?? 45_000_000,
             'step' => 6,
             'status' => LoanRequest::STATUS_ACTIVE,
             'pay_due_at' => now()->addDays(5),
@@ -298,7 +298,7 @@ class DemoDataSeeder extends Seeder
             'buyer_id' => $users[2]->id,
             'seller_id' => $waiting->user_id,
             'amount' => $offer->amount,
-            'price' => $waiting->amount,
+            'price' => $offer->amount,
             'step' => 3,
             'status' => LoanRequest::STATUS_ACTIVE,
             'pay_due_at' => now()->addDays(7),
@@ -311,7 +311,7 @@ class DemoDataSeeder extends Seeder
             'buyer_id' => $users[8]->id,
             'seller_id' => $done->user_id,
             'amount' => 22_000_000,
-            'price' => $done->amount,
+            'price' => 22_000_000,
             'step' => 7,
             'status' => LoanRequest::STATUS_COMPLETED,
             'paid_at' => now()->subDays(12),
@@ -326,7 +326,7 @@ class DemoDataSeeder extends Seeder
             'buyer_id' => $users[0]->id,
             'seller_id' => $rejected->user_id,
             'amount' => 30_000_000,
-            'price' => $rejected->amount,
+            'price' => 30_000_000,
             'step' => 2,
             'status' => LoanRequest::STATUS_REJECTED,
             'reject_reason' => 'متاسفانه درخواست شما رد شد.',
@@ -566,6 +566,22 @@ class DemoDataSeeder extends Seeder
             ['user_id' => $users[0]->id, 'action' => 'admin.note'],
             ['actor_id' => $admin->id, 'description' => 'بررسی حساب توسط مدیر سیستم', 'created_at' => now()->subHours(2)]
         );
+
+        // اعلان‌های زنگوله = رویدادهایی که دیگگان (فروشنده/مدیر/پشتیبانی) دررباره کاربر ثبت کرده‌اند
+        $incoming = [
+            [$users[0]->id, 'offer.accepted', 'تایید درخواست خریدار برای آگهی ۱۲۳۵۸۹۹', $users[5]->id, now()->subHours(3)],
+            [$users[0]->id, 'kyc.approved', 'تایید احراز هویت توسط کارشناس', $admin->id, now()->subDay()],
+            [$users[0]->id, 'ad.approved', 'تایید و انتشار آگهی ۱۲۳۵۸۹۳', $admin->id, now()->subDays(2)],
+            [$users[1]->id, 'offer.created', 'ثبت درخواست برای آگهی ۱۲۳۵۸۹۰', $users[4]->id, now()->subHours(5)],
+            [$users[1]->id, 'ticket.answered', 'پاسخ به تیکت ۴۴۱۲۳۵۸', $admin->id, now()->subDays(3)],
+        ];
+
+        foreach ($incoming as [$ownerId, $action, $description, $actorId, $at]) {
+            ActivityLog::updateOrCreate(
+                ['user_id' => $ownerId, 'action' => $action],
+                ['actor_id' => $actorId, 'description' => $description, 'ip' => '5.112.40.9', 'created_at' => $at]
+            );
+        }
     }
 
     /* ------------------------------ کمکی‌ها ------------------------------ */

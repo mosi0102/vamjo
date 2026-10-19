@@ -837,11 +837,11 @@ $(function () {
 
         function rdSummary() {
             var min = rdNum($('#rdMin').val()), max = rdNum($('#rdMax').val()), mo = rdNum($('#rdMonths').val()),
-                rate = $('#rdRate').val(), bank = $('#rdBank').val(), city = $.trim($('#rdCity').val());
+                rateMin = $('#rdRateMin').val(), rate = $('#rdRate').val(), bank = $('#rdBank').val(), city = $.trim($('#rdCity').val());
             var t = [];
             if (min || max) t.push('مبلغ ' + (min ? rdMil(min) : '۰') + (max ? ' تا ' + rdMil(max) : '+') + ' میلیون');
             if (mo) t.push('حداقل ' + rdFaD(mo) + ' ماه');
-            if (rate) t.push('سود تا ' + rdFaD(rate) + '٪');
+            if (rateMin || rate) t.push('سود ' + (rateMin ? 'از ' + rdFaD(rateMin) : '') + (rate ? ' تا ' + rdFaD(rate) : (rateMin ? '٪' : '') + '٪'));
             if (bank) t.push(bank);
             if (city) t.push(city);
             $('#rdSummaryTags').html($.map(t, function (x) {
@@ -877,6 +877,7 @@ $(function () {
                 $('#rdMin').val(r.min ? rdFaD(Number(r.min).toLocaleString('en-US')) : '');
                 $('#rdMax').val(r.max ? rdFaD(Number(r.max).toLocaleString('en-US')) : '');
                 $('#rdMonths').val(r.months ? rdFaD(r.months) : '');
+                $('#rdRateMin').val(r.rate_min || '');
                 $('#rdRate').val(r.rate || '');
                 $('#rdBank').val(r.bank || '');
                 $('#rdCity').val(r.city || '');
@@ -904,6 +905,11 @@ $(function () {
             chk('min', !(min && max && min > max));
             chk('max', !(min && max && min > max));
             chk('months', !$('#rdMonths').val() || (mo >= 1 && mo <= 120));
+            var rMin = $('#rdRateMin').val(), rMax = $('#rdRate').val();
+            if (rMin && rMax && +rMin > +rMax) {
+                $('#rdRateMin').closest('.f-field').addClass('invalid');
+                bad.push($('#rdRateMin').closest('.f-field'));
+            }
             var hasFilter = rdSummary() > 0;
             $('#rdFormErr').toggleClass('show', !hasFilter);
             if (bad.length || !hasFilter) {

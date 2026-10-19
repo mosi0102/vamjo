@@ -92,7 +92,7 @@ class Dashboard
                 'id' => $ad?->id,
                 // شناسه وام در نمایش = ستون code جدول ads (id برای لینک حفظ می‌شود)
                 'code' => (string) ($ad?->code ?? ''),
-                'bank' => $bank?->name ?? '',
+                'bank' => $bank?->display_name ?? '',
                 'l' => $bank?->initial ?? '',
                 'image' => $bank?->image ?? '1',
                 'c' => $bank?->color ?? '#1e5a45',
@@ -118,7 +118,7 @@ class Dashboard
 
         return [
             'id' => $ad->id,
-            'bank' => $ad->bank?->name ?? '',
+            'bank' => $ad->bank?->display_name ?? '',
             'image' => $ad->bank?->image ?? '1',
             'l' => $ad->bank?->initial ?? '',
             'c' => $ad->bank?->color ?? '#1e5a45',
@@ -217,7 +217,7 @@ class Dashboard
         return Ad::query()->pendingReview()->with(['user', 'bank'])->latest()
             ->limit($limit)->get()
             ->map(fn (Ad $ad) => [
-                'وام '.Fa::digits(number_format($ad->amount)).' بانک '.($ad->bank?->name ?? ''),
+                'وام '.Fa::digits(number_format($ad->amount)).' بانک '.($ad->bank?->display_name ?? ''),
                 $ad->user?->display_name ?? '',
                 Fa::ago($ad->created_at),
                 $ad->bank?->image ?? '1',

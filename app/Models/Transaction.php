@@ -72,9 +72,10 @@ class Transaction extends Model
         return $query->whereIn('status', $statuses);
     }
 
+    /** مبالغ حقیقتاً در امانت: فقط تراکنشهای پرداخت خریدار با وضعیت امانت */
     public function scopeEscrow(Builder $query): Builder
     {
-        return $query->where('status', self::STATUS_ESCROW);
+        return $query->where('type', self::TYPE_PAYMENT)->where('status', self::STATUS_ESCROW);
     }
 
     public function typeLabel(): string

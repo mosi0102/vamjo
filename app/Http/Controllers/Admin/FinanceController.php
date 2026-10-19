@@ -61,9 +61,15 @@ class FinanceController extends Controller
         return back()->with('success', 'واریز فروشنده ثبت شد.');
     }
 
-    /** برگشت وجه به خریدار */
+    /** برگشت وجه به خریدار – فقط برای پول‌هایی که هنوز در امانت مانده معنا دارد */
     public function refund(Request $request, Transaction $transaction): RedirectResponse
     {
+        abort_unless(
+            $transaction->type === Transaction::TYPE_PAYMENT && $transaction->status === Transaction::STATUS_ESCROW,
+            404,
+            'این تراکنش قابل برگشت وجه نیست; مبلغ از امانت خارج شده است.'
+        );
+
         $data = $request->validate([
             'reason' => ['nullable', 'string', 'max:200'],
         ]);

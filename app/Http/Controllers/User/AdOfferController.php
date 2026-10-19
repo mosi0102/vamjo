@@ -30,7 +30,7 @@ class AdOfferController extends Controller
             'buyer_id' => $offer->user_id,
             'seller_id' => $ad->user_id,
             'amount' => $offer->amount,
-            'price' => $ad->amount,
+            'price' => $offer->amount, // مبلغ معامله = پیشنهادِ پذیرفته‌شده خریدار (نه مقدار وام)
             'step' => 3, // در انتظار پرداخت خریدار
             'status' => LoanRequest::STATUS_ACTIVE,
             'pay_due_at' => now()->addDays((int) config('vamjou.deadlines.pay')),

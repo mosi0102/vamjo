@@ -106,12 +106,24 @@ class RadarController extends Controller
             'min_amount' => ['nullable', 'string'],
             'max_amount' => ['nullable', 'string'],
             'min_months' => ['nullable', 'string'],
+            'min_rate' => ['nullable', 'numeric', 'between:0,100'],
             'max_rate' => ['nullable', 'numeric', 'between:0,100'],
             'bank' => ['nullable', 'string'],
             'city' => ['nullable', 'string', 'max:50'],
             'notify_panel' => ['nullable', 'boolean'],
             'notify_sms' => ['nullable', 'boolean'],
-        ], [], ['name' => 'نام رادار', 'min_amount' => 'حداقل مبلغ', 'max_amount' => 'حداکثر مبلغ']);
+        ], [], [            'name' => 'نام رادار', 'min_amount' => 'حداقل مبلغ', 'max_amount' => 'حداکثر مبلغ',
+            'min_rate' => 'حداقل نرخ سود', 'max_rate' => 'حداکثر نرخ سود']);
+
+        // بازه نرخ سود: از X تا Y درصد (هر دو مرز اختیاری؛ اگر هر دو برش بزرگ کوچکش، خطا)
+        $minRate = ($data['min_rate'] ?? null) !== null && ($data['min_rate'] ?? null) !== '' ? (float) Iran::toLatin((string) $data['min_rate']) : null;
+        $maxRate = ($data['max_rate'] ?? null) !== null && ($data['max_rate'] ?? null) !== '' ? (float) Iran::toLatin((string) $data['max_rate']) : null;
+
+        if ($minRate !== null && $maxRate !== null && $minRate > $maxRate) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'max_rate' => 'حداکثر نرخ سود نمی‌تواند از حداقل کمتر باشد.',
+            ]);
+        }
 
         $bankName = Text::canonical($data['bank'] ?? null, Bank::query()->active()->pluck('name')->all());
         $bank = $bankName ? Bank::query()->where('name', $bankName)->first() : null;
@@ -121,7 +133,8 @@ class RadarController extends Controller
             Iran::digits($data['min_amount'] ?? null) ?: null,
             Iran::digits($data['max_amount'] ?? null) ?: null,
             Iran::digits($data['min_months'] ?? null) ?: null,
-            ($data['max_rate'] ?? null) !== null && ($data['max_rate'] ?? null) !== '' ? $data['max_rate'] : null,
+            $minRate,
+            $maxRate,
             $bank?->id,
             $data['city'] ?? null,
         ])) {
@@ -137,7 +150,8 @@ class RadarController extends Controller
             'min_amount' => Iran::digits($data['min_amount'] ?? null) ?: null,
             'max_amount' => Iran::digits($data['max_amount'] ?? null) ?: null,
             'months' => Iran::digits($data['min_months'] ?? null) ?: null,
-            'max_rate' => $data['max_rate'] ?? null,
+            'min_rate' => $minRate,
+            'max_rate' => $maxRate,
             'notify_panel' => $request->boolean('notify_panel'),
             'notify_sms' => $request->boolean('notify_sms'),
         ];

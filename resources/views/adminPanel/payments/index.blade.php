@@ -8,10 +8,11 @@
     // گروه: payment (پرداخت خریدار → امانت) | payout (واریز به فروشنده) | refund (برگشت وجه) | failed
     $fa = fn ($n) => strtr(number_format($n), ['0'=>'۰','1'=>'۱','2'=>'۲','3'=>'۳','4'=>'۴','5'=>'۵','6'=>'۶','7'=>'۷','8'=>'۸','9'=>'۹']);
     $faId = fn ($s) => strtr((string) $s, ['0'=>'۰','1'=>'۱','2'=>'۲','3'=>'۳','4'=>'۴','5'=>'۵','6'=>'۶','7'=>'۷','8'=>'۸','9'=>'۹']);
-    $type = ['payout_due' => ['واریز به فروشنده', 'pending', 'در انتظار واریز', 'send'], 'escrow' => ['پرداخت خریدار', 'pending', 'در امانت', 'card'], 'paid' => ['واریز به فروشنده', 'approved', 'واریز شده', 'check'], 'refund' => ['برگشت وجه', 'refund', 'برگشت داده شد', 'undo'], 'failed' => ['پرداخت خریدار', 'rejected', 'ناموفق', 'close']];
+    // settled = پرداخت تسویه‌شده/برگشتی/ناموفق: پول از امانت خارج شده یا اصلاً نشسته؛ دکمه برگشت وجه ندارد
+    $type = ['payout_due' => ['واریز به فروشنده', 'pending', 'در انتظار واریز', 'send'], 'escrow' => ['پرداخت خریدار', 'pending', 'در امانت', 'card'], 'paid' => ['واریز به فروشنده', 'approved', 'واریز شده', 'check'], 'refund' => ['برگشت وجه', 'refund', 'برگشت داده شد', 'undo'], 'failed' => ['پرداخت خریدار', 'rejected', 'ناموفق', 'close'], 'settled' => ['پرداخت خریدار', 'approved', 'تسویه شده', 'check']];
     $c = collect($rows);
     $cnt = ['all' => $c->count()] + $c->groupBy(1)->map->count()->all();
-    $tabs = ['all' => 'همه', 'payout_due' => 'در انتظار واریز', 'escrow' => 'در امانت', 'paid' => 'واریز شده', 'refund' => 'برگشتی', 'failed' => 'ناموفق'];
+    $tabs = ['all' => 'همه', 'payout_due' => 'در انتظار واریز', 'escrow' => 'در امانت', 'paid' => 'واریز شده', 'refund' => 'برگشتی', 'failed' => 'ناموفق', 'settled' => 'تسویه شده'];
     $dueSum = (int) ($summary['due_payout'] ?? 0);
 @endphp
 
@@ -58,6 +59,7 @@
                                 <button type="button" class="btn btn-brand at-btn" data-bs-toggle="modal" data-bs-target="#payoutModal" data-tx="{{ $faId($r[0]) }}" data-seller="{{ $r[2] }}" data-sheba="{{ $r[9] }}" data-loan="#{{ $faId($r[4]) }} · بانک {{ $r[5] }}"
                                         data-gross="{{ $fa($r[6]) }}" data-fee="{{ $fa($fee) }}" data-net="{{ $fa($net) }}" data-action="{{ route('admin.finance.payout', $r[10]) }}">ثبت واریز</button>
                             @elseif ($r[1] === 'escrow')
+                                {{-- برگشت وجه فقط وقتی معنا دارد که مبلغ هنوز در امانت است؛ پس فقط گروه escrow --}}
                                 <button type="button" class="btn btn-ghost of-reject at-btn" data-bs-toggle="modal" data-bs-target="#confirmModal" data-confirm-title="برگشت وجه به خریدار" data-confirm-text="مبلغ {{ $fa($r[6]) }} تومان به حساب {{ $r[2] }} برگشت داده شود و معامله لغو شود؟"
                                         data-confirm-action="{{ route('admin.finance.refund', $r[10]) }}" data-confirm-method="POST" data-confirm-label="برگشت وجه" data-confirm-tone="danger" data-confirm-reason="1">برگشت وجه</button>
                             @else<a href="{{ route('admin.users.show', $r[11]) }}" class="rd-ic-btn" title="مشاهده کاربر" aria-label="مشاهده کاربر">@include('userPanel.partials.icon', ['name' => 'eye'])</a>@endif

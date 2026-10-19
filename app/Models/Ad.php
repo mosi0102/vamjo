@@ -226,12 +226,19 @@ class Ad extends Model
 
     public function scopeMonthsTo(Builder $query, $months): Builder
     {
-        return $months ? $query->where('months', '<=', (int) $months) : $query;
+        // «حداقل اقساط»: وام با تعداد اقساط بیشتر یا برابر مقدار ورودی نمایش داده شود
+        return $months ? $query->where('months', '>=', (int) $months) : $query;
     }
 
     public function scopeRateTo(Builder $query, $rate): Builder
     {
         return $rate !== null && $rate !== '' ? $query->where('rate', '<=', $rate) : $query;
+    }
+
+    /** سقف پایین بازه نرخ سود (از X تا Y درصد) */
+    public function scopeRateFrom(Builder $query, $rate): Builder
+    {
+        return $rate !== null && $rate !== '' ? $query->where('rate', '>=', $rate) : $query;
     }
 
     public function scopeSearch(Builder $query, ?string $term): Builder

@@ -38,6 +38,7 @@ class RadarPanelTest extends TestCase
         $response = $this->actingAs($user)->post(route('user.radar.store'), [
             'name' => 'رادار تست',
             'min_amount' => '50000000',
+            'min_rate' => '15',
             'max_rate' => '30',
             'notify_panel' => '1',
             'notify_sms' => '1',
@@ -47,7 +48,16 @@ class RadarPanelTest extends TestCase
 
         $radar = LoanRadar::query()->where('user_id', $user->id)->where('name', 'رادار تست')->firstOrFail();
         $this->assertSame(50_000_000, (int) $radar->min_amount);
+        // بازه نرخ سود از ۱۵ تا ۳۰ درصد ذخیره می‌شود
+        $this->assertSame(15.0, (float) $radar->min_rate);
+        $this->assertSame(30.0, (float) $radar->max_rate);
         $this->assertTrue((bool) $radar->is_active);
+
+        // حداقل ۱۲ قست: فقط وام با اقساط >= ۱۲ منطبق می‌شود
+        $matching = $radar->matchingAds()->get();
+        foreach ($matching as $ad) {
+            $this->assertGreaterThanOrEqual(12, (int) $ad->months);
+        }
 
         $radar->delete();
     }

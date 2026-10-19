@@ -16,16 +16,22 @@
         <h1 class="pn-bar-title">@yield('page_title')</h1>
 
         <div class="pn-push">
-            {{-- اعلان‌ها = آخرین رویدادهای ثبت‌شده کاربر؛ «جدید» یعنی امروز --}}
+            {{-- اعلان‌ها = رویدادهایی که «دیگران» (فروشنده، پشتیبانی، مدیر یا سیستم) و
+                 در رابطه با کاربر ثبت کرده‌اند؛ کارهای خود کاربر اینجا گزارش نمی‌شود --}}
             @php
                 $notifs = auth()->user()
-                    ?->activityLogs()->with('actor')->latest()->limit(5)
+                    ?->activityLogs()
+                    ->whereNotNull('actor_id')
+                    ->where('actor_id', '!=', auth()->id())
+                    ->latest()
+                    ->limit(5)
                     ->get()
                     ->map(fn ($log) => [
-                        'icon' => $log->icon(),
+                        // اگر بازیگر حذف شده باشد، سیستم فرض می‌شود
+                        'icon' => $log->actor_id ? $log->icon() : 'shield',
                         'text' => $log->description ?? $log->action,
                         'time' => \App\Support\Fa::ago($log->created_at),
-                        'new'  => $log->created_at->isToday(),
+                        'new' => $log->created_at->isToday(),
                     ])->all();
             @endphp
             <div class="pn-notif" id="pnNotif">

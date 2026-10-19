@@ -46,6 +46,13 @@
                             <p class="f-err">تعداد اقساط را بین ۱ تا ۱۲۰ وارد کنید.</p>
                         </div>
                         <div class="f-field">
+                            <label for="rdRateMin">حداقل نرخ سود</label>
+                            <select id="rdRateMin" name="min_rate" class="f-input f-select">
+                                <option value="">مهم نیست</option>
+                                @foreach ([10, 15, 20, 23, 25] as $p)<option value="{{ $p }}">از {{ strtr((string) $p, ['0'=>'۰','1'=>'۱','2'=>'۲','3'=>'۳','4'=>'۴','5'=>'۵','6'=>'۶','7'=>'۷','8'=>'۸','9'=>'۹']) }} درصد</option>@endforeach
+                            </select>
+                        </div>
+                        <div class="f-field">
                             <label for="rdRate">حداکثر نرخ سود</label>
                             <select id="rdRate" name="max_rate" class="f-input f-select">
                                 <option value="">مهم نیست</option>

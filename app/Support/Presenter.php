@@ -248,6 +248,7 @@ class Presenter
             'max' => $radar->max_amount,
             'months' => $radar->months,
             'rate' => $radar->max_rate,
+            'rate_min' => $radar->min_rate,
             'bank' => $radar->bank?->name ?? '',
             'city' => $radar->city ?? '',
             'sms' => (bool) $radar->notify_sms,
@@ -440,12 +441,14 @@ class Presenter
     public static function adminPaymentRow(Transaction $transaction): array
     {
         $ad = $transaction->ad;
+        // «در امانت» فقط برای پرداخت‌های فعلاً در امانت است؛ تراکنش‌های مستقر/برگشتی/ناموفق پول را ترک گفته‌اند و دکمه برگشت وجه ندارند
         $group = match (true) {
             $transaction->type === Transaction::TYPE_PAYOUT && $transaction->status === Transaction::STATUS_PENDING => 'payout_due',
             $transaction->type === Transaction::TYPE_PAYOUT => 'paid',
             $transaction->status === Transaction::STATUS_REFUNDED => 'refund',
             $transaction->status === Transaction::STATUS_FAILED => 'failed',
-            default => 'escrow',
+            $transaction->type === Transaction::TYPE_PAYMENT && $transaction->status === Transaction::STATUS_ESCROW => 'escrow',
+            default => 'settled',
         };
 
         return [

@@ -14,7 +14,7 @@ class LoanRadar extends Model
 {
     protected $fillable = [
         'user_id', 'name', 'bank_id', 'type', 'city', 'min_amount', 'max_amount',
-        'months', 'max_rate', 'notify_sms', 'notify_panel', 'is_active',
+        'months', 'min_rate', 'max_rate', 'notify_sms', 'notify_panel', 'is_active',
     ];
 
     protected function casts(): array
@@ -23,6 +23,7 @@ class LoanRadar extends Model
             'min_amount' => 'integer',
             'max_amount' => 'integer',
             'months' => 'integer',
+            'min_rate' => 'float',
             'max_rate' => 'float',
             'notify_sms' => 'boolean',
             'notify_panel' => 'boolean',
@@ -66,6 +67,7 @@ class LoanRadar extends Model
             ->amountFrom($this->min_amount)
             ->amountTo($this->max_amount)
             ->monthsTo($this->months)
+            ->rateFrom($this->min_rate)
             ->rateTo($this->max_rate);
     }
 }

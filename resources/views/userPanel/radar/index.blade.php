@@ -17,7 +17,7 @@
       $p = [];
       if ($r['min'] || $r['max']) $p[] = 'مبلغ ' . ($r['min'] ? $mil($r['min']) : '۰') . ($r['max'] ? ' تا ' . $mil($r['max']) : '+') . ' میلیون';
       if ($r['months']) $p[] = 'حداقل ' . $faId($r['months']) . ' ماه';
-      if ($r['rate']) $p[] = 'سود تا ' . $faId($r['rate']) . '٪';
+      if ($r['rate_min'] || $r['rate']) $p[] = 'سود ' . ($r['rate_min'] ? 'از ' . $faId($r['rate_min']) : '') . ($r['rate'] ? ' تا ' . $faId($r['rate']) : ($r['rate_min'] ? '٪ به بالا' : '')) . '٪';
       if ($r['bank']) $p[] = $r['bank'];
       if ($r['city']) $p[] = $r['city'];
       return $p;
